@@ -21,7 +21,7 @@ The rules of this ecosystem are governed by a living document maintained by the 
 **The Core Pillars:**
 * **Open by Default:** We renounce "stealth mode." Everything is public from Day 1.
 * **The Republic of Doers:** Influence is earned through tangible Contribution Scores (CS).
-* **Anti-Whale Logic:** Voting power is logarithmic ($Weight = log_{10}(CS)$) to ensure the many out-voice the few.
+* **Anti-Whale Logic:** Voting power is logarithmic (`Weight = log10(CS)`) to ensure the many out-voice the few.
 * **Host-Agnostic:** The data belongs to the community. If this host fails, the community is pre-authorized to migrate.
 
 ---
