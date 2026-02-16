@@ -10,6 +10,7 @@ Innovation is a public utility. We renounce "stealth mode," NDAs, and private re
     * **1.1.1 Security Exception:** Security vulnerabilities in the Governance Platform itself may be patched in a private temporary fork (max 72 hours) before public disclosure.
 * **1.2 Execution is the Moat:** The only true competitive advantage is the speed and quality of execution.
 * **1.3 Integrity of Origin:** Purposely misrepresenting external IP as an original Spark is a System Offense. The AI Scribe will re-attribute "Originator" status to primary sources when discovered.
+* **1.4 The Glass Box AI:** Any AI model integrated into the governance workflow must be fully open-source (weights and code) and explainable. "Black Box" APIs are strictly prohibited.
 
 ### 2. Governance: The Republic of Doers
 Influence is earned through tangible value added to the ecosystem.
