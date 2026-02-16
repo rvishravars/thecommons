@@ -20,6 +20,8 @@
 
 ---
 **Instructions for the Originator:**
-1. Fill out this template.
-2. Post it as a new **GitHub Discussion**.
-3. Comment `!SPARK` on your post to notify the AI Scribe and initiate the Novelty Audit.
+
+1. **Fill out this template:** Ensure your "Novel Core" (The Delta) is clearly defined.
+2. **Create a new file:** Save your completed template as a `.md` file inside the `/sparks/` directory (e.g., `/sparks/your-idea-name.md`).
+3. **Submit a Pull Request (PR):** Open a PR from your branch to the main repository.
+4. **Initiate the Audit:** Comment `!SPARK` on your own PR. This notifies the AI Scribe to generate a Novelty Report and alerts the community Refiners to begin their audit.

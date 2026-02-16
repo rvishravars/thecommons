@@ -1,4 +1,4 @@
-# 📜 TheCommons: Master Framework (v1.5)
+# 📜 TheCommons: Master Framework (v1.6)
 
 ---
 
@@ -10,6 +10,7 @@ The value of a Spark is determined by its **Unique Insight**. We do not reward "
     * **1.1.1 The Delta Lock:** Upon submission, the Originator must explicitly define the **"Novel Core"**—the specific 10% of the idea that does not exist elsewhere.
 * **1.2 Execution is the Moat:** While the idea is the seed, the only true competitive advantage is the speed and quality of execution.
 * **1.3 The Glass Box AI:** Any AI integrated into governance must be fully open-source. The AI Scribe’s primary function is **Prior Art Discovery**—scanning global repositories to help the community verify the novelty of a Spark.
+* **1.4 The Living Spark (Wiki Protocol):** A Spark is not a static post; it is a **Living Document** stored as a Markdown file in the `/sparks/` directory. It is subject to continuous refinement and community hardening via Pull Requests.
 
 ### 2. Governance: The Republic of Doers
 Influence is earned through tangible value. The system is designed to filter out noise and amplify breakthrough insights.
@@ -22,12 +23,20 @@ Influence is earned through tangible value. The system is designed to filter out
 | **⚡ Spark** | +25 CS | **Invention:** Proving a unique insight and defending its Novel Core. |
 | **🏛️ Architect** | +50 CS | **Structure:** Proposing structural amendments to the Manifesto. |
 
-#### 2.2 The Novelty Bounty
+#### 2.2 The technical Hierarchy
+| Role | Reward | Purpose |
+| :--- | :--- | :--- |
+| **🧹 Janitor** | +2 CS | **Maintenance:** Cleaning the `/sparks/` directory or fixing formatting in Wiki files. |
+| **🛠️ Refiner** | +10 CS | **Hardening:** Stress-testing the "Novel Core" via PRs to existing Spark files. |
+| **⚡ Spark** | +25 CS | **Invention:** Creating a new file in `/sparks/` and defining a "Novel Core." |
+| **🏛️ Architect** | +50 CS | **Structure:** Proposing amendments to the Root Manifesto. |
+
+#### 2.3 The Novelty Bounty
 * **Proof of Delta:** To earn the full **+25 CS**, a Spark must successfully withstand 3 "Refiner" critiques or technical audits.
 * **The Implementation Bonus:** A one-time **+30 CS** is awarded when the Novel Core is successfully translated into a working MVP (Minimum Viable Product).
 * **Proof of Presence:** All rewards require verifiable documentation (Merged PRs, Commits, or logged Technical Specs).
 
-#### 2.3 Logarithmic Voting Power
+#### 2.4 Logarithmic Voting Power
 To prevent "Whale Dictatorship," influence scales non-linearly:
 $$Weight = log_{10}(CS)$$
 * **Sybil Protection:** Voting rights are restricted to contributors with **3 merged PRs** or **CS > 50**.
