@@ -1,6 +1,6 @@
 # 📜 TheCommons
 
-### *For the Unseen Architects and the Silent Inventors.*
+### *For the Silent Inventors.*
 
 Every day, a world-changing idea dies in a basement because its creator lacked a platform, a patent lawyer, or a seat at the table. History is littered with the names we *don’t* know—the innovators who were sidelined, underappreciated, or forgotten by time. 
 
