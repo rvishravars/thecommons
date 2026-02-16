@@ -1,0 +1,17 @@
+# Licensing for TheCommons
+
+## 1. Documentation & Manifesto
+All text, project ideas, and governance frameworks in this repository are licensed under the **Creative Commons Attribution-ShareAlike 4.0 International (CC-BY-SA 4.0)**.
+
+**You are free to:**
+* **Share:** Copy and redistribute the material in any medium or format.
+* **Adapt:** Remix, transform, and build upon the material for any purpose, even commercially.
+
+**Under the following terms:**
+* **Attribution:** You must give appropriate credit to "TheCommons (github.com/rvishravars/thecommons)" and provide a link to the license.
+* **ShareAlike:** If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
+
+## 2. Software & AI Logic
+All source code (The AI Scribe, automated scripts, and platform architecture) is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. 
+
+This ensures that any "Software-as-a-Service" built using this logic must also contribute its source code back to the community.
