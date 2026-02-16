@@ -1,101 +1,84 @@
-# 📜 TheCommons: Master Framework
+# 📜 TheCommons: Master Framework (v1.5)
 
 ---
 
-## Part 1: The Manifesto (v1.3)
+## Part 1: The Manifesto
 
-### 1. The Prime Directive: Open by Default
-Innovation is a public utility. We renounce "stealth mode," NDAs, and private repositories.
+### 1. The Prime Directive: Novelty & Transparency
+The value of a Spark is determined by its **Unique Insight**. We do not reward "re-inventing the wheel"; we reward the **Delta** (the measurable difference between the status quo and the new idea).
 * **1.1 Radical Transparency:** Every project, discussion, and design is visible to the public from day one.
-    * **1.1.1 Security Exception:** Security vulnerabilities in the Governance Platform itself may be patched in a private temporary fork (max 72 hours) before public disclosure.
-* **1.2 Execution is the Moat:** The only true competitive advantage is the speed and quality of execution.
-* **1.3 Integrity of Origin:** Purposely misrepresenting external IP as an original Spark is a System Offense. The AI Scribe will re-attribute "Originator" status to primary sources when discovered.
-* **1.4 The Glass Box AI:** Any AI model integrated into the governance workflow must be fully open-source (weights and code) and explainable. "Black Box" APIs are strictly prohibited.
+    * **1.1.1 The Delta Lock:** Upon submission, the Originator must explicitly define the **"Novel Core"**—the specific 10% of the idea that does not exist elsewhere.
+* **1.2 Execution is the Moat:** While the idea is the seed, the only true competitive advantage is the speed and quality of execution.
+* **1.3 The Glass Box AI:** Any AI integrated into governance must be fully open-source. The AI Scribe’s primary function is **Prior Art Discovery**—scanning global repositories to help the community verify the novelty of a Spark.
 
 ### 2. Governance: The Republic of Doers
-Influence is earned through tangible value added to the ecosystem.
+Influence is earned through tangible value. The system is designed to filter out noise and amplify breakthrough insights.
 
-#### 2.1 The Four Roles of Contribution
-The system recognizes four tiers of effort, each with specific rewards:
-
-* **🧹 The Janitor (+2 CS):** The entry point. Janitors maintain the "Garden" by fixing typos, repairing broken links, updating documentation, and improving formatting. This is the fastest path to earning initial voting rights.
-* **🛠️ The Refiner (+10 CS):** The technical backbone. Refiners identify **Critical Flaws** in Sparks, write technical specifications, and design the "Manual Logic" (human-executable instructions) for a project.
-* **⚡ The Spark (+15 CS):** The originators. Sparks launch new ideas using the `idea_template.md`. As "Root Originators," they are entitled to a 15% CS royalty from downstream forks and refinements.
-* **🏛️ The Architect (+50 CS):** The structural designers. Architects propose amendments to this Manifesto, the Governance Logic, or the Core AI Scribe code. These changes require a 75% Supermajority.
-
+#### 2.1 The Value Hierarchy
 | Role | Reward | Purpose |
 | :--- | :--- | :--- |
-| **Janitor** | +2 CS | Reliability & Onboarding |
-| **Refiner** | +10 CS | Feasibility & Technical Depth |
-| **Spark** | +15 CS | Creative Origin & Expansion |
-| **Architect** | +50 CS | Structural Integrity & Evolution |
+| **🧹 Janitor** | +2 CS | **Maintenance:** Keeping the existing ecosystem clean (typos, links, docs). |
+| **🛠️ Refiner** | +10 CS | **Hardening:** Identifying flaws and stress-testing the "Novel Core" of others' ideas. |
+| **⚡ Spark** | +25 CS | **Invention:** Proving a unique insight and defending its Novel Core. |
+| **🏛️ Architect** | +50 CS | **Structure:** Proposing structural amendments to the Manifesto. |
 
-#### 2.2 Logarithmic Voting Power
-Voting weight is decoupled from total points to prevent "Whale Dictatorship." 
+#### 2.2 The Novelty Bounty
+* **Proof of Delta:** To earn the full **+25 CS**, a Spark must successfully withstand 3 "Refiner" critiques or technical audits.
+* **The Implementation Bonus:** A one-time **+30 CS** is awarded when the Novel Core is successfully translated into a working MVP (Minimum Viable Product).
+* **Proof of Presence:** All rewards require verifiable documentation (Merged PRs, Commits, or logged Technical Specs).
+
+#### 2.3 Logarithmic Voting Power
+To prevent "Whale Dictatorship," influence scales non-linearly:
 $$Weight = log_{10}(CS)$$
-To prevent **Sybil attacks**, voting rights are restricted to contributors with a verifiable history of at least **3 merged PRs** or **CS > 50**.
+* **Sybil Protection:** Voting rights are restricted to contributors with **3 merged PRs** or **CS > 50**.
 
 ### 3. The Law of the Supermajority (75%)
 * **3.1 The Threshold:** Manifesto or core architecture changes require a **75% Weighted Supermajority**.
-* **3.2 The Scribe’s Buffer:** AI-generated updates are held in "Pending" for 24 hours.
-* **3.3 The Veto Command:** A `!VOTE_VETO [Reason]` command halts an update if 10% of the total community weight supports the freeze.
+* **3.2 The Scribe’s Buffer:** AI-proposed updates are held in "Pending" for 24 hours for human review.
+* **3.3 The Veto Command:** `!VOTE_VETO [Reason]` halts an update if 10% of total community weight supports the freeze.
 
-### 4. The Pulse: Life & Death of an Idea
-* **4.1 Stagnation Check:** Ideas with no updates for **60 days** are automatically **Archived**.
-* **4.2 The Reclamation Right:** Any archived or stagnant idea can be **Claimed** by a new lead. 
+### 4. Conflict & Dispute Resolution (The Novelty Audit)
+* **4.1 The Challenge:** Users with CS > 10 may file a `!CHALLENGE` if they believe a Spark lacks novelty or is a derivative of existing work without attribution.
+* **4.2 The Scribe’s Brief:** The AI Scribe acts as an **Investigator**. It generates a "Novelty Report" comparing the Spark to existing repositories and papers.
+* **4.3 Human Jury:** Three randomly selected contributors (CS > 50) review the report and decide if the "Novel Core" stands.
+* **4.4 The Cool-Down:** If a Spark receives >5 critical flaws in 24 hours, the AI locks the thread for 12 hours to prevent dogpiling.
 
-### 5. Universal Accessibility (IT-Optional)
-* **5.1 The Manual First Rule:** Contributors are encouraged to define the "Human Logic" (paper/pencil) of their idea before digital automation.
-* **5.2 Proof of Presence:** CS for "Execution" requires verifiable documentation (URLs, Repos, or Photos).
-
-### 6. Conflict & Dispute Resolution
-* **6.1 The Challenge Mechanism:** Users with CS > 10 may file a `!CHALLENGE` to trigger an AI audit.
-* **6.2 Resolution Tiers:** Resolves via Automated Audit (Tier 1), Community Jury (Tier 2), or Split Fork (Tier 3).
-* **6.3 The "Bad Faith" Penalty:** Malicious flagging results in a CS Penalty.
-
-### 7. Licensing & Legal Protection
-* **7.1 Documentation:** All text and ideas are licensed under **CC-BY-SA 4.0**.
-* **7.2 Software:** All automation scripts are licensed under **AGPL-3.0**.
-* **7.3 The Sentinel:** The AI Scribe scans for unattributed use of Commons logic externally.
-* **7.4 The Continuity Clause:** If the host is inaccessible for >72 hours, the community is pre-authorized to migrate to the most active Fork.
-
-### 8. Hosting Openness (The Freedom to Run)
-* **8.1 Self-Hosting Guarantee:** The platform must be self-hostable. No features shall be gated behind proprietary cloud services.
-* **8.2 Zero Vendor Lock-in:** All dependencies must be open-source or easily replaceable.
-* **8.3 The "Code & Data" Covenant:**
-    * **Code:** Mirrored to multiple public repositories (GitHub, GitLab, etc.).
-    * **Data:** A snapshot of all public Sparks and CS scores published daily to IPFS/Arweave.
+### 5. Licensing & Continuity
+* **5.1 Documentation:** Licensed under **CC-BY-SA 4.0**.
+* **5.2 Software:** All automation and logic scripts licensed under **AGPL-3.0**.
+* **5.3 Continuity:** If the host is inaccessible for >72h, the community is pre-authorized to migrate to the most active Fork.
 
 ---
 
 ## Part 2: Getting Started Guide
 
-### 1. Your First Action: The "Janitor" Entry (+2 CS)
-Browse the repository. Find a typo, a broken link, or a formatting error. Submit a Pull Request (PR). Once merged, you earn your first **2 CS**. Complete 3 of these to unlock your voting rights.
+### 1. Level 1: The "Janitor" Entry (+2 CS)
+Browse the repository. Find a typo, a broken link, or a formatting error. Submit a Pull Request (PR). Once merged, you earn your first **2 CS**. This is the fastest path to unlocking voting rights.
 
-### 2. Launch a "Spark" (+15 CS)
-Have an idea? Copy the `idea_template.md`, fill out the **Manual Logic**, and post it in **Discussions**. Once validated, you are the **Root Originator**.
+### 2. Level 2: Launch a "Novel Spark" (+25 CS)
+Don't just post a project; post a **Unique Insight**.
+1. Copy the `novel_spark_template.md`.
+2. Define the **Existing Landscape** (What currently exists).
+3. Define your **Novel Core** (The "Delta" that makes your idea different).
+4. Use `!SPARK` to log it. Defend your logic against Refiners to secure your points.
 
-### 3. Become a Refiner (+10 CS)
-Review an existing Spark. Post a **Critical Flaw** or a **Technical Spec**. Providing a solution to a flaw earns you Refiner status.
+### 3. Level 3: Become a Refiner (+10 CS)
+Review an existing Spark. If you find "Prior Art" (an existing version of the idea) that the author missed, or identify a **Critical Flaw** in their logic, you earn Refiner points.
 
 ### 4. Commands for the AI Scribe
-Type these in GitHub comments to interact with the system:
-* `!SPARK`: Submits an idea for review.
+* `!SPARK`: Submits a Novel Core for review and system logging.
 * `!VOTE_VETO`: Stops a pending Manifesto change.
-* `!CHALLENGE`: Questions the origin or points of a project.
+* `!CHALLENGE`: Initiates a Novelty Audit on an idea.
 
 ---
 
-## Part 3: TODO - The Development Roadmap
+## Part 3: The Development Roadmap
 
-* [x] **Manifesto v1.3:** Codified governance, licensing, roles, and continuity.
-* [ ] **Getting Started Guide:** Finalize detailed onboarding manual.
-* [ ] **Automated IPFS Backups:** Script a daily snapshot of CS scores and Sparks to IPFS/Arweave.
+* [x] **Manifesto & Guide v1.5:** Novelty-centered governance and rewards.
+* [ ] **Novelty Scan Script:** Integrate a tool for the AI Scribe to scan for prior art automatically.
 * [ ] **CS Tracker Bot:** Automate CS point logging via GitHub Actions.
 * [ ] **The Midnight Scribe:** Code the logic to generate "Proposed Patches" from community discussions.
 * [ ] **Succession Protocol:** Create a "Panic Button" script for CS verification against IPFS hashes.
-* [ ] **Knowledge Royalty Script:** Automate the 15% CS royalty flow back to Root Originators.
 
 ---
-> *"The Commons belongs to those who build it, and it stays open for those who follow."*
+> *"The Commons rewards the insight that changes the game, and the execution that keeps it open."*

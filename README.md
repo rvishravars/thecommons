@@ -16,12 +16,12 @@ We are building a **Republic of Doers** where execution is the only moat and tra
 
 The rules of this ecosystem are governed by a living document maintained by the community and interpreted by an AI Scribe. 
 
-### [👉 Read the Full Manifesto v1.3](MANIFESTO.md)
+### [👉 Read the Full Manifesto v1.5](MANIFESTO.md)
 
 **The Core Pillars:**
-* **Open by Default:** We renounce "stealth mode." Everything is public from Day 1.
-* **The Republic of Doers:** Influence is earned through tangible Contribution Scores (CS).
-* **Anti-Whale Logic:** Voting power is logarithmic (`Weight = log10(CS)`) to ensure the many out-voice the few.
+* **Novelty & Transparency:** We do not reward "re-inventing the wheel"; we reward the **Delta**.
+* **Execution is the Moat:** The only true competitive advantage is the speed and quality of execution.
+* **Glass Box AI:** Any AI integrated into governance must be fully open-source.
 * **Host-Agnostic:** The data belongs to the community. If this host fails, the community is pre-authorized to migrate.
 
 ---
@@ -30,9 +30,9 @@ The rules of this ecosystem are governed by a living document maintained by the 
 
 New to the Commons? Here is how you earn your seat at the table:
 
-1.  **Read the [Getting Started Guide](GETTING_STARTED.md):** Learn about the roles of Janitor, Refiner, Spark, and Architect.
+1.  **Read the [Getting Started Guide](MANIFESTO.md#part-2-getting-started-guide):** Learn about the roles of Janitor, Refiner, Spark, and Architect.
 2.  **Earn Your Citizenship (+2 CS):** Submit a Pull Request for a "Janitor" task (typos, formatting, or broken links). Complete 3 of these to unlock full voting rights.
-3.  **Launch a Spark (+15 CS):** Use the `idea_template.md` to post a new vision in the **Discussions** tab.
+3.  **Launch a Spark (+25 CS):** Use the `novel_spark_template.md` to post a new vision in the **Discussions** tab.
 
 ---
 
