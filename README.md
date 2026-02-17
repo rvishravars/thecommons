@@ -22,6 +22,7 @@ The rules of this ecosystem are governed by a living document maintained by the 
 * **Novelty & Transparency:** We do not reward "re-inventing the wheel"; we reward the **Delta**.
 * **Execution is the Moat:** The only true competitive advantage is the speed and quality of execution.
 * **Glass Box AI:** Any AI integrated into governance must be fully open-source.
+* **The Living Spark:** Sparks are not static posts; they are **Living Documents** subject to continuous hardening via Pull Requests.
 * **Host-Agnostic:** The data belongs to the community. If this host fails, the community is pre-authorized to migrate.
 
 ---
