@@ -1,0 +1,26 @@
+name: Novelty Scan
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'sparks/**'
+
+jobs:
+  novelty-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run Novelty Scan
+        run: |
+          # Find modified files in sparks/ directory
+          # This is a simple implementation; for robust diff checking we might use other actions
+          # For now, we scan all sparks ensures nothing broke
+          python3 scripts/novelty_scan.py
