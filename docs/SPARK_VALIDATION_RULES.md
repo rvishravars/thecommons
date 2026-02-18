@@ -1,86 +1,60 @@
-# Spark Submission Validation Rules
+# 🧩 Spark Build Validation Rules (v2.0)
 
-All sparks submitted to the repository must follow the 8-Question Lego Block template and pass the novelty scan validation.
-
-## The 4 Blocks + 8 Questions Framework
-
-### Block 1: THE SPARK - My Big Idea
-**Questions (2):**
-1. **What's the problem I'm trying to solve?** - Describe the problem in simple terms
-2. **What's my cool way of solving it?** - Describe your specific solution/approach
-
-**Validation:** Both questions must have substantive answers (minimum 5 words each)
+All Sparks submitted to TheCommons must follow the **Intuition → Imagination → Logic** assembly line. Our validation ensures that every "brick" has enough **Clutch Power** to hold the structure together.
 
 ---
 
-### Block 2: THE SOUL - Why It Matters
-**Questions (2):**
-1. **Who does this help?** - Identify the stakeholders/beneficiaries
-2. **What good thing happens?** - Describe the positive outcome
+## 🏗️ The 3-Phase Assembly Framework
 
-**Validation:** Both questions must have substantive answers (minimum 5 words each)
-
----
-
-### Block 3: THE MUSCLE - How to Build It
-**Questions (3):**
-1. **How does it work? (step by step)** - Provide a clear process/mechanism
-2. **What's the first thing I do?** - Identify the initial concrete action
-3. **What could go wrong?** - List potential risks or failure modes
-
-**Validation:** All three questions must have substantive answers (minimum 5 words each)
+### Phase 1: 🧠 INTUITION (!HUNCH)
+*Focus: Problem Discovery & Signal.*
+**Requirements:**
+1.  **The Observation:** What is currently "loose" or missing in the ecosystem?
+2.  **The Gap:** Identify the specific void.
+3.  **The "Why":** Why does this matter now?
+**Validation:** Must include a `@Scout` handle. Minimum 10 words per section.
 
 ---
 
-### Block 4: THE SKIN - Does It Work?
-**Questions (2):**
-1. **How do I check if it's working?** - Define measurement mechanisms
-2. **What tells me I'm on the right track?** - Define success indicators
-
-**Validation:** Both questions must have substantive answers (minimum 5 words each)
+### Phase 2: 🎨 IMAGINATION (!SHAPE)
+*Focus: The Blueprint & The Novel Core.*
+**Requirements:**
+1.  **The Novel Core:** Define the specific 10% "Delta" that makes this unique.
+2.  **The Blueprint:** A high-level description of the solution's shape.
+3.  **The Interface:** How does this "snap" into existing Sparks?
+**Validation:** Must include a `@Designer` handle. Must provide "Prior Art" context to prove novelty.
 
 ---
 
-## File Requirements
+### Phase 3: 🛠️ LOGIC (!BUILD)
+*Focus: Technical Rigor & Integration.*
+**Requirements:**
+1.  **Technical Implementation:** Link to PR, code, or deep technical specs.
+2.  **Clutch Power Test:** Evidence that the build is stable and doesn't break other bricks.
+**Validation:** Must include a `@Builder` handle. Technical links must be reachable.
 
-- **Filename:** `your-spark-name.spark.md`
-- **Location:** `/sparks/` directory
-- **Metadata:** Must include `**Originator:** @[GitHub-Username]`
+---
 
-## Submission Checklist
+## 📂 File & Metadata Requirements
 
-- [ ] File is named `[something].spark.md`
-- [ ] File is saved in `/sparks/` directory
-- [ ] All 4 blocks are present with correct headers
-- [ ] All 8 questions are answered (not empty)
-- [ ] Each answer has at least 5 words
-- [ ] Metadata includes Originator
-- [ ] Language is simple and clear (written like for a 10-year-old)
-- [ ] Passes `novelty_scan.py --file sparks/your-spark-name.spark.md`
+- **Location:** All bricks must reside in the `/sparks/` directory.
+- **Format:** Standard Markdown (`.md`).
+- **Handle Requirement:** Every phase must be signed (e.g., `*Scout: @username*`) to trigger **Contribution Score (CS)** rewards.
 
-## Running Validation
+## 📋 Submission Checklist
+
+- [ ] **Phase Integrity:** At least one Phase (Intuition) is 100% complete.
+- [ ] **Handle Mapping:** All active phases have a valid GitHub `@username`.
+- [ ] **Standard Gauge:** Language is clear and technical terms are defined.
+- [ ] **Clutch Check:** Passes the `novelty_scan.py` stability audit.
+
+## 🤖 Running the Stability Audit
+
+The **AI Scribe** uses the `novelty_scan.py` script to check the "Clutch Power" of your brick.
 
 ```bash
-# Validate a specific spark
-python scripts/novelty_scan.py --file sparks/your-spark-name.spark.md
+# Audit a specific brick
+python scripts/novelty_scan.py --file sparks/your-brick-name.md
 
-# Validate all sparks in the sparks/ directory
+# Audit the entire baseplate
 python scripts/novelty_scan.py
-```
-
-## Failure Cases
-
-The validation script will return a failure if:
-- Any of the 8 questions are missing
-- Any question has an empty or very brief answer (< 5 words)
-- The file is not readable
-
-## Passing Criteria
-
-A spark PASSES validation when:
-- All required sections are present
-- All 8 questions have substantive answers
-- Originator is identified in metadata
-- File follows naming convention
-
-Once a spark passes validation, it is eligible for community review and audit.
