@@ -1,4 +1,4 @@
-# ⚡ Novel Spark: [Title]
+# Novel Spark: [Title]
 
 > **Metadata**
 > * **Originator:** @[GitHub-Username]
@@ -7,86 +7,43 @@
 
 ---
 
-## The Architecture of Your Idea
+## 1. THE SPARK - My Big Idea
 
-Your idea isn't a static statue to be guarded; it's a living organism that thrives through collaborative construction. This template guides you through the anatomy every impactful idea needs to evolve from a solitary spark into a robust, collective reality.
+### What's the problem I'm trying to solve?
 
----
-
-## 1. ⚡ THE SPARK
-*The initial flash of brilliance—your "Aha!" moment when two disparate thoughts collided to create something new.*
-
-### What is your core insight?
-*In 2-3 sentences, capture the essence of your breakthrough. What collision of ideas sparked this vision?*
-
-### The Context (What Exists Today)
-*What current solutions, libraries, or methodologies address this problem space? Why are they insufficient?*
-* **Prior Art Tags for AI Scan:** [List 3-5 specific keywords here]
-
-### The Novel Core (The Delta)
-*This is the most critical section. What is the specific 'tweak,' 'pivot,' or 'breakthrough' that makes your version unique? Describe the logic that differentiates this from existing approaches.*
-
-**✨ Activation:** Document your spark immediately. Don't let the electricity dissipate. This template is your anchor.
+### What's my cool way of solving it?
 
 ---
 
-## 2. 💫 THE SOUL (Your Manifesto)
-*If the spark is the collision, the Soul is the meaning you give it. This isn't a business plan—it's a declaration of intent.*
+## 2. THE SOUL - Why It Matters
 
-### Why does this matter?
-* **What problem does it solve?**
-* **What value does it create?**
-* **What future does it envision?**
+### Who does this help?
 
-### Guiding Principles
-*What are the 2-3 core values or principles that will guide this idea's evolution? (e.g., openness, accessibility, sustainability)*
-
-**✨ Activation:** Your manifesto gives your idea emotional weight and direction. When things get tough, this is what keeps you and the community aligned.
+### What good thing happens?
 
 ---
 
-## 3. 💪 THE MUSCLE (First Steps)
-*With a soul established, your idea needs to move. The Muscle represents the initial, tangible actions that translate vision into reality.*
+## 3. THE MUSCLE - How to Build It
 
-### Technical Spec / Core Logic
-*How does it work? Provide step-by-step instructions, a logic flow, or a technical overview of the execution.*
+### How does it work? (step by step)
 
-### First Actionable Steps
-*What are the 3-5 smallest, most concrete tasks that can be taken immediately?*
-1. 
-2. 
-3. 
+### What's the first thing I do?
 
-### Self-Audit: Potential Critical Flaws
-*What are the biggest risks or reasons this might fail? (Identifying these early earns respect from Refiners and strengthens your idea.)*
-
-**✨ Activation:** Focus on the absolute minimum viable movement. Muscle is built through tension and repetition. Your idea needs to move to gain strength.
+### What could go wrong?
 
 ---
 
-## 4. 🛡️ THE SKIN (Feedback Loop)
-*The Skin is where your idea interacts with the outside world. It's the constant flow of feedback, observation, and learning that allows your idea to adapt, evolve, and grow.*
+## 4. THE SKIN - Does It Work?
 
-### How will you gather feedback?
-*What mechanisms will you use to collect community input? (e.g., GitHub issues, discussions, surveys, office hours)*
+### How do I check if it's working?
 
-### Success Metrics (Definition of Done)
-*How will the community know when the 'Delta' has been successfully executed? Define the specific criteria required to claim the +30 CS Implementation Bonus.*
-
-### Evolution Indicators
-*What signals will tell you the idea is maturing and adapting successfully?*
-
-**✨ Activation:** Embrace the feedback loop. Share your idea (even in its raw form) with trusted peers. Every interaction strengthens its outer layer and resilience.
+### What tells me I'm on the right track?
 
 ---
 
-## 📋 Instructions for the Originator
+## How to Use This Template
 
-**Remember:** You don't need a perfect plan; you need an anatomy.
-
-1. **Fill out this template:** Ensure all four elements (Spark, Soul, Muscle, Skin) are clearly defined.
-2. **Create a new file:** Save your completed template as a `.md` file inside the `/sparks/` directory (e.g., `/sparks/your-idea-name.md`).
-3. **Submit a Pull Request (PR):** Open a PR from your branch to the main repository.
-4. **Initiate the Audit:** Comment `!SPARK` on your own PR. This notifies the AI Scribe to generate a Novelty Report and alerts the community Refiners to begin their audit.
-
-**Structure Creates Freedom:** By documenting your idea's anatomy, you invite collaborative construction that turns fragile sparks into resilient realities.
+1. Answer all 8 questions above
+2. Save your file as `/sparks/your-idea-name.md`
+3. Open a Pull Request
+4. Comment `!SPARK` on your PR to start the audit
