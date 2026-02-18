@@ -10,7 +10,6 @@ import { useToast } from '../utils/ToastContext';
 export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
   const [showPreview, setShowPreview] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
-  const [markdown, setMarkdown] = useState('');
   const toast = useToast();
 
   const handleBlockUpdate = (phase, blockType, value) => {
@@ -25,12 +24,6 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
       },
     };
     onSparkUpdate(updatedData);
-  };
-
-  const handleGenerateMarkdown = () => {
-    const generatedMd = generateSparkMarkdown(sparkData);
-    setMarkdown(generatedMd);
-    setShowPreview(true);
   };
 
   const handleDownload = () => {

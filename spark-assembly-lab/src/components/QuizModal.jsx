@@ -296,7 +296,7 @@ export default function QuizModal({ sparkData, onClose }) {
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-2">Spark: {sparkData.name}</h3>
             <p className="text-sm text-gray-400">
-              Choose your AI provider to generate quiz questions based on this spark's content
+              Choose your AI provider to generate quiz questions based on this spark&apos;s content
             </p>
           </div>
 

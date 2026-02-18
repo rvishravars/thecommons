@@ -1,20 +1,17 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Maximize2, Edit3, X } from 'lucide-react';
+import { Maximize2, Edit3, X } from 'lucide-react';
 
-export default function BuildingBlock({ type, title, description, icon, color, value, onUpdate }) {
+export default function BuildingBlock({ title, description, icon, color, value, onUpdate }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
 
   const hasContent = value && value.length > 0;
 
   const handleExpand = () => {
     setIsExpanded(true);
-    setIsEditing(true);
   };
 
   const handleClose = () => {
     setIsExpanded(false);
-    setIsEditing(false);
   };
 
   return (
