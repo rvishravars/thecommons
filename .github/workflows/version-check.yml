@@ -5,7 +5,6 @@ on:
     paths:
       - 'docs/MANIFESTO.md'
       - 'README.md'
-      - 'scripts/novelty_scan.py' # Added this because the script also tracks version logic
 
 jobs:
   check-version:
@@ -16,27 +15,36 @@ jobs:
 
       - name: Extract and Validate Versions
         run: |
-          # 1. Check for file existence to prevent workflow failure
-          if [ ! -f "docs/MANIFESTO.md" ]; then
-            echo "⚠️ docs/MANIFESTO.md not found. If you merged it into README, please update this workflow."
-            exit 0
+          # 1. Identify Version in Manifesto
+          # Pattern: Master Framework (v2.0)
+          MANIFESTO_VERSION=$(grep -oP 'Master Framework \(v\K[0-9.]+' docs/MANIFESTO.md | head -1)
+          
+          # 2. Identify Version in README
+          # This pattern is more flexible to catch "Manifesto v2.0" inside or outside of links
+          README_VERSION=$(grep -oP '(Manifesto v|Framework \(v)\K[0-9.]+' README.md | head -1)
+          
+          echo "🔍 Diagnostic Output:"
+          echo "Found in Manifesto: v$MANIFESTO_VERSION"
+          echo "Found in README:    v$README_VERSION"
+          
+          # 3. Validation Logic
+          if [ -z "$MANIFESTO_VERSION" ]; then
+            echo "❌ Error: Could not find version string in docs/MANIFESTO.md"
+            exit 1
           fi
 
-          # 2. Extract versions using the v2.0 pattern
-          MANIFESTO_VERSION=$(grep -oP 'Master Framework \(v\K[0-9.]+' docs/MANIFESTO.md | head -1)
-          README_VERSION=$(grep -oP 'Manifesto v\K[0-9.]+' README.md | head -1)
-          
-          echo "Manifesto version: v$MANIFESTO_VERSION"
-          echo "README version: v$README_VERSION"
-          
-          # 3. Check consistency
-          if [ "$MANIFESTO_VERSION" != "$README_VERSION" ]; then
-            echo ""
-            echo "❌ Version mismatch detected!"
-            echo "Manifesto: v$MANIFESTO_VERSION"
-            echo "README:    v$README_VERSION"
-            echo "⚠️ Ensure the 'Master Framework' version in docs/MANIFESTO.md matches the 'Manifesto vX.X' tag in README.md."
+          if [ -z "$README_VERSION" ]; then
+            echo "❌ Error: Could not find version string in README.md"
+            echo "💡 Tip: Ensure README contains 'Manifesto v$MANIFESTO_VERSION' or 'Master Framework (v$MANIFESTO_VERSION)'"
             exit 1
           fi
           
-          echo "✅ All version references are consistent: v$MANIFESTO_VERSION"
+          if [ "$MANIFESTO_VERSION" != "$README_VERSION" ]; then
+            echo ""
+            echo "❌ VERSION MISMATCH!"
+            echo "The version in docs/MANIFESTO.md (v$MANIFESTO_VERSION) does not match README.md (v$README_VERSION)"
+            exit 1
+          fi
+          
+          echo ""
+          echo "✅ Logic Check Passed: Versions are synchronized at v$MANIFESTO_VERSION"
