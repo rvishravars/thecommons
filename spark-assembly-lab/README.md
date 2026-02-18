@@ -2,10 +2,34 @@
 
 A React-based LEGO-style interface for building and visualizing **Sparks** in TheCommons v2.0 modular meritocracy.
 
+## 📸 Screenshots
+
+### Main Assembly Interface
+![Assembly Canvas](./docs/screenshots/assembly-canvas.png)
+*The three-phase LEGO-style interface: Intuition (Blue), Imagination (Yellow), and Logic (Green)*
+
+### Building Blocks in Action
+![Building Blocks](./docs/screenshots/building-blocks.png)
+*Expandable building blocks with phase-specific colors and icons*
+
+### Full-Screen Editor
+![Full Screen Editor](./docs/screenshots/fullscreen-editor.png)
+*Click the maximize icon to expand any block to full-screen for focused editing*
+
+### Quiz Me Feature
+![Quiz Mode](./docs/screenshots/quiz-mode.png)
+*Interactive quiz system to test understanding of spark content*
+
+### Spark Selector & Preview
+![Spark Selector](./docs/screenshots/spark-selector.png)
+*Sidebar showing existing sparks with stability indicators and live markdown preview*
+
 ## 🎯 Features
 
 - **Visual Assembly**: Build sparks using a 3-lane LEGO-style interface (Intuition, Imagination, Logic)
 - **Building Blocks**: Modular components for each phase with expandable form fields
+- **Full-Screen Editor**: Maximize any block for focused, distraction-free editing
+- **Quiz Me**: Interactive AI-powered quiz system to test understanding of spark content
 - **Live Preview**: Real-time markdown preview of your spark
 - **Stability Tracking**: Visual indicators showing completion status (0/3 to 3/3 Stable)
 - **Smart Loading**: Automatically loads existing sparks from the `/sparks/` directory
