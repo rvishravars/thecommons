@@ -34,6 +34,25 @@ New to the Commons? Here is how you earn your seat at the table by adding mass t
 3.  **Phase 3: Builder (+25 CS):** Use your **Logic**. Write the code or technical specs to turn a design into a functional brick using `!BUILD`.
 
 
+### Visual Tour
+
+Here's a glimpse of the Spark Assembly Lab, where ideas are built:
+
+| **Assembly Canvas** |
+|:---:|
+| <img src="spark-assembly-lab/docs/screenshots/assembly-canvas.png" width="800" alt="Assembly Canvas"> |
+| _The main interface for assembling your spark_ |
+
+| **Fullscreen Editor** | **Quiz Mode** |
+|:---:|:---:|
+| <img src="spark-assembly-lab/docs/screenshots/fullscreen-editor.png" width="400" alt="Fullscreen Editor"> | <img src="spark-assembly-lab/docs/screenshots/quiz-mode.png" width="400" alt="Quiz Mode"> |
+| _Distraction-free writing experience_ | _AI-powered validation for your ideas_ |
+
+| **Spark Selector** |
+|:---:|
+| <img src="spark-assembly-lab/docs/screenshots/spark-selector.png" width="400" alt="Spark Selector"> |
+| _Manage and switch between your sparks_ |
+
 
 ---
 
