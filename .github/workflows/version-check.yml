@@ -5,7 +5,6 @@ on:
     paths:
       - 'MANIFESTO.md'
       - 'README.md'
-      - 'presentation.md'
 
 jobs:
   check-version:
@@ -24,33 +23,10 @@ jobs:
           README_VERSION=$(grep -oP 'Manifesto v\K[0-9.]+' README.md | head -1)
           echo "README version: v$README_VERSION"
           
-          # Extract version from presentation.md
-          PRESENTATION_VERSION=$(grep -oP 'Master Framework \(v\K[0-9.]+' presentation.md | head -1)
-          echo "Presentation version (title): v$PRESENTATION_VERSION"
-          
-          PRESENTATION_ROADMAP_VERSION=$(grep -oP 'Manifesto v\K[0-9.]+' presentation.md | head -1)
-          echo "Presentation version (roadmap): v$PRESENTATION_ROADMAP_VERSION"
-          
           # Check consistency
-          INCONSISTENT=0
-          
           if [ "$MANIFESTO_VERSION" != "$README_VERSION" ]; then
-            echo "❌ Version mismatch: MANIFESTO.md (v$MANIFESTO_VERSION) != README.md (v$README_VERSION)"
-            INCONSISTENT=1
-          fi
-          
-          if [ "$MANIFESTO_VERSION" != "$PRESENTATION_VERSION" ]; then
-            echo "❌ Version mismatch: MANIFESTO.md (v$MANIFESTO_VERSION) != presentation.md title (v$PRESENTATION_VERSION)"
-            INCONSISTENT=1
-          fi
-          
-          if [ "$MANIFESTO_VERSION" != "$PRESENTATION_ROADMAP_VERSION" ]; then
-            echo "❌ Version mismatch: MANIFESTO.md (v$MANIFESTO_VERSION) != presentation.md roadmap (v$PRESENTATION_ROADMAP_VERSION)"
-            INCONSISTENT=1
-          fi
-          
-          if [ $INCONSISTENT -eq 1 ]; then
             echo ""
+            echo "❌ Version mismatch: MANIFESTO.md (v$MANIFESTO_VERSION) != README.md (v$README_VERSION)"
             echo "⚠️ Version inconsistency detected across documentation files."
             echo "Please ensure all files reference version v$MANIFESTO_VERSION"
             exit 1

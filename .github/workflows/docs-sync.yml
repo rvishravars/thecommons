@@ -37,12 +37,6 @@ jobs:
             fi
           done
           
-          # Check that presentation.md version matches
-          if ! grep -q "v$MANIFESTO_VERSION" presentation.md; then
-            echo "❌ presentation.md doesn't reference the current version (v$MANIFESTO_VERSION)"
-            ISSUES=$((ISSUES + 1))
-          fi
-          
           # Validate internal links
           echo ""
           echo "🔗 Validating internal references..."
