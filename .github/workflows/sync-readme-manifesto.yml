@@ -1,0 +1,85 @@
+name: Sync README and Manifesto
+
+on:
+  pull_request:
+    paths:
+      - 'README.md'
+      - 'docs/MANIFESTO.md'
+  pull_request_target:
+    paths:
+      - 'README.md'
+      - 'docs/MANIFESTO.md'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  sync-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract versions
+        id: versions
+        run: |
+          # Extract version from README.md
+          README_VERSION=$(grep -oP 'Manifesto v\K[0-9]+\.[0-9]+' README.md | head -1)
+          echo "readme_version=$README_VERSION" >> $GITHUB_OUTPUT
+          
+          # Extract version from MANIFESTO.md
+          MANIFESTO_VERSION=$(grep -oP 'Master Framework \(v\K[0-9]+\.[0-9]+' docs/MANIFESTO.md | head -1)
+          echo "manifesto_version=$MANIFESTO_VERSION" >> $GITHUB_OUTPUT
+          
+          echo "README version: $README_VERSION"
+          echo "MANIFESTO version: $MANIFESTO_VERSION"
+
+      - name: Verify version consistency
+        id: check
+        run: |
+          README_VER=${{ steps.versions.outputs.readme_version }}
+          MANIFESTO_VER=${{ steps.versions.outputs.manifesto_version }}
+          
+          if [ -z "$README_VER" ]; then
+            echo "error=true" >> $GITHUB_OUTPUT
+            echo "message=❌ Could not find version in README.md (expected format: 'Manifesto v2.0')" >> $GITHUB_OUTPUT
+          elif [ -z "$MANIFESTO_VER" ]; then
+            echo "error=true" >> $GITHUB_OUTPUT
+            echo "message=❌ Could not find version in MANIFESTO.md (expected format: 'Master Framework (v2.0)')" >> $GITHUB_OUTPUT
+          elif [ "$README_VER" != "$MANIFESTO_VER" ]; then
+            echo "error=true" >> $GITHUB_OUTPUT
+            echo "message=❌ Version mismatch: README.md has v$README_VER but MANIFESTO.md has v$MANIFESTO_VER" >> $GITHUB_OUTPUT
+          else
+            echo "error=false" >> $GITHUB_OUTPUT
+            echo "message=✅ Versions are in sync (v$README_VER)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Post check result
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const isError = '${{ steps.check.outputs.error }}' === 'true';
+            const message = '${{ steps.check.outputs.message }}';
+            
+            const comment = `## 📋 Documentation Sync Check
+
+${message}
+
+**Files Checked:**
+- README.md
+- docs/MANIFESTO.md
+
+${isError ? '\n⚠️ Please ensure both files reference the same framework version.' : '\n✨ Documentation is consistent!'}`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+      - name: Fail if version mismatch
+        if: steps.check.outputs.error == 'true'
+        run: exit 1
