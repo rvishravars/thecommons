@@ -36,7 +36,7 @@ New to the Commons? Here is how you earn your seat at the table by adding mass t
 
 ### Visual Tour
 
-Here's a glimpse of the Spark Assembly Lab, where ideas are built:
+Here's a glimpse of the [Spark Assembly Lab](spark-assembly-lab/README.md), where ideas are built:
 
 | **Assembly Canvas** |
 |:---:|
