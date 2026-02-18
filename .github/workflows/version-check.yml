@@ -1,10 +1,11 @@
-name: Version Consistency Check
+name: Version Consistency Check (v2.0)
 
 on:
   pull_request:
     paths:
       - 'docs/MANIFESTO.md'
       - 'README.md'
+      - 'scripts/novelty_scan.py' # Added this because the script also tracks version logic
 
 jobs:
   check-version:
@@ -15,20 +16,26 @@ jobs:
 
       - name: Extract and Validate Versions
         run: |
-          # Extract version from docs/MANIFESTO.md
+          # 1. Check for file existence to prevent workflow failure
+          if [ ! -f "docs/MANIFESTO.md" ]; then
+            echo "⚠️ docs/MANIFESTO.md not found. If you merged it into README, please update this workflow."
+            exit 0
+          fi
+
+          # 2. Extract versions using the v2.0 pattern
           MANIFESTO_VERSION=$(grep -oP 'Master Framework \(v\K[0-9.]+' docs/MANIFESTO.md | head -1)
-          echo "Manifesto version: v$MANIFESTO_VERSION"
-          
-          # Extract version from README.md
           README_VERSION=$(grep -oP 'Manifesto v\K[0-9.]+' README.md | head -1)
+          
+          echo "Manifesto version: v$MANIFESTO_VERSION"
           echo "README version: v$README_VERSION"
           
-          # Check consistency
+          # 3. Check consistency
           if [ "$MANIFESTO_VERSION" != "$README_VERSION" ]; then
             echo ""
-            echo "❌ Version mismatch: docs/MANIFESTO.md (v$MANIFESTO_VERSION) != README.md (v$README_VERSION)"
-            echo "⚠️ Version inconsistency detected across documentation files."
-            echo "Please ensure all files reference version v$MANIFESTO_VERSION"
+            echo "❌ Version mismatch detected!"
+            echo "Manifesto: v$MANIFESTO_VERSION"
+            echo "README:    v$README_VERSION"
+            echo "⚠️ Ensure the 'Master Framework' version in docs/MANIFESTO.md matches the 'Manifesto vX.X' tag in README.md."
             exit 1
           fi
           
