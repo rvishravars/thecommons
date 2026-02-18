@@ -6,21 +6,77 @@ on:
     paths:
       - 'sparks/**'
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   novelty-check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Run Novelty Scan
+      - name: Install dependencies
         run: |
-          # Find modified files in sparks/ directory
-          # This is a simple implementation; for robust diff checking we might use other actions
-          # For now, we scan all sparks ensures nothing broke
-          python3 scripts/novelty_scan.py
+          pip install requests
+
+      - name: Get changed spark files
+        id: changed-files
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- sparks/*.md | tr '\n' ' ')
+          echo "files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "Changed files: $CHANGED_FILES"
+
+      - name: Run Novelty Scan
+        id: scan
+        if: steps.changed-files.outputs.files != ''
+        run: |
+          OUTPUT_FILE=$(mktemp)
+          for file in ${{ steps.changed-files.outputs.files }}; do
+            if [ -f "$file" ]; then
+              python3 scripts/novelty_scan.py --file "$file" | tee -a "$OUTPUT_FILE"
+            fi
+          done
+          echo "output_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+
+      - name: Post PR Comment
+        if: steps.changed-files.outputs.files != '' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const outputFile = '${{ steps.scan.outputs.output_file }}';
+            let scanOutput = '✅ No output generated';
+            
+            if (fs.existsSync(outputFile)) {
+              scanOutput = fs.readFileSync(outputFile, 'utf8');
+            }
+            
+            const comment = `## 🔍 Novelty Scan Results
+            
+            **Changed Spark Files:** \`${{ steps.changed-files.outputs.files }}\`
+            
+            ### Scan Output:
+            \`\`\`
+            ${scanOutput}
+            \`\`\`
+            
+            ---
+            *This scan validates the structure and extracts tags for prior art discovery.*
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
