@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - '**.md'
+      - 'docs/**.md'
+      - 'templates/**.md'
 
 jobs:
   sync-check:
@@ -20,7 +22,7 @@ jobs:
           ISSUES=0
           
           # Extract version from MANIFESTO
-          MANIFESTO_VERSION=$(grep -oP 'Master Framework \(v\K[0-9.]+' MANIFESTO.md | head -1)
+          MANIFESTO_VERSION=$(grep -oP 'Master Framework \(v\K[0-9.]+' docs/MANIFESTO.md | head -1)
           
           # Check if README references the correct manifesto version
           if ! grep -q "Manifesto v$MANIFESTO_VERSION" README.md; then
@@ -32,8 +34,8 @@ jobs:
           CORE_CONCEPTS=("Delta" "Novelty" "Transparency" "Execution is the Moat" "Glass Box AI")
           
           for concept in "${CORE_CONCEPTS[@]}"; do
-            if grep -q "$concept" MANIFESTO.md && ! grep -q "$concept" README.md; then
-              echo "⚠️  Core concept '$concept' is in MANIFESTO.md but not in README.md"
+            if grep -q "$concept" docs/MANIFESTO.md && ! grep -q "$concept" README.md; then
+              echo "⚠️  Core concept '$concept' is in docs/MANIFESTO.md but not in README.md"
             fi
           done
           
@@ -41,8 +43,8 @@ jobs:
           echo ""
           echo "🔗 Validating internal references..."
           
-          # Check for broken internal links (simple check)
-          for file in *.md; do
+          # Find all markdown files
+          find . -name "*.md" -not -path "./.git/*" | while read -r file; do
             if [ -f "$file" ]; then
               # Find markdown links
               grep -oP '\[.*?\]\(\K[^)]+' "$file" | while read -r link; do

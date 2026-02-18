@@ -3,7 +3,7 @@ name: Version Consistency Check
 on:
   pull_request:
     paths:
-      - 'MANIFESTO.md'
+      - 'docs/MANIFESTO.md'
       - 'README.md'
 
 jobs:
@@ -15,8 +15,8 @@ jobs:
 
       - name: Extract and Validate Versions
         run: |
-          # Extract version from MANIFESTO.md
-          MANIFESTO_VERSION=$(grep -oP 'Master Framework \(v\K[0-9.]+' MANIFESTO.md | head -1)
+          # Extract version from docs/MANIFESTO.md
+          MANIFESTO_VERSION=$(grep -oP 'Master Framework \(v\K[0-9.]+' docs/MANIFESTO.md | head -1)
           echo "Manifesto version: v$MANIFESTO_VERSION"
           
           # Extract version from README.md
@@ -26,7 +26,7 @@ jobs:
           # Check consistency
           if [ "$MANIFESTO_VERSION" != "$README_VERSION" ]; then
             echo ""
-            echo "❌ Version mismatch: MANIFESTO.md (v$MANIFESTO_VERSION) != README.md (v$README_VERSION)"
+            echo "❌ Version mismatch: docs/MANIFESTO.md (v$MANIFESTO_VERSION) != README.md (v$README_VERSION)"
             echo "⚠️ Version inconsistency detected across documentation files."
             echo "Please ensure all files reference version v$MANIFESTO_VERSION"
             exit 1
