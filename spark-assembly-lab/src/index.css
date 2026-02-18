@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-commons-darker text-commons-light font-sans;
+  }
+  
+  * {
+    @apply border-gray-700;
+  }
+}
+
+@layer components {
+  .phase-card {
+    @apply rounded-lg border-2 p-4 transition-all duration-200 hover:shadow-lg;
+  }
+  
+  .block-component {
+    @apply cursor-move rounded border-2 border-dashed p-3 transition-all hover:scale-105;
+  }
+  
+  .drop-zone {
+    @apply min-h-[100px] rounded-lg border-2 border-dashed p-4 transition-colors;
+  }
+  
+  .stability-badge {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
+  }
+}
+
+@layer utilities {
+  @keyframes slide-in {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+  }
+}
