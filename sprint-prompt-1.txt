@@ -1,0 +1,28 @@
+# Project Context: The Commons Spark-Runner
+I am building a high-performance, native (non-web) terminal-based application for the project `rvishravars/thecommons` on GitHub. This app acts as a "Spark-Runner" where users join rooms, play quizzes, and provide feedback to the Sparks.
+
+# Core Requirements & Tech Stack
+1. Language: [Choose: Go or Rust]
+2. UI: Terminal User Interface (TUI). If Go, use 'Bubble Tea' (Charm.sh). If Rust, use 'Ratatui'.
+3. Identity: GitHub OAuth using the 'Device Flow' (native CLI auth).
+4. Local Storage: Local-first persistence for quizzes using [Choose: SQLite (Go: modernc.org/sqlite | Rust: rusqlite) or BadgerDB/RocksDB].
+5. AI Integration: An internal "AI Account" module that acts as the quiz-master and evaluates user answers.
+
+# Feature Specifications
+- GitHub Login: Implement a module to handle GitHub Device Flow. It should open a browser for auth and return a JWT/Token to be stored locally.
+- Spark Quiz Engine: A quiz is a JSON/TOML 'Spark' file stored locally. The engine loads these files and presents them in a TUI.
+- Feedback Loop: Every answer submitted by the user must be evaluated by the 'AI Account'. The result (correct/incorrect/nuance) should be saved as a 'Knowledge Delta' in the local DB.
+- Networking: An IRC-like 'Room' architecture. Even if playing locally, the app should be architected to broadcast 'Score Sparks' to a mock server-side component for future scaling.
+
+# Task: Initial Scaffold
+1. Create a project structure:
+   - /cmd: Entry point.
+   - /internal/auth: GitHub OAuth logic.
+   - /internal/tui: UI components (Main menu, Quiz room, Leaderboard).
+   - /internal/storage: Database schema and CRUD for quizzes/feedback.
+   - /internal/spark: The logic for loading and 'running' a Spark.
+2. Provide a 'Hello World' implementation of the TUI that includes a "Login with GitHub" button and a placeholder for the "Local Quiz Room."
+3. Ensure the code prioritizes concurrency (Goroutines/Async) and zero-cost abstractions.
+
+# Goal
+The final output should be a compiled binary that feels like a high-speed IRC client but functions as a decentralized training tool for The Commons.
