@@ -37,4 +37,13 @@ New to the Commons? Here is how you earn your seat at the table:
 
 ---
 
+## 🤖 AI Scribe Commands
+
+The Commons is assisted by an AI Scribe that helps maintain novelty and governance.
+
+* **`!SPARK`**: Validates a new Spark proposal in a Pull Request. It checks for required structure and tags.
+  * *Usage*: Comment `!SPARK` on your PR containing a new file in `sparks/`.
+
+---
+
 > *"The Commons belongs to those who build it, and it stays open for those who follow."*
