@@ -1,4 +1,4 @@
-name: Novelty Scan
+name: Stability Scan (v2.0)
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  novelty-check:
+  stability-check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -24,54 +24,61 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
-        run: |
-          pip install requests
-
+      # Note: We don't need heavy dependencies yet because our new script 
+      # uses standard library re and os for efficiency.
       - name: Get changed spark files
         id: changed-files
         run: |
           git fetch origin ${{ github.base_ref }}
+          # Look for any .md file in sparks/
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- sparks/*.md | tr '\n' ' ')
           echo "files=$CHANGED_FILES" >> $GITHUB_OUTPUT
           echo "Changed files: $CHANGED_FILES"
 
-      - name: Run Novelty Scan
+      - name: Run Stability Scan
         id: scan
         if: steps.changed-files.outputs.files != ''
         run: |
-          OUTPUT_FILE=$(mktemp)
+          OUTPUT_FILE="scan_results.txt"
+          touch $OUTPUT_FILE
           for file in ${{ steps.changed-files.outputs.files }}; do
             if [ -f "$file" ]; then
-              python3 scripts/novelty_scan.py --file "$file" | tee -a "$OUTPUT_FILE"
+              # Running our new Phase-based script
+              python3 scripts/novelty_scan.py --file "$file" >> $OUTPUT_FILE 2>&1
             fi
           done
-          echo "output_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+          # Save path for the next step
+          echo "output_path=$OUTPUT_FILE" >> $GITHUB_OUTPUT
 
-      - name: Post PR Comment
+      - name: Post Stability Report
         if: steps.changed-files.outputs.files != '' && always()
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-            const outputFile = '${{ steps.scan.outputs.output_file }}';
-            let scanOutput = '✅ No output generated';
+            const path = 'scan_results.txt';
+            let scanOutput = '⚠️ No stability data generated.';
             
-            if (fs.existsSync(outputFile)) {
-              scanOutput = fs.readFileSync(outputFile, 'utf8');
+            if (fs.existsSync(path)) {
+              scanOutput = fs.readFileSync(path, 'utf8');
             }
             
-            const comment = `## 🔍 Novelty Scan Results
+            const comment = `## 🧱 TheCommons Stability Report
             
-            **Changed Spark Files:** \`${{ steps.changed-files.outputs.files }}\`
+            The **AI Scribe** has inspected your contribution for structural integrity.
             
-            ### Scan Output:
-            \`\`\`
+            ### 🛠️ Inspection Results:
+            \`\`\`text
             ${scanOutput}
             \`\`\`
             
             ---
-            *This scan validates the structure and extracts tags for prior art discovery.*
+            **Next Steps:**
+            * **Green (Stable):** Your brick is ready for the baseplate!
+            * **Yellow (Wobbly):** Add missing @handles or fill out required Phase sections.
+            * **Red (Unstable):** Ensure your file follows the \`spark_template.md\` format.
+            
+            *Remember: Intuition earns 5 CS, Imagination earns 15 CS, and Logic earns 25 CS.*
             `;
             
             github.rest.issues.createComment({
