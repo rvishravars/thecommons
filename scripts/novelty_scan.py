@@ -1,16 +1,16 @@
-
 import os
 import re
 import sys
 import argparse
 
-def scan_file(filepath):
+def scan_spark(filepath):
     """
-    Scans a markdown file for the 8-question Spark template.
-    Validates: All 4 blocks + 8 questions have content.
-    Returns True if valid, False otherwise.
+    Scans a Spark file for the Phase-based LEGO architecture:
+    1. Intuition (!HUNCH)
+    2. Imagination (!SHAPE)
+    3. Logic (!BUILD)
     """
-    print(f"\n🔍 Scanning: {filepath}")
+    print(f"\n🧱 Checking Brick Stability: {filepath}")
     
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
@@ -19,97 +19,94 @@ def scan_file(filepath):
         print(f"❌ Error reading file: {e}")
         return False
 
-    # Define the 8 required questions across 4 blocks
-    required_questions = [
-        # SPARK Block
-        (r"What's the problem I'm trying to solve\?", "SPARK: Problem"),
-        (r"What's my cool way of solving it\?", "SPARK: Solution"),
-        # SOUL Block
-        (r"Who does this help\?", "SOUL: Who"),
-        (r"What good thing happens\?", "SOUL: Impact"),
-        # MUSCLE Block
-        (r"How does it work\? \(step by step\)", "MUSCLE: How It Works"),
-        (r"What's the first thing I do\?", "MUSCLE: First Step"),
-        (r"What could go wrong\?", "MUSCLE: Risks"),
-        # SKIN Block
-        (r"How do I check if it's working\?", "SKIN: Measurement"),
-        (r"What tells me I'm on the right track\?", "SKIN: Success Signals"),
-    ]
+    # Define Requirements for each Phase
+    phases = {
+        "Intuition (!HUNCH)": {
+            "patterns": [r"The Observation", r"The Gap", r"The \"Why\""],
+            "required_role": r"\*Scout: @[\w-]+"
+        },
+        "Imagination (!SHAPE)": {
+            "patterns": [r"The Novel Core", r"The Blueprint", r"The Interface"],
+            "required_role": r"\*Designer: @[\w-]+"
+        },
+        "Logic (!BUILD)": {
+            "patterns": [r"Technical Implementation", r"Clutch Power Test"],
+            "required_role": r"\*Builder: @[\w-]+"
+        }
+    }
 
-    missing_questions = []
-    empty_questions = []
+    completion_status = []
     
-    for pattern, label in required_questions:
-        # Check if question exists
-        match = re.search(pattern, content, re.IGNORECASE)
-        if not match:
-            missing_questions.append(label)
-            continue
+    # 1. Evaluate Completion Level
+    for phase_name, requirements in phases.items():
+        # Check if Header exists
+        header_exists = re.search(re.escape(phase_name), content, re.IGNORECASE)
         
-        # Check if question has content after it (not empty)
-        question_pos = match.end()
-        next_question = re.search(r'^###', content[question_pos:], re.MULTILINE)
-        
-        if next_question:
-            answer_text = content[question_pos:question_pos + next_question.start()].strip()
-        else:
-            answer_text = content[question_pos:].strip()
-        
-        # Simple check: answer should have at least 10 characters of non-whitespace
-        if len(answer_text.split()) < 5:
-            empty_questions.append(label)
+        if header_exists:
+            # Check for Role/Handle
+            role_match = re.search(requirements["required_role"], content)
+            
+            # Check for pattern content
+            missing_patterns = []
+            for p in requirements["patterns"]:
+                if not re.search(p, content, re.IGNORECASE):
+                    missing_patterns.append(p)
 
-    # Check for Metadata
-    if not re.search(r'\*\*Originator:', content):
-        print(f"⚠️  Missing Originator in Metadata")
-    
-    issues = []
-    if missing_questions:
-        issues.append(f"Missing questions: {', '.join(missing_questions)}")
-    if empty_questions:
-        issues.append(f"Incomplete answers: {', '.join(empty_questions)}")
-    
-    if issues:
-        print(f"❌ Issues found:")
-        for issue in issues:
-            print(f"   • {issue}")
+            if role_match and not missing_patterns:
+                completion_status.append(phase_name)
+            else:
+                if not role_match:
+                    print(f"⚠️  {phase_name} found but missing @handle.")
+                if missing_patterns:
+                    print(f"⚠️  {phase_name} missing components: {', '.join(missing_patterns)}")
+
+    # 2. Output Stability Report
+    if not completion_status:
+        print("❌ Invalid Brick: No phases completed.")
         return False
 
-    print(f"✅ All 8 questions answered!")
-    print(f"   Block 1 (SPARK): Problem + Solution")
-    print(f"   Block 2 (SOUL): Who + Impact")
-    print(f"   Block 3 (MUSCLE): How + First Step + Risks")
-    print(f"   Block 4 (SKIN): Measurement + Success Signals")
-    
+    print(f"✅ Stability Level: {len(completion_status)}/3 Phases locked.")
+    for phase in completion_status:
+        print(f"   [Snap] {phase} is stable.")
+
+    # 3. Novelty Audit (The Scribe's Logic)
+    # Check for the "Novel Core" description length in Imagination phase
+    if "Imagination (!SHAPE)" in completion_status:
+        novel_core_match = re.search(r"The Novel Core(.*?)(?=---|\n##)", content, re.DOTALL | re.IGNORECASE)
+        if novel_core_match:
+            text = novel_core_match.group(1).strip()
+            if len(text.split()) < 15:
+                print("⚠️  Warning: Novel Core description is too thin. Needs more Imagination.")
+
     return True
 
 def main():
-    parser = argparse.ArgumentParser(description='Novelty Scan for Sparks (8Q Template)')
-    parser.add_argument('--file', help='Specific file to scan')
+    parser = argparse.ArgumentParser(description='TheCommons v2.0 Stability Scan')
+    parser.add_argument('--file', help='Specific Spark file to scan')
     args = parser.parse_args()
 
+    files = []
     if args.file:
         files = [args.file]
     else:
-        # Auto-discover .spark.md files in sparks/ directory
-        files = []
+        # Looking for .md files in the sparks directory
         if os.path.exists('sparks'):
-            for f in os.listdir('sparks'):
-                if f.endswith('.spark.md') or f.endswith('.md'):
-                    files.append(os.path.join('sparks', f))
+            files = [os.path.join('sparks', f) for f in os.listdir('sparks') if f.endswith('.md')]
 
     if not files:
-        print("⚠️ No spark files found to scan.")
+        print("⚠️ No Spark bricks found in /sparks/")
         return
 
-    success = True
+    all_passed = True
     for f in files:
-        if not scan_file(f):
-            success = False
+        if not scan_spark(f):
+            all_passed = False
 
-    if not success:
+    if not all_passed:
+        print("\n❌ Build failed. Some bricks are wobbly.")
         sys.exit(1)
+    else:
+        print("\n🌟 All scanned bricks are structurally sound!")
 
 if __name__ == "__main__":
     main()
-

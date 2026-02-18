@@ -1,49 +1,51 @@
-# 📜 TheCommons
+# 📜 TheCommons: Master Framework (v2.0)
 
-### *For the Inventors.*
+### *For the Architects of the Open Build.*
 
-Every day, a world-changing idea dies in a basement because its creator lacked a platform, a patent lawyer, or a seat at the table. History is littered with the names we *don’t* know—the innovators who were sidelined, underappreciated, or forgotten by time. 
+Every day, a world-changing idea dies in a basement because its creator lacked a platform, a connection, or a seat at the table. History is littered with the names we *don’t* know—the innovators who were sidelined because they had the **Intuition** but lacked the **Logic** to build it, or the **Logic** but no room for **Imagination**.
 
 **TheCommons** is a tribute to them. 
 
-We feel a profound connection to those who came before us—the tinkerers and dreamers who are no longer here to push their own code or defend their own logic. We believe that if they could see the tools we have today, they wouldn't want their work locked in a vault or hidden behind an NDA. They would want it **fanned into a flame.**
-
-We are building a **Republic of Doers** where execution is the only moat and transparency is the only law. We honor the silent inventor by becoming the vocal executor.
+We are building a **Modular Meritocracy**—a "LEGO set" for human progress. We believe that ideas shouldn't be locked in vaults; they should be designed as interoperable bricks that anyone can snap into. We honor the silent inventor by providing the baseplate for their vision to become reality.
 
 ---
 
-## 🏛️ Governance & Philosophy
+## 🏛️ Governance & Philosophy: The LEGO Trinity
 
-The rules of this ecosystem are governed by a living document maintained by the community and interpreted by an AI Scribe. 
+The Commons is governed by a meritocratic hierarchy where influence is earned through three types of contribution. Like a LEGO brick, every contribution needs "Clutch Power" to stick.
 
-### [👉 Read the Full Manifesto v1.7](docs/MANIFESTO.md)
+### [👉 Read the Unified Manifesto & Guide v2.0](docs/MANIFESTO.md)
 
 **The Core Pillars:**
-* **Novelty & Transparency:** We do not reward "re-inventing the wheel"; we reward the **Delta**.
-* **Execution is the Moat:** The only true competitive advantage is the speed and quality of execution.
-* **Glass Box AI:** Any AI integrated into governance must be fully open-source.
-* **The Living Spark:** Sparks are not static posts; they are **Living Documents** subject to continuous hardening via Pull Requests.
-* **Host-Agnostic:** The data belongs to the community. If this host fails, the community is pre-authorized to migrate.
+* **🧠 Intuition (The Scout):** We reward the "gut feel"—the ability to spot a gap in the ecosystem before others do.
+* **🎨 Imagination (The Designer):** We reward the "leap"—the ability to design a **Novel Core** that solves the gap.
+* **🛠️ Logic (The Builder):** We reward the "rigor"—the execution, code, and stress-testing that makes the idea solid.
+* **🔗 Interoperability:** Execution is the only moat. We build things that are meant to be snapped onto, not hidden away.
+* **📡 Host-Agnostic:** The data belongs to the community. If this host fails, the community is pre-authorized to migrate to the most active fork.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started (The Instruction Manual)
 
-New to the Commons? Here is how you earn your seat at the table:
+New to the Commons? Here is how you earn your seat at the table by adding mass to the build:
 
-1.  **Read the [Getting Started Guide](docs/MANIFESTO.md#part-2-getting-started-guide):** Learn about the roles of Janitor, Refiner, Spark, and Architect.
-2.  **Earn Your Citizenship (+2 CS):** Submit a Pull Request for a "Janitor" task (typos, formatting, or broken links). Complete 3 of these to unlock full voting rights.
-3.  **Launch a Spark (+25 CS):** Use the `templates/novel_spark.md` to post a new vision in the **Discussions** tab.
+1.  **Phase 1: Scout (+5 CS):** Use your **Intuition**. Find a "loose stud" (a bug, typo, or missing feature) and log it using `!HUNCH`.
+2.  **Phase 2: Designer (+15 CS):** Use your **Imagination**. Take a hunch and give it a shape. Define the **Novel Core** using the `!SHAPE` template.
+3.  **Phase 3: Builder (+25 CS):** Use your **Logic**. Write the code or technical specs to turn a design into a functional brick using `!BUILD`.
 
----
 
-## 🤖 AI Scribe Commands
-
-The Commons is assisted by an AI Scribe that helps maintain novelty and governance.
-
-* **`!SPARK`**: Validates a new Spark proposal in a Pull Request. It checks for required structure and tags.
-  * *Usage*: Comment `!SPARK` on your PR containing a new file in `sparks/`.
 
 ---
 
-> *"The Commons belongs to those who build it, and it stays open for those who follow."*
+## 🤖 AI Scribe Commands (The Standard Gauge)
+
+The Commons is assisted by an AI Scribe that ensures every new brick follows the standard gauge of the community.
+
+* **`!HUNCH`**: Logs an intuition or observation of a gap.
+* **`!SHAPE`**: Validates a blueprint and checks for "Prior Art" (Novelty Audit).
+* **`!BUILD`**: Runs a stability check to ensure your logic doesn't break existing bricks.
+* **`!VOTE_VETO`**: A community safety-valve to halt structural changes.
+
+---
+
+> *"The Commons rewards the intuition to see the gap, the imagination to design the piece, and the logic to make it stick."*

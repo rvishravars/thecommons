@@ -1,49 +1,45 @@
-# Novel Spark: [Title]
-
-> **Metadata**
-> * **Originator:** @[GitHub-Username]
-> * **Status:** Under Audit (Tier 1)
-> * **Tags:** #domain, #technology, #methodology
+# 🧩 Spark Template: [Name of Your Brick]
 
 ---
 
-## 1. THE SPARK - My Big Idea
+## 🧠 Phase 1: The Intuition (!HUNCH)
+*Status: [Active / Claimed]* *Scout: @[YourGitHubHandle]*
 
-### What's the problem I'm trying to solve?
-
-### What's my cool way of solving it?
-
----
-
-## 2. THE SOUL - Why It Matters
-
-### Who does this help?
-
-### What good thing happens?
+### The Observation
+> Use your intuition here. What is missing? What feels "off" in the current ecosystem?
+* **The Gap:** (e.g., "Our current notification system is too noisy.")
+* **The "Why":** (e.g., "Users are ignoring important alerts because of minor update pings.")
 
 ---
 
-## 3. THE MUSCLE - How to Build It
+## 🎨 Phase 2: The Imagination (!SHAPE)
+*Status: [Pending / Designed]* *Designer: @[Handle]*
 
-### How does it work? (step by step)
+### The Novel Core (The 10% Delta)
+* **The Blueprint:** (Describe the unique design of this new brick.)
+* **The Interface:** (How does this "snap" into existing sparks or the root framework?)
+* **Prior Art:** (Briefly list why existing solutions/bricks don't fill this gap.)
 
-### What's the first thing I do?
 
-### What could go wrong?
-
----
-
-## 4. THE SKIN - Does It Work?
-
-### How do I check if it's working?
-
-### What tells me I'm on the right track?
 
 ---
 
-## How to Use This Template
+## 🛠️ Phase 3: The Logic (!BUILD)
+*Status: [In-Progress / Merged]* *Builder: @[Handle]*
 
-1. Answer all 8 questions above
-2. Save your file as `/sparks/your-idea-name.md`
-3. Open a Pull Request
-4. Comment `!SPARK` on your PR to start the audit
+### Technical Implementation
+* **The Logic:** (Link to the PR, code snippet, or technical documentation.)
+* **Clutch Power Test:** (Explain how you verified that this brick doesn't break others.)
+* **Dependencies:** (List any other Sparks or libraries required for this to function.)
+
+---
+
+## 📊 Contribution Log (CS Tracker)
+| Phase | Contributor | Action | Reward |
+| :--- | :--- | :--- | :--- |
+| **Intuition** | @user1 | Submitted Hunch | +5 CS |
+| **Imagination** | @user2 | Designed Shape | +15 CS (+5 Echo) |
+| **Logic** | @user3 | Merged Build | +25 CS (+10 Prototype) |
+
+---
+> *Instructions: Start by filling out Phase 1. As the community interacts, update the file via Pull Requests to complete Phase 2 and 3.*
