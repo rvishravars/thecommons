@@ -6,9 +6,9 @@
 *Status: Claimed* *Scout: @IntuitionIvan*
 
 ### The Observation
-> I have a gut feel that as we grow, the "Janitor" role will be exploited by bots just to farm CS points.
-* **The Gap:** We currently reward all typo fixes equally, but 100 tiny typo PRs don't equal one high-quality documentation rewrite.
-* **The "Why":** Logic-builders will get frustrated if their voting power is diluted by "Point-Farmers" who aren't actually invested in the structure.
+> I have a gut feel that as we grow, the "Scout" role will be exploited by bots just to farm CS points through trivial intuition submissions.
+* **The Gap:** We currently reward all Scout discoveries equally, but 100 tiny observations (typo hunches, broken links) don't equal one high-quality gap analysis.
+* **The "Why":** Builders and Designers will get frustrated if their voting power is diluted by "Point-Farmers" who submit minimal-effort hunches without actual investment in the structure.
 
 ---
 
@@ -16,7 +16,7 @@
 *Status: Designed* *Designer: @CreativeClara*
 
 ### The Novel Core (The 10% Delta)
-* **The Blueprint:** Introduce a "Decay Rate" for CS earned via Janitor tasks. Unlike Logic points, which are permanent, Janitor points lose 10% value every month unless the user contributes a higher-tier Spark.
+* **The Blueprint:** Introduce a "Decay Rate" for CS earned via Scout tasks. Unlike Logic/Builder points, which are more permanent, Scout points lose 10% value every month unless the user contributes a higher-tier Spark (Designer or Builder level).
 * **The Interface:** This snaps into the **Logarithmic Voting Power** formula ($$Weight = log_{10}(CS_{active})$$).
 * **Prior Art:** Traditional DAOs use "Staking" (locking money). Our "Delta" is **Staking Time/Consistency** instead of capital.
 
