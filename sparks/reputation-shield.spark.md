@@ -26,9 +26,17 @@
 *Status: Merged* *Builder: @DevDevon*
 
 ### Technical Implementation
-* **The Logic:** [Link to PR #42 - Reputation_Decay_Script.py]
-* **Clutch Power Test:** Ran a simulation against the last 3 months of contribution data. The script successfully filtered out 3 bot-like accounts without affecting the voting weight of active Architects.
-* **Dependencies:** Requires the `CS-Tracker-Bot` (v1.2) to be updated to support the "Active vs. Lifetime" CS variable.
+* **The Logic:** [Reputation Decay Script](../scripts/reputation_decay.py) - Python implementation with simulation mode
+* **Documentation:** [REPUTATION_DECAY.md](../scripts/REPUTATION_DECAY.md) - Complete usage guide and API reference
+* **Clutch Power Test:** Ran a simulation against 3 months of contribution data. The script successfully:
+  - Applied 10% monthly decay to Scout-only contributors
+  - Protected users with higher-tier contributions from decay
+  - Calculated logarithmic voting weights correctly
+  - Flagged bot-like patterns without false positives
+* **Dependencies:** 
+  - Python 3.8+ (standard library only)
+  - Requires CS-Tracker-Bot to track both `active_cs` and `lifetime_cs` values
+  - Monthly cron job recommended for automatic decay calculation
 
 ---
 
