@@ -1,0 +1,2 @@
+# Requirements for novelty scan and other scripts
+requests>=2.31.0

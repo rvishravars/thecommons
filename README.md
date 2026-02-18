@@ -16,7 +16,7 @@ We are building a **Republic of Doers** where execution is the only moat and tra
 
 The rules of this ecosystem are governed by a living document maintained by the community and interpreted by an AI Scribe. 
 
-### [👉 Read the Full Manifesto v1.6](MANIFESTO.md)
+### [👉 Read the Full Manifesto v1.7](MANIFESTO.md)
 
 **The Core Pillars:**
 * **Novelty & Transparency:** We do not reward "re-inventing the wheel"; we reward the **Delta**.

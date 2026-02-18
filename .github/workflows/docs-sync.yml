@@ -1,0 +1,73 @@
+name: Documentation Sync Check
+
+on:
+  pull_request:
+    paths:
+      - '**.md'
+
+jobs:
+  sync-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Cross-References
+        run: |
+          echo "🔍 Checking documentation synchronization..."
+          
+          # Check that key concepts from MANIFESTO appear in README
+          ISSUES=0
+          
+          # Extract version from MANIFESTO
+          MANIFESTO_VERSION=$(grep -oP 'Master Framework \(v\K[0-9.]+' MANIFESTO.md | head -1)
+          
+          # Check if README references the correct manifesto version
+          if ! grep -q "Manifesto v$MANIFESTO_VERSION" README.md; then
+            echo "❌ README.md doesn't reference the current Manifesto version (v$MANIFESTO_VERSION)"
+            ISSUES=$((ISSUES + 1))
+          fi
+          
+          # Check that core concepts exist in both MANIFESTO and README
+          CORE_CONCEPTS=("Delta" "Novelty" "Transparency" "Execution is the Moat" "Glass Box AI")
+          
+          for concept in "${CORE_CONCEPTS[@]}"; do
+            if grep -q "$concept" MANIFESTO.md && ! grep -q "$concept" README.md; then
+              echo "⚠️  Core concept '$concept' is in MANIFESTO.md but not in README.md"
+            fi
+          done
+          
+          # Check that presentation.md version matches
+          if ! grep -q "v$MANIFESTO_VERSION" presentation.md; then
+            echo "❌ presentation.md doesn't reference the current version (v$MANIFESTO_VERSION)"
+            ISSUES=$((ISSUES + 1))
+          fi
+          
+          # Validate internal links
+          echo ""
+          echo "🔗 Validating internal references..."
+          
+          # Check for broken internal links (simple check)
+          for file in *.md; do
+            if [ -f "$file" ]; then
+              # Find markdown links
+              grep -oP '\[.*?\]\(\K[^)]+' "$file" | while read -r link; do
+                # Skip external links
+                if [[ $link != http* ]] && [[ $link != \#* ]]; then
+                  target_file=$(echo "$link" | cut -d'#' -f1)
+                  if [ -n "$target_file" ] && [ ! -f "$target_file" ]; then
+                    echo "⚠️  Broken link in $file: $link"
+                  fi
+                fi
+              done
+            fi
+          done
+          
+          if [ $ISSUES -gt 0 ]; then
+            echo ""
+            echo "❌ Found $ISSUES critical documentation sync issues"
+            exit 1
+          fi
+          
+          echo ""
+          echo "✅ Documentation sync validated successfully"

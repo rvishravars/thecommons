@@ -48,7 +48,7 @@ Your idea isn't a static statue to be guarded; it's a living organism that thriv
 ## 3. 💪 THE MUSCLE (First Steps)
 *With a soul established, your idea needs to move. The Muscle represents the initial, tangible actions that translate vision into reality.*
 
-### Technical Spec / Human Logic
+### Technical Spec / Core Logic
 *How does it work? Provide step-by-step instructions, a logic flow, or a technical overview of the execution.*
 
 ### First Actionable Steps

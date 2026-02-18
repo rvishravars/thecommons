@@ -1,0 +1,15 @@
+# CODEOWNERS for TheCommons
+# These owners will be automatically requested for review when someone opens a PR
+
+# Default owner for everything in the repo
+* @rvishravars
+
+# Manifesto changes require special attention
+/MANIFESTO.md @rvishravars
+
+# Workflow and automation changes
+/.github/ @rvishravars
+/scripts/ @rvishravars
+
+# Documentation
+*.md @rvishravars

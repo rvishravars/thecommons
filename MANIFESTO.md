@@ -1,4 +1,4 @@
-# 📜 TheCommons: Master Framework (v1.6)
+# 📜 TheCommons: Master Framework (v1.7)
 
 ---
 
@@ -16,6 +16,7 @@ The value of a Spark is determined by its **Unique Insight**. We do not reward "
 Influence is earned through tangible value. The system is designed to filter out noise and amplify breakthrough insights.
 
 #### 2.1 The Value Hierarchy
+Any GitHub account holder can participate.
 | Role | Reward | Purpose |
 | :--- | :--- | :--- |
 | **🧹 Janitor** | +2 CS | **Maintenance:** Keeping the existing ecosystem clean (typos, links, docs). |
@@ -43,13 +44,13 @@ $$Weight = log_{10}(CS)$$
 
 ### 3. The Law of the Supermajority (75%)
 * **3.1 The Threshold:** Manifesto or core architecture changes require a **75% Weighted Supermajority**.
-* **3.2 The Scribe’s Buffer:** AI-proposed updates are held in "Pending" for 24 hours for human review.
+* **3.2 The Scribe’s Buffer:** AI-proposed updates are held in "Pending" for 24 hours for peer review.
 * **3.3 The Veto Command:** `!VOTE_VETO [Reason]` halts an update if 10% of total community weight supports the freeze.
 
 ### 4. Conflict & Dispute Resolution (The Novelty Audit)
-* **4.1 The Challenge:** Users with CS > 10 may file a `!CHALLENGE` if they believe a Spark lacks novelty or is a derivative of existing work without attribution.
+* **4.1 The Challenge:** Contributors with CS > 10 may file a `!CHALLENGE` if they believe a Spark lacks novelty or is a derivative of existing work without attribution.
 * **4.2 The Scribe’s Brief:** The AI Scribe acts as an **Investigator**. It generates a "Novelty Report" comparing the Spark to existing repositories and papers.
-* **4.3 Human Jury:** Three randomly selected contributors (CS > 50) review the report and decide if the "Novel Core" stands.
+* **4.3 Community Jury:** Three randomly selected contributors (CS > 50) review the report and decide if the "Novel Core" stands.
 * **4.4 The Cool-Down:** If a Spark receives >5 critical flaws in 24 hours, the AI locks the thread for 12 hours to prevent dogpiling.
 
 ### 5. Licensing & Continuity

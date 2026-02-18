@@ -1,7 +1,7 @@
 
 
 # 📜 The Commons
-## Master Framework (v1.6)
+## Master Framework (v1.7)
 ### *For the Inventors.*
 
 ---
@@ -77,7 +77,7 @@ $$Weight = log_{10}(CS)$$
 
 ## 🗺️ Development Roadmap
 
-*   [x] **Manifesto v1.6:** Governance & Rewards
+*   [x] **Manifesto v1.7:** Governance & Rewards
 *   [ ] **Novelty Scan Script:** AI Prior Art Discovery
 *   [ ] **CS Tracker Bot:** GitHub Actions for Points
 *   [ ] **The Midnight Scribe:** Auto-patch generation
