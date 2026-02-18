@@ -16,7 +16,7 @@ We are building a **Republic of Doers** where execution is the only moat and tra
 
 The rules of this ecosystem are governed by a living document maintained by the community and interpreted by an AI Scribe. 
 
-### [👉 Read the Full Manifesto v1.7](MANIFESTO.md)
+### [👉 Read the Full Manifesto v1.7](docs/MANIFESTO.md)
 
 **The Core Pillars:**
 * **Novelty & Transparency:** We do not reward "re-inventing the wheel"; we reward the **Delta**.
@@ -31,9 +31,9 @@ The rules of this ecosystem are governed by a living document maintained by the 
 
 New to the Commons? Here is how you earn your seat at the table:
 
-1.  **Read the [Getting Started Guide](MANIFESTO.md#part-2-getting-started-guide):** Learn about the roles of Janitor, Refiner, Spark, and Architect.
+1.  **Read the [Getting Started Guide](docs/MANIFESTO.md#part-2-getting-started-guide):** Learn about the roles of Janitor, Refiner, Spark, and Architect.
 2.  **Earn Your Citizenship (+2 CS):** Submit a Pull Request for a "Janitor" task (typos, formatting, or broken links). Complete 3 of these to unlock full voting rights.
-3.  **Launch a Spark (+25 CS):** Use the `novel_spark_template.md` to post a new vision in the **Discussions** tab.
+3.  **Launch a Spark (+25 CS):** Use the `templates/novel_spark.md` to post a new vision in the **Discussions** tab.
 
 ---
 
