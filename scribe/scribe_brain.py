@@ -451,7 +451,20 @@ class ScribeBrain:
 
 def main():
     """Main entry point for the Scribe Brain."""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Scribe v2.0 Brain - Glass Box AI Agent")
+    parser.add_argument("--demo", action="store_true", help="Run in demo mode (no inference)")
+    parser.add_argument("--eval-file", type=str, help="Spark file to evaluate")
+    parser.add_argument("--phase", choices=["hunch", "shape"], default="hunch", help="Evaluation phase")
+    args = parser.parse_args()
+
     logger.info("🧠 Initializing Scribe v2.0 Brain...")
+
+    if args.demo:
+        logger.info("📊 Running in DEMO MODE (no inference required)")
+        demo_mode()
+        return
 
     brain = ScribeBrain()
     logger.info(f"Hardware selected: {brain.hardware.value}")
@@ -464,13 +477,105 @@ def main():
     """
 
     logger.info("📥 Evaluating sample HUNCH...")
-    result = brain.evaluate_spark(EvaluationPhase.HUNCH, sample_hunch)
+    try:
+        result = brain.evaluate_spark(EvaluationPhase.HUNCH, sample_hunch)
 
-    if result:
-        logger.info("\n" + brain.output_result(result))
-    else:
-        logger.error("Evaluation failed")
+        if result:
+            logger.info("\n" + brain.output_result(result))
+        else:
+            logger.error("Evaluation failed")
+            logger.info("\n💡 HELP:")
+            logger.info("   1. Download model: python scribe/models/downloader.py --download")
+            logger.info("   2. Or use demo mode: python scribe/scribe_brain.py --demo")
+            logger.info("   3. Or set Groq API: export GROQ_API_KEY='your-key'")
+            sys.exit(1)
+    except Exception as e:
+        logger.error(f"Fatal error during evaluation: {e}")
+        logger.info("\n💡 HELP:")
+        logger.info("   • Run demo mode: python scribe/scribe_brain.py --demo")
+        logger.info("   • Install model: python scribe/models/downloader.py --download")
+        logger.info("   • Check dependencies: pip install -r scribe/requirements.txt")
         sys.exit(1)
+
+
+def demo_mode():
+    """Demo mode showing Scribe functionality without inference."""
+    logger.info("\n" + "="*60)
+    logger.info("🧠 SCRIBE V2.0 GLASS BOX DEMO")
+    logger.info("="*60)
+    
+    # Simulate evaluation
+    sample_hunch = """
+    I notice that our Spark files don't have consistent date fields. 
+    It's hard to track when a blueprint was created vs. when it was approved.
+    This makes it difficult to analyze the velocity of the Commons.
+    """
+    
+    logger.info("\n📥 INPUT: Sample !HUNCH")
+    logger.info(f"{sample_hunch}")
+    
+    # Simulated Glass Box output
+    demo_result = {
+        "status": "approved",
+        "phase": "hunch",
+        "stability_score": 8.5,
+        "reasoning": {
+            "checks": {
+                "specificity": "✅ Concrete observation about date field inconsistency",
+                "actionability": "✅ Designer can create timeline tracking feature",
+                "novelty": "✅ Not mentioned in existing Spark files",
+                "scope_alignment": "✅ Within Commons governance scope"
+            },
+            "decision_path": [
+                "Scanning for Loose Studs...",
+                "Identifying specific gap: date field inconsistency",
+                "Checking Clutch Power (specificity of observation)...",
+                "Validating actionability (can Designer build on this?)...",
+                "Cross-referencing against existing Sparks...",
+                "Novelty assessment: New observation, not duplicate"
+            ],
+            "glass_box": {
+                "hardware_used": "cpu (demo mode)",
+                "time_elapsed_ms": 42.5,
+                "memory_used_mb": 8.2,
+                "prompts_tested": ["hunch_eval.md"],
+                "decision_path": [
+                    "Scanning for Loose Studs...",
+                    "Identified: Missing date standardization",
+                    "Checking Clutch Power (specificity)...",
+                    "Score: 8.5/10 (clear, actionable, novel)"
+                ],
+                "stability_score": 8.5,
+                "critical_flaws": [],
+                "recommendations": [
+                    "Consider proposing a timestamp schema in !SHAPE phase",
+                    "Include impact analysis on existing queries/reports"
+                ]
+            }
+        }
+    }
+    
+    logger.info("\n📊 OUTPUT: Glass Box Reasoning Log")
+    logger.info("="*60)
+    logger.info(json.dumps(demo_result, indent=2))
+    
+    logger.info("\n" + "="*60)
+    logger.info("✅ Demo complete")
+    logger.info("="*60)
+    logger.info("\n💡 NEXT STEPS:")
+    logger.info("   1. Download Qwen2.5-1.5B model:")
+    logger.info("      python scribe/models/downloader.py --download")
+    logger.info("")
+    logger.info("   2. Or set up Groq API fallback:")
+    logger.info("      export GROQ_API_KEY='your-groq-api-key'")
+    logger.info("      pip install groq>=0.4.0")
+    logger.info("")
+    logger.info("   3. Run stability audits (no model required):")
+    logger.info("      python scribe/logic/stability_audit.py --dir sparks/")
+    logger.info("")
+    logger.info("   4. Then run live evaluation:")
+    logger.info("      python scribe/scribe_brain.py")
+    logger.info("")
 
 
 if __name__ == "__main__":
