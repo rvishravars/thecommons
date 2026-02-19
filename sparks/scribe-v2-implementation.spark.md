@@ -12,7 +12,7 @@ clutch_power: 45
 ---
 
 ## 🧠 Phase 1: The Intuition (!HUNCH)
-*Status: Claimed* *Scout: @TheCommons*
+*Status: [Claimed]* *Scout: @TheCommons*
 
 ### The Observation
 > The AI "Scribe" is currently a concept. To enforce our Manifesto and automate compatibility verification, we need a deterministic, hardware-agnostic intelligence layer that runs locally and outputs its reasoning transparently.
@@ -32,7 +32,7 @@ clutch_power: 45
 ---
 
 ## 🎨 Phase 2: The Imagination (!SHAPE)
-*Status: Designed* *Designer: @CopilotAgent*
+*Status: [Designed]* *Designer: @CopilotAgent*
 
 ### The Novel Core (The 10% Delta)
 * **The Blueprint:** "The Glass Box Scribe"—a modular, hardware-aware AI agent that:
@@ -116,7 +116,7 @@ scribe_status.json              # Real-time thinking steps for UI
 ---
 
 ## 🛠️ Phase 3: The Logic (!BUILD)
-*Status: Completed* *Builder: @CopilotAgent*
+*Status: [Completed]* *Builder: @CopilotAgent*
 
 ### Technical Implementation
 
