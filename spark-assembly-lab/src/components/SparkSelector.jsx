@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Plus, FileText, Zap, RefreshCw } from 'lucide-react';
 import { parseSparkFile } from '../utils/sparkParser';
 
@@ -19,7 +19,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     };
   };
 
-  const loadSparks = async () => {
+  const loadSparks = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -111,7 +111,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadSparks();
