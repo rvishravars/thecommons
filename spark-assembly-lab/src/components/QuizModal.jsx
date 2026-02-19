@@ -143,14 +143,14 @@ export default function QuizModal({ sparkData, onClose }) {
     if (phase === 'intuition') return 'text-intuition-400';
     if (phase === 'imagination') return 'text-imagination-400';
     if (phase === 'logic') return 'text-logic-400';
-    return 'text-gray-400';
+    return 'theme-muted';
   };
 
   if (showResults) {
     const score = calculateScore();
     return (
-      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="bg-gray-900 rounded-xl border-2 border-imagination-600 w-full max-w-2xl shadow-2xl">
+      <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="theme-panel rounded-xl border-2 border-imagination-600 w-full max-w-2xl shadow-2xl">
           <div className="bg-imagination-600 px-6 py-4 rounded-t-xl flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Award className="h-8 w-8" />
@@ -207,8 +207,8 @@ export default function QuizModal({ sparkData, onClose }) {
     const hasAnswered = selectedAnswers[currentQuestion] !== undefined;
 
     return (
-      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="bg-gray-900 rounded-xl border-2 border-imagination-600 w-full max-w-2xl shadow-2xl">
+      <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="theme-panel rounded-xl border-2 border-imagination-600 w-full max-w-2xl shadow-2xl">
           <div className="bg-imagination-600 px-6 py-4 rounded-t-xl flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Brain className="h-6 w-6" />
@@ -237,7 +237,7 @@ export default function QuizModal({ sparkData, onClose }) {
                   className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                     selectedAnswers[currentQuestion] === idx
                       ? 'border-imagination-500 bg-imagination-900/20'
-                      : 'border-gray-700 hover:border-gray-600 bg-gray-800'
+                      : 'theme-border theme-border-hover theme-card'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -245,7 +245,7 @@ export default function QuizModal({ sparkData, onClose }) {
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                         selectedAnswers[currentQuestion] === idx
                           ? 'border-imagination-500 bg-imagination-500'
-                          : 'border-gray-600'
+                          : 'theme-border'
                       }`}
                     >
                       {selectedAnswers[currentQuestion] === idx && (
@@ -259,7 +259,7 @@ export default function QuizModal({ sparkData, onClose }) {
             </div>
 
             <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-400">
+              <div className="text-sm theme-muted">
                 {Object.keys(selectedAnswers).length} of {questions.length} answered
               </div>
               <button
@@ -277,8 +277,8 @@ export default function QuizModal({ sparkData, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-gray-900 rounded-xl border-2 border-imagination-600 w-full max-w-2xl shadow-2xl">
+    <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="theme-panel rounded-xl border-2 border-imagination-600 w-full max-w-2xl shadow-2xl">
         <div className="bg-imagination-600 px-6 py-4 rounded-t-xl flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Brain className="h-8 w-8" />
@@ -295,7 +295,7 @@ export default function QuizModal({ sparkData, onClose }) {
         <div className="p-8">
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-2">Spark: {sparkData.name}</h3>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm theme-muted">
               Choose your AI provider to generate quiz questions based on this spark&apos;s content
             </p>
           </div>
@@ -308,7 +308,7 @@ export default function QuizModal({ sparkData, onClose }) {
                 className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                   selectedAI === provider.id
                     ? 'border-imagination-500 bg-imagination-900/20'
-                    : 'border-gray-700 hover:border-gray-600 bg-gray-800'
+                    : 'theme-border theme-border-hover theme-card'
                 }`}
               >
                 <div className="flex items-center space-x-3">
@@ -327,9 +327,9 @@ export default function QuizModal({ sparkData, onClose }) {
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="Enter your API key..."
-                className="w-full bg-gray-800 rounded border border-gray-700 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-imagination-500"
+                className="w-full theme-input rounded border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-imagination-500"
               />
-              <p className="text-xs text-gray-500 mt-1">Coming soon! Local template available now.</p>
+              <p className="text-xs theme-subtle mt-1">Coming soon! Local template available now.</p>
             </div>
           )}
 

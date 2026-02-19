@@ -97,7 +97,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-4 border-b border-gray-700">
+      <div className="p-4 border-b theme-border">
         <button
           onClick={onNewSpark}
           className="w-full flex items-center justify-center space-x-2 rounded-lg bg-imagination-600 px-4 py-3 text-sm font-semibold hover:bg-imagination-700 transition-colors"
@@ -109,13 +109,13 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
 
       <div className="flex-1 overflow-y-auto p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+          <h3 className="text-xs font-semibold uppercase tracking-wider theme-muted">
             Existing Sparks
           </h3>
           <button
             onClick={loadSparks}
             disabled={loading}
-            className="text-gray-400 hover:text-gray-300 transition-colors disabled:opacity-50"
+            className="theme-muted-hover transition-colors disabled:opacity-50"
             title="Refresh"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -130,12 +130,12 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         
         <div className="space-y-2">
           {loading && sparks.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 theme-subtle">
               <RefreshCw className="h-8 w-8 mx-auto mb-2 animate-spin" />
               <p className="text-sm">Loading sparks...</p>
             </div>
           ) : sparks.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 theme-subtle">
               <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No sparks found</p>
               <p className="text-xs mt-1">Add .spark.md files to /sparks/</p>
@@ -147,8 +147,8 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
                 onClick={() => onSparkSelect(spark.data)}
                 className={`w-full rounded-lg border-2 p-3 text-left transition-all hover:border-imagination-500 ${
                   selectedSpark?.name === spark.name
-                    ? 'border-imagination-500 bg-gray-800'
-                    : 'border-gray-700 bg-gray-800/50'
+                    ? 'border-imagination-500 theme-card'
+                    : 'theme-border theme-card-soft'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -156,7 +156,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
                     <Zap className="h-4 w-4 mt-0.5 text-imagination-500" />
                     <div>
                       <h4 className="font-semibold text-sm">{spark.name}</h4>
-                      <p className="text-xs text-gray-400 mt-1">{spark.file}</p>
+                      <p className="text-xs theme-muted mt-1">{spark.file}</p>
                     </div>
                   </div>
                 </div>
@@ -176,8 +176,8 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         </div>
       </div>
       
-      <div className="border-t border-gray-700 p-4 bg-gray-900">
-        <div className="text-xs text-gray-500">
+      <div className="border-t theme-border p-4 theme-sidebar-footer">
+        <div className="text-xs theme-subtle">
           <p className="font-semibold mb-2">Stability Levels:</p>
           <div className="space-y-1">
             <div className="flex items-center space-x-2">

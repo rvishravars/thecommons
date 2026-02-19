@@ -20,7 +20,7 @@ export default function PhaseLane({ phase, title, description, color, data, cont
   const blocks = getBlocksForPhase();
 
   return (
-    <div className={`flex-1 min-w-[320px] flex flex-col rounded-xl border-2 border-${color}-600 bg-gray-900/50`}>
+    <div className={`flex-1 min-w-[320px] flex flex-col rounded-xl border-2 border-${color}-600 theme-panel-soft`}>
       {/* Lane Header */}
       <div className={`bg-${color}-600 px-6 py-4 rounded-t-xl`}>
         <h2 className="text-xl font-bold">{title}</h2>
@@ -33,7 +33,7 @@ export default function PhaseLane({ phase, title, description, color, data, cont
             value={contributor || ''}
             onChange={(e) => onContributorUpdate(e.target.value)}
             placeholder="@github-handle"
-            className="flex-1 bg-white/10 rounded px-2 py-1 text-sm placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30"
+            className="flex-1 phase-input rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-white/30"
           />
         </div>
       </div>
@@ -60,7 +60,7 @@ export default function PhaseLane({ phase, title, description, color, data, cont
       {/* CS Reward Display */}
       <div className={`bg-${color}-700/30 px-6 py-3 rounded-b-xl border-t border-${color}-600/50`}>
         <div className="text-sm font-semibold">
-          <span className="text-gray-400">Reward: </span>
+          <span className="theme-muted">Reward: </span>
           <span className={`text-${color}-400`}>
             {phase === PhaseTypes.INTUITION && '+5 CS'}
             {phase === PhaseTypes.IMAGINATION && '+15 CS (+5 Echo)'}
