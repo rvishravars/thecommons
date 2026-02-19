@@ -8,7 +8,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const buildSparkEntry = (filename, content) => {
+  const buildSparkEntry = useCallback((filename, content) => {
     const parsed = parseSparkFile(content);
     return {
       id: filename.replace('.spark.md', ''),
@@ -17,7 +17,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
       stability: parsed.stability,
       data: parsed,
     };
-  };
+  }, []);
 
   const loadSparks = useCallback(async () => {
     setLoading(true);
@@ -111,11 +111,11 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [buildSparkEntry]);
 
   useEffect(() => {
     loadSparks();
-  }, []);
+  }, [loadSparks]);
 
   const getStabilityColor = (stability) => {
     if (stability === 0) return 'bg-red-600';
