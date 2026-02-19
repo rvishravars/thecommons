@@ -1,7 +1,25 @@
+#!/usr/bin/env python3
+"""
+⚠️ DEPRECATED: This script has been migrated to Scribe v2.0
+
+Use instead: python3 scribe/logic/stability_audit.py
+
+This file is maintained for backward compatibility only.
+For new development, use the Scribe stability auditor.
+"""
+
 import os
 import re
 import sys
 import argparse
+import warnings
+
+# Show deprecation warning
+warnings.warn(
+    "novelty_scan.py is deprecated. Use 'python3 scribe/logic/stability_audit.py' instead.",
+    DeprecationWarning,
+    stacklevel=1
+)
 
 def scan_spark(filepath):
     """
