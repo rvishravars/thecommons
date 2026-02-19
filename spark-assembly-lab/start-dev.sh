@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Generate sparks index
-node scripts/generate-sparks-index.js
-
 # Start the API server in the background
 node server/index.js &
 SERVER_PID=$!

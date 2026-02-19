@@ -63,47 +63,6 @@ const searchForSparkFiles = async (owner, repo) => {
   return searchData.items || [];
 };
 
-import fs from 'fs';
-import { promises as fsPromises } from 'fs';
-
-const fetchLocalSparks = async () => {
-  const localSparksPath = path.resolve(__dirname, '../public/sparks');
-  
-  try {
-    const files = await fsPromises.readdir(localSparksPath);
-    const sparkFiles = files.filter((file) => file.endsWith('.spark.md'));
-    
-    if (sparkFiles.length === 0) {
-      return { source: 'local', files: [] };
-    }
-    
-    const filesWithContent = await Promise.all(
-      sparkFiles.map(async (filename) => {
-        try {
-          const filePath = path.join(localSparksPath, filename);
-          const content = await fsPromises.readFile(filePath, 'utf-8');
-          return {
-            name: filename,
-            path: filename,
-            content,
-          };
-        } catch (err) {
-          console.error(`Failed to read ${filename}:`, err.message);
-          return null;
-        }
-      })
-    );
-    
-    return {
-      source: 'local',
-      files: filesWithContent.filter(Boolean),
-    };
-  } catch (err) {
-    console.warn('Could not read local sparks:', err.message);
-    return { source: 'local', files: [] };
-  }
-};
-
 const fetchSparksFromGithub = async (owner, repo, branch = 'main', searchPath = 'sparks') => {
   const headers = buildGithubHeaders();
   let sparkItems = [];
@@ -182,42 +141,9 @@ const fetchSparksFromGithub = async (owner, repo, branch = 'main', searchPath = 
 app.get('/api/sparks', async (req, res) => {
   const now = Date.now();
   
-  // Get repo parameters from query string
-  const repoInput = req.query.repo;
+  // Get repo parameters from query string, default to rvishravars/thecommons
+  const repoInput = req.query.repo || defaultRepo;
   
-  // If no repo specified, use local sparks
-  if (!repoInput) {
-    try {
-      const localData = await fetchLocalSparks();
-      
-      // Return local sparks with a short cache time
-      const cacheKey = 'local';
-      if (cache.data && cache.data.cacheKey === cacheKey && now - cache.timestamp < cacheTtlMs) {
-        return res.json({
-          cached: true,
-          updatedAt: cache.timestamp,
-          ...cache.data,
-        });
-      }
-      
-      cache.timestamp = now;
-      cache.data = { ...localData, cacheKey };
-      
-      return res.json({
-        cached: false,
-        updatedAt: cache.timestamp,
-        ...localData,
-      });
-    } catch (error) {
-      console.error('Error loading local sparks:', error);
-      return res.status(500).json({
-        error: 'Failed to load local sparks',
-        files: [],
-      });
-    }
-  }
-  
-  // If repo is specified, fetch from GitHub
   let owner, repo;
   let branch = req.query.branch || 'main';
   let searchPath = req.query.path || 'sparks';
