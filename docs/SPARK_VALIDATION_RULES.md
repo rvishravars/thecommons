@@ -46,15 +46,16 @@ All Sparks submitted to TheCommons must follow the **Intuition → Imagination �
 - [ ] **Phase Integrity:** At least one Phase (Intuition) is 100% complete.
 - [ ] **Handle Mapping:** All active phases have a valid GitHub `@username`.
 - [ ] **Standard Gauge:** Language is clear and technical terms are defined.
-- [ ] **Clutch Check:** Passes the `novelty_scan.py` stability audit.
+- [ ] **Clutch Check:** Passes the Scribe v2.0 stability audit.
 
 ## 🤖 Running the Stability Audit
 
-The **AI Scribe** uses the `novelty_scan.py` script to check the "Clutch Power" of your brick.
+The **AI Scribe** uses the Scribe v2.0 script to check the "Clutch Power" of your brick.
 
 ```bash
 # Audit a specific brick
-python scripts/novelty_scan.py --file sparks/your-brick-name.md
+python3 scribe/logic/stability_audit.py --file sparks/your-brick-name.md
 
-# Audit the entire baseplate
-python scripts/novelty_scan.py
+# Audit all bricks
+  # Use --dir for directory or --file for single file
+python3 scribe/logic/stability_audit.py

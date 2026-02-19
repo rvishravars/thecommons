@@ -41,12 +41,8 @@ jobs:
         run: |
           OUTPUT_FILE="scan_results.txt"
           touch $OUTPUT_FILE
-          for file in ${{ steps.changed-files.outputs.files }}; do
-            if [ -f "$file" ]; then
-              # Running our new Phase-based script
-              python3 scripts/novelty_scan.py --file "$file" >> $OUTPUT_FILE 2>&1
-            fi
-          done
+          # Using new Scribe v2.0 stability auditor
+          python3 scribe/logic/stability_audit.py --dir sparks/ --json > $OUTPUT_FILE 2>&1
           # Save path for the next step
           echo "output_path=$OUTPUT_FILE" >> $GITHUB_OUTPUT
 
