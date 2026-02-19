@@ -29,7 +29,6 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
 
     try {
       console.log('🔍 Loading sparks...');
-      let sparkFiles = [];
 
       try {
         // Build API URL with repo parameter if provided
@@ -57,9 +56,6 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
               setLoading(false);
               return;
             }
-            sparkFiles = apiData.files
-              .map((file) => file?.name || file?.path)
-              .filter(Boolean);
           } else {
             // No spark files found in the repository
             setErrorType('no-sparks');

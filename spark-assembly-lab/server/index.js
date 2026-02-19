@@ -47,7 +47,7 @@ const buildGithubHeaders = () => {
   return headers;
 };
 
-const searchForSparkFiles = async (owner, repo, branch = 'main') => {
+const searchForSparkFiles = async (owner, repo) => {
   const headers = buildGithubHeaders();
   const searchUrl = `https://api.github.com/search/code?q=filename:.spark.md+repo:${owner}/${repo}`;
   
@@ -66,7 +66,7 @@ const fetchSparksFromGithub = async (owner, repo, branch = 'main', searchPath = 
 
   // Try searching first (more comprehensive)
   try {
-    sparkItems = await searchForSparkFiles(owner, repo, branch);
+    sparkItems = await searchForSparkFiles(owner, repo);
   } catch (searchErr) {
     console.warn('Search failed, falling back to directory listing:', searchErr.message);
   }

@@ -6,7 +6,7 @@ const THEME_OPTIONS = [
   { value: 'ledger', label: 'Ledger Light' },
 ];
 
-export default function Header({ theme, onThemeChange, onMenuToggle, isMobileMenuOpen }) {
+export default function Header({ theme, onThemeChange, onMenuToggle }) {
   return (
     <header className="border-b theme-border theme-surface px-4 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-between">
