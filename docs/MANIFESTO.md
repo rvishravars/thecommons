@@ -41,6 +41,35 @@ The AI Scribe is the **Instruction Manual**, not the Master Builder.
 * **4.1 The Challenge:** Contributors may file a `!CHALLENGE` if they believe a Spark lacks Logic (it's "wobbly") or Imagination (it's a duplicate brick).
 * **4.2 The Cooling Rack:** If a Spark receives >5 critical flaws in 24 hours, the AI locks the thread for 12 hours to prevent dogpiling and allow the Builder to apply "Clutch Power" (fixes).
 
+## 🏛️ Theoretical Foundation
+
+TheCommons is built upon decades of research into decentralized cooperation, institutional economics, and stigmergic systems. Our "LEGO" model is a practical implementation of the following academic pillars:
+
+### 1. The Governance of the Commons
+Based on the work of Nobel Laureate **Elinor Ostrom** (*Governing the Commons*, 1990).
+* **The Principle:** Successful common-pool resources require "graduated sanctions" and "collective-choice arrangements."
+* **Application:** Our **Manifesto** serves as the constitutional layer, while the **AI Scribe** acts as the automated monitor to ensure the "Bricks" meet community standards.
+
+### 2. Commons-Based Peer Production (CBPP)
+Based on the theories of **Yochai Benkler** (*The Wealth of Networks*, 2006).
+* **The Principle:** CBPP succeeds when tasks are broken down into **Granular** and **Modular** components.
+* **Application:** The **Intuition → Imagination → Logic** trinity allows for "low-friction entry," where a Scout can contribute a small Hunch without needing the technical Logic to build the entire system.
+
+### 3. Stigmergic Coordination
+Based on the research of **Mark Elliott** (*Stigmergic Collaboration*, 2016).
+* **The Principle:** Agents coordinate by leaving "traces" in the environment that stimulate further action (e.g., how ants follow pheromone trails).
+* **Application:** Every `!HUNCH` or `!SHAPE` left in the `/sparks/` directory is a digital pheromone. The environment (the repo) directs the community's energy without the need for central management.
+
+### 4. Non-Linear Influence & Meritocracy
+Based on **Logarithmic Scaling** and **Plural Control** theories (**Glen Weyl et al.**).
+* **The Principle:** To prevent "Whale Dictatorship" in decentralized systems, voting power should not scale linearly with capital or points.
+* **Application:** We implement $$Weight = log_{10}(CS)$$ to ensure that while high-contributors (Architects) have more say, they cannot easily silence the collective "Intuition" of the Scouts.
+
+### 5. Open-Source Translucence
+Based on **Dabbish et al.** (*Social Translucence in GitHub*, 2012).
+* **The Principle:** Deep transparency in contribution history drives trust and attracts high-quality "Builders."
+* **Application:** **"Execution is the Moat"**—by making all Logic audits and Contribution Scores public, we create a high-trust environment where the most capable actors naturally rise to the top.
+
 ---
 
 ## Part 2: Getting Started Guide
