@@ -10,6 +10,5 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-      - ../sparks:/app/public/sparks:ro
     env_file:
       - .env

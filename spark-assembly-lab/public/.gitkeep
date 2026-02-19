@@ -1,2 +1,0 @@
-# This file ensures the public directory is tracked in git
-# The sparks symlink is created by setup.sh and ignored in .gitignore
