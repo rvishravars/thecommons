@@ -12,7 +12,7 @@ clutch_power: 45
 ---
 
 ## 🧠 Phase 1: The Intuition (!HUNCH)
-*Status: [Claimed]* *Scout: @TheCommons*
+*Status: [Claimed]* *Scout: @rvishravars*
 
 ### The Observation
 > The AI "Scribe" is currently a concept. To enforce our Manifesto and automate compatibility verification, we need a deterministic, hardware-agnostic intelligence layer that runs locally and outputs its reasoning transparently.
