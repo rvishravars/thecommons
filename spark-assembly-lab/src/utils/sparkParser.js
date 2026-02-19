@@ -91,9 +91,15 @@ function extractPhase(content, headerPattern) {
 
   const phaseContent = match[0];
 
-  // Extract status
-  const statusMatch = phaseContent.match(/\*Status: \[([^\]]+)\]\*/);
-  const status = statusMatch ? statusMatch[1].split('/')[0].trim() : 'empty';
+  // Extract status (supports both *Status: [Active]* and *Status: Claimed*)
+  let statusMatch = phaseContent.match(/\*Status: \[([^\]]+)\]\*/);
+  let status = statusMatch ? statusMatch[1].split('/')[0].trim() : null;
+  
+  // Fallback to format without brackets
+  if (!status) {
+    statusMatch = phaseContent.match(/\*Status:\s*([^*]+)\*/);
+    status = statusMatch ? statusMatch[1].trim() : 'empty';
+  }
 
   // Extract contributor
   const contributorMatch = phaseContent.match(/@([\w-]+)/);
