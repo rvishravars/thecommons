@@ -7,6 +7,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.resolve(__dirname, '../dist');
 
+// Middleware
+app.use(express.json());
+
 const cache = {
   timestamp: 0,
   data: null,

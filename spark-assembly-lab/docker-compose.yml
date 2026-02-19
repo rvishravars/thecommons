@@ -11,8 +11,5 @@ services:
       - .:/app
       - /app/node_modules
       - ../sparks:/app/public/sparks:ro
-    environment:
-      - NODE_ENV=development
-    restart: unless-stopped
-    stdin_open: true
-    tty: true
+    env_file:
+      - .env

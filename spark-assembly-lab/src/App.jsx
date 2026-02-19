@@ -6,7 +6,8 @@ import AssemblyCanvas from './components/AssemblyCanvas';
 import Header from './components/Header';
 import { Sparkles, X } from 'lucide-react';
 
-function App() {
+// Main application component
+function AppMain() {
   console.log('🎯 App component rendering!');
   const [theme, setTheme] = useState(() => localStorage.getItem('sparkTheme') || 'studio');
   const [selectedSpark, setSelectedSpark] = useState(null);
@@ -141,4 +142,4 @@ function App() {
   );
 }
 
-export default App;
+export default AppMain;
