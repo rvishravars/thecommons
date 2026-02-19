@@ -1,12 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, FileText, Zap, RefreshCw } from 'lucide-react';
 import { parseSparkFile } from '../utils/sparkParser';
+import RepoInput from './RepoInput';
 
-export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark }) {
+export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, onRepoChange }) {
   console.log('🚀 SparkSelector component mounted!');
   const [sparks, setSparks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [errorType, setErrorType] = useState(null); // 'repo-not-found', 'no-sparks', 'network-error'
+  const [repoInfo, setRepoInfo] = useState(null);
 
   const buildSparkEntry = useCallback((filename, content) => {
     const parsed = parseSparkFile(content);
@@ -22,15 +25,27 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
   const loadSparks = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setErrorType(null);
 
     try {
       console.log('🔍 Loading sparks...');
-      let sparkFiles = [];
 
       try {
-        const apiResponse = await fetch('/api/sparks');
+        // Build API URL with repo parameter if provided
+        const apiUrl = repoUrl 
+          ? `/api/sparks?repo=${encodeURIComponent(repoUrl)}`
+          : '/api/sparks';
+        
+        const apiResponse = await fetch(apiUrl);
+        
         if (apiResponse.ok) {
           const apiData = await apiResponse.json();
+          
+          // Store repo info for display
+          if (apiData.owner && apiData.repo) {
+            setRepoInfo(`${apiData.owner}/${apiData.repo}`);
+          }
+          
           if (Array.isArray(apiData.files) && apiData.files.length > 0) {
             const apiContentFiles = apiData.files.filter((file) => file?.content);
             if (apiContentFiles.length > 0) {
@@ -41,77 +56,53 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
               setLoading(false);
               return;
             }
-            sparkFiles = apiData.files
-              .map((file) => file?.name || file?.path)
-              .filter(Boolean);
+          } else {
+            // No spark files found in the repository
+            setErrorType('no-sparks');
+            setError('No .spark.md files found in this repository');
+            setSparks([]);
+            setLoading(false);
+            return;
           }
+        } else {
+          const errorData = await apiResponse.json().catch(() => ({ error: 'Unknown error' }));
+          const errorMessage = errorData.error || `Failed to fetch sparks: ${apiResponse.status}`;
+          
+          // Determine error type based on status code and message
+          if (apiResponse.status === 404 || errorMessage.includes('GitHub index fetch failed: 404')) {
+            setErrorType('repo-not-found');
+            setError('Repository not found. Please check the URL and try again.');
+          } else if (apiResponse.status === 403) {
+            setErrorType('rate-limit');
+            setError('GitHub API rate limit exceeded. Please try again later or add a GITHUB_TOKEN.');
+          } else if (errorMessage.includes('Invalid repository format')) {
+            setErrorType('invalid-format');
+            setError('Invalid repository format. Use: owner/repo or https://github.com/owner/repo');
+          } else {
+            setErrorType('network-error');
+            setError(errorMessage);
+          }
+          setSparks([]);
+          setLoading(false);
+          return;
         }
       } catch (err) {
         console.warn('⚠️ Could not fetch sparks from backend', err);
+        setErrorType('network-error');
+        setError(err.message || 'Failed to connect to the server');
+        setSparks([]);
+        setLoading(false);
+        return;
       }
-
-      try {
-        // First try to fetch the generated sparks.json index
-        const indexResponse = await fetch('/sparks.json');
-        if (indexResponse.ok) {
-          sparkFiles = await indexResponse.json();
-          console.log('✅ Loaded sparks from sparks.json');
-        } else {
-          // Fallback: Attempt to fetch the sparks directory listing (dev mode)
-          const dirResponse = await fetch('/sparks/');
-          if (dirResponse.ok) {
-            const html = await dirResponse.text();
-            const matches = html.match(/[\w-]+\.spark\.md/g);
-            if (matches) {
-              sparkFiles = [...new Set(matches)];
-              console.log('✅ Loaded sparks from directory listing');
-            }
-          }
-        }
-      } catch (err) {
-        console.warn('⚠️ Could not fetch spark index or directory listing', err);
-      }
-
-      // Secondary fallback if all else fails
-      if (sparkFiles.length === 0) {
-        sparkFiles = ['reputation-shield.spark.md'];
-      }
-
-      console.log('📂 Spark files to load:', sparkFiles);
-
-      const loadedSparks = await Promise.all(
-        sparkFiles.map(async (filename) => {
-          try {
-            console.log(`📥 Fetching ${filename}...`);
-            const response = await fetch(`/sparks/${filename}`);
-            console.log(`📡 Response status for ${filename}:`, response.status);
-
-            if (!response.ok) throw new Error(`Failed to load ${filename}: ${response.statusText}`);
-
-            const content = await response.text();
-            console.log(`✅ Loaded ${filename}, length:`, content.length);
-
-            const sparkEntry = buildSparkEntry(filename, content);
-            console.log(`🔧 Parsed ${filename}:`, sparkEntry);
-
-            return sparkEntry;
-          } catch (err) {
-            console.error(`❌ Error loading ${filename}:`, err);
-            return null;
-          }
-        })
-      );
-
-      const validSparks = loadedSparks.filter(Boolean);
-      console.log('✨ Valid sparks loaded:', validSparks);
-      setSparks(validSparks);
     } catch (err) {
       console.error('❌ Error in loadSparks:', err);
+      setErrorType('network-error');
       setError(err.message);
+      setSparks([]);
     } finally {
       setLoading(false);
     }
-  }, [buildSparkEntry]);
+  }, [buildSparkEntry, repoUrl]);
 
   useEffect(() => {
     loadSparks();
@@ -130,6 +121,8 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
 
   return (
     <div className="flex flex-col h-full">
+      <RepoInput onRepoChange={onRepoChange} currentRepo={repoUrl} />
+      
       <div className="p-4 border-b theme-border">
         <button
           onClick={onNewSpark}
@@ -142,9 +135,16 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
 
       <div className="flex-1 overflow-y-auto p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wider theme-muted">
-            Existing Sparks
-          </h3>
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-wider theme-muted">
+              Existing Sparks
+            </h3>
+            {repoInfo && (
+              <p className="text-xs theme-subtle mt-1">
+                from {repoInfo}
+              </p>
+            )}
+          </div>
           <button
             onClick={loadSparks}
             disabled={loading}
@@ -156,8 +156,35 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         </div>
 
         {error && (
-          <div className="bg-red-900/20 border border-red-600 rounded-lg p-3 mb-3 text-sm text-red-400">
-            {error}
+          <div className="bg-red-900/20 border border-red-600 rounded-lg p-3 mb-3">
+            <div className="flex items-start space-x-2">
+              {errorType === 'repo-not-found' && (
+                <svg className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              )}
+              {errorType === 'no-sparks' && (
+                <svg className="h-5 w-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+              {(errorType === 'network-error' || errorType === 'rate-limit' || errorType === 'invalid-format') && (
+                <svg className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-red-400 mb-1">
+                  {errorType === 'repo-not-found' && 'Repository Not Found'}
+                  {errorType === 'no-sparks' && 'No Spark Files'}
+                  {errorType === 'rate-limit' && 'Rate Limit Exceeded'}
+                  {errorType === 'invalid-format' && 'Invalid Format'}
+                  {errorType === 'network-error' && 'Connection Error'}
+                  {!errorType && 'Error'}
+                </p>
+                <p className="text-sm text-red-300">{error}</p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -170,8 +197,12 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
           ) : sparks.length === 0 ? (
             <div className="text-center py-8 theme-subtle">
               <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No sparks found</p>
-              <p className="text-xs mt-1">Add .spark.md files to /sparks/</p>
+              <p className="text-sm">
+                {error ? 'Unable to load sparks' : 'No sparks found'}
+              </p>
+              <p className="text-xs mt-1">
+                {error ? 'Please check the error message above' : 'This repository has no .spark.md files'}
+              </p>
             </div>
           ) : (
             sparks.map((spark) => (

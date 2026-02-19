@@ -1,4 +1,4 @@
-import { Boxes, Github } from 'lucide-react';
+import { Boxes, Github, Menu } from 'lucide-react';
 
 const THEME_OPTIONS = [
   { value: 'studio', label: 'Studio Noir' },
@@ -6,25 +6,34 @@ const THEME_OPTIONS = [
   { value: 'ledger', label: 'Ledger Light' },
 ];
 
-export default function Header({ theme, onThemeChange }) {
+export default function Header({ theme, onThemeChange, onMenuToggle }) {
   return (
-    <header className="border-b theme-border theme-surface px-6 py-4">
+    <header className="border-b theme-border theme-surface px-4 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Boxes className="h-8 w-8 text-imagination-500" />
-          <div>
-            <h1 className="text-2xl font-bold font-mono">
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={onMenuToggle}
+            className="lg:hidden p-2 rounded-lg theme-muted-hover -ml-2"
+            aria-label="Toggle menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+          
+          <Boxes className="h-6 w-6 sm:h-8 sm:w-8 text-imagination-500 flex-shrink-0" />
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold font-mono truncate">
               Spark Assembly Lab
             </h1>
-            <p className="text-sm theme-muted">
+            <p className="text-xs sm:text-sm theme-muted hidden sm:block">
               TheCommons v2.0 | Build in LEGO-style
             </p>
           </div>
         </div>
         
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <label htmlFor="theme-select" className="text-xs uppercase tracking-wider theme-subtle">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="hidden md:flex items-center space-x-2">
+            <label htmlFor="theme-select" className="text-xs uppercase tracking-wider theme-subtle whitespace-nowrap">
               Theme
             </label>
             <select
@@ -41,14 +50,31 @@ export default function Header({ theme, onThemeChange }) {
               ))}
             </select>
           </div>
+          
+          {/* Mobile Theme Selector - Icon only */}
+          <div className="md:hidden">
+            <select
+              value={theme}
+              onChange={(event) => onThemeChange(event.target.value)}
+              className="rounded-lg border px-2 py-1.5 text-xs font-semibold theme-input"
+              aria-label="Theme"
+            >
+              {THEME_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <a
             href="https://github.com/rvishravars/thecommons"
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-lg theme-button p-2 transition-colors"
+            aria-label="GitHub Repository"
           >
-            <Github className="h-5 w-5" />
+            <Github className="h-4 w-4 sm:h-5 sm:w-5" />
           </a>
         </div>
       </div>

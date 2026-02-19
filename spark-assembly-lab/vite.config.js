@@ -9,6 +9,12 @@ export default defineConfig({
     watch: {
       usePolling: true, // Enable polling for file changes in Docker
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
   },
   publicDir: 'public', // Explicitly set public directory
 })
