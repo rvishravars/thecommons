@@ -17,7 +17,7 @@ export default function BuildingBlock({ title, description, icon, color, value, 
   return (
     <>
       <div
-        className={`block-component border-${color}-500 bg-gray-800 ${
+        className={`block-component border-${color}-500 theme-card ${
           hasContent ? `bg-${color}-900/20` : ''
         }`}
       >
@@ -27,7 +27,7 @@ export default function BuildingBlock({ title, description, icon, color, value, 
             <span className="text-xl">{icon}</span>
             <div>
               <h4 className="font-semibold text-sm">{title}</h4>
-              <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+              <p className="text-xs theme-muted mt-0.5">{description}</p>
             </div>
           </div>
           
@@ -37,7 +37,7 @@ export default function BuildingBlock({ title, description, icon, color, value, 
               className={`p-1.5 rounded hover:bg-${color}-600/20 transition-colors`}
               title="Expand to full screen"
             >
-              <Maximize2 className={`h-4 w-4 ${hasContent ? `text-${color}-400` : 'text-gray-400'}`} />
+              <Maximize2 className={`h-4 w-4 ${hasContent ? `text-${color}-400` : 'theme-muted'}`} />
             </button>
           </div>
         </div>
@@ -62,8 +62,8 @@ export default function BuildingBlock({ title, description, icon, color, value, 
 
       {/* Full Screen Modal */}
       {isExpanded && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-gray-900 rounded-xl border-2 border-${color}-600 w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl">
+        <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="theme-panel rounded-xl border-2 border-${color}-600 w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl">
             {/* Modal Header */}
             <div className={`bg-${color}-600 px-6 py-4 rounded-t-xl flex items-center justify-between`}>
               <div className="flex items-center space-x-3">
@@ -88,14 +88,14 @@ export default function BuildingBlock({ title, description, icon, color, value, 
                 value={value}
                 onChange={(e) => onUpdate(e.target.value)}
                 placeholder={`Enter ${title.toLowerCase()}...\n\nTip: Use markdown formatting for better structure.`}
-                className="w-full h-full bg-gray-800 rounded border border-gray-700 p-4 text-base focus:outline-none focus:ring-2 focus:ring-${color}-500 font-mono resize-none min-h-[500px]"
+                className="w-full h-full theme-input rounded border p-4 text-base focus:outline-none focus:ring-2 focus:ring-${color}-500 font-mono resize-none min-h-[500px]"
                 autoFocus
               />
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-700 flex justify-between items-center">
-              <div className="text-sm text-gray-400">
+            <div className="px-6 py-4 border-t theme-border flex justify-between items-center">
+              <div className="text-sm theme-muted">
                 {value.length} characters
               </div>
               <button

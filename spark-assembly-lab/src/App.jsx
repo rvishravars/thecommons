@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import SparkSelector from './components/SparkSelector';
@@ -8,6 +8,7 @@ import { Sparkles } from 'lucide-react';
 
 function App() {
   console.log('🎯 App component rendering!');
+  const [theme, setTheme] = useState(() => localStorage.getItem('sparkTheme') || 'studio');
   const [selectedSpark, setSelectedSpark] = useState(null);
   const [sparkData, setSparkData] = useState({
     name: 'New Spark',
@@ -48,14 +49,18 @@ function App() {
     });
   };
 
+  useEffect(() => {
+    localStorage.setItem('sparkTheme', theme);
+  }, [theme]);
+
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="flex h-screen flex-col bg-commons-darker">
-        <Header />
+      <div className="flex h-screen flex-col theme-app" data-theme={theme}>
+        <Header theme={theme} onThemeChange={setTheme} />
         
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar: Spark Selector */}
-          <aside className="w-80 border-r border-gray-700 bg-commons-dark overflow-y-auto">
+          <aside className="w-80 border-r theme-border theme-surface overflow-y-auto">
             <SparkSelector
               selectedSpark={selectedSpark}
               onSparkSelect={handleSparkSelect}
@@ -73,11 +78,11 @@ function App() {
             ) : (
               <div className="flex h-full items-center justify-center">
                 <div className="text-center">
-                  <Sparkles className="mx-auto h-16 w-16 text-gray-600" />
-                  <h3 className="mt-4 text-xl font-semibold text-gray-400">
+                  <Sparkles className="mx-auto h-16 w-16 theme-faint" />
+                  <h3 className="mt-4 text-xl font-semibold theme-muted">
                     Select a Spark or Create a New One
                   </h3>
-                  <p className="mt-2 text-gray-500">
+                  <p className="mt-2 theme-subtle">
                     Choose from existing sparks or start building from scratch
                   </p>
                 </div>

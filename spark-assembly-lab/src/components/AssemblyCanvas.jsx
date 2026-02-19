@@ -61,7 +61,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
   return (
     <div className="h-full flex flex-col">
       {/* Toolbar */}
-      <div className="border-b border-gray-700 bg-commons-dark px-6 py-4">
+      <div className="border-b theme-border theme-surface px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
             <input
@@ -99,7 +99,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
             
             <button
               onClick={() => setShowPreview(!showPreview)}
-              className="flex items-center space-x-2 rounded-lg bg-gray-700 px-4 py-2 text-sm font-semibold hover:bg-gray-600 transition-colors"
+              className="flex items-center space-x-2 rounded-lg theme-button px-4 py-2 text-sm font-semibold transition-colors"
             >
               <Eye className="h-4 w-4" />
               <span>{showPreview ? 'Edit' : 'Preview'}</span>
@@ -107,7 +107,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
             
             <button
               onClick={handleCopyToClipboard}
-              className="flex items-center space-x-2 rounded-lg bg-gray-700 px-4 py-2 text-sm font-semibold hover:bg-gray-600 transition-colors"
+              className="flex items-center space-x-2 rounded-lg theme-button px-4 py-2 text-sm font-semibold transition-colors"
             >
               <Copy className="h-4 w-4" />
               <span>Copy MD</span>
