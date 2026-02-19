@@ -5,9 +5,27 @@
 export function parseSparkFile(content) {
   console.log('🔍 Parsing spark file, content length:', content.length);
   
-  // Extract spark name from title
-  const titleMatch = content.match(/# 🧩 Spark Template: (.+)/);
-  const name = titleMatch ? titleMatch[1].trim() : 'Untitled Spark';
+  // Extract spark name from title - support multiple formats
+  let name = 'Untitled Spark';
+  
+  // Try format 1: # 🧩 Spark Template: [name]
+  let titleMatch = content.match(/# 🧩 Spark Template: (.+)/);
+  if (titleMatch) {
+    name = titleMatch[1].trim();
+  } else {
+    // Try format 2: # 🧠 Spark: [name]
+    titleMatch = content.match(/# 🧠 Spark: (.+)/);
+    if (titleMatch) {
+      name = titleMatch[1].trim();
+    } else {
+      // Try format 3: # Spark: [name] (any emoji or no emoji)
+      titleMatch = content.match(/# (?:🧩|🧠)? ?Spark(?:s)?:? +(.+)/);
+      if (titleMatch) {
+        name = titleMatch[1].trim();
+      }
+    }
+  }
+  
   console.log('📝 Spark name:', name);
   
   // Parse Phase 1: Intuition
