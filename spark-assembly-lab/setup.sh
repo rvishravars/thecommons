@@ -34,6 +34,10 @@ fi
 echo "✅ Symlink created: public/sparks -> ../../sparks"
 
 echo ""
+echo "🔍 Generating sparks index..."
+node scripts/generate-sparks-index.js
+
+echo ""
 echo "✅ Setup complete!"
 echo ""
 echo "🚀 To start the development server:"

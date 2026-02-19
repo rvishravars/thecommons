@@ -84,6 +84,7 @@ gcloud run deploy "$SERVICE_NAME" \
     --platform managed \
     --region "$REGION" \
     --allow-unauthenticated \
+    --set-env-vars "GITHUB_OWNER=rvishravars,GITHUB_REPO=thecommons,GITHUB_BRANCH=main,GITHUB_SPARKS_PATH=sparks,SPARK_CACHE_TTL_SECONDS=60" \
     --memory 128Mi \
     --cpu 1 \
     --max-instances 1 \
