@@ -149,33 +149,33 @@ export default function QuizModal({ sparkData, onClose }) {
   if (showResults) {
     const score = calculateScore();
     return (
-      <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="theme-panel rounded-xl border-2 border-imagination-600 w-full max-w-2xl shadow-2xl">
-          <div className="bg-imagination-600 px-6 py-4 rounded-t-xl flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Award className="h-8 w-8" />
-              <h2 className="text-2xl font-bold">Quiz Results</h2>
+      <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+        <div className="theme-panel rounded-xl border-2 border-imagination-600 w-full max-w-2xl shadow-2xl max-h-[95vh] overflow-y-auto">
+          <div className="bg-imagination-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl flex items-center justify-between sticky top-0">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <Award className="h-6 w-6 sm:h-8 sm:w-8" />
+              <h2 className="text-lg sm:text-2xl font-bold">Quiz Results</h2>
             </div>
-            <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/10 transition-colors">
-              <X className="h-6 w-6" />
+            <button onClick={onClose} className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 transition-colors">
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
           </div>
 
-          <div className="p-8 text-center">
-            <div className="text-6xl font-bold mb-4">
+          <div className="p-4 sm:p-8 text-center">
+            <div className="text-4xl sm:text-6xl font-bold mb-4">
               {score.percentage}%
             </div>
-            <div className="text-2xl mb-8">
+            <div className="text-lg sm:text-2xl mb-6 sm:mb-8">
               {score.correct} out of {score.total} correct
             </div>
 
-            <div className="space-y-3 mb-8">
+            <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
               {questions.map((q, idx) => {
                 const isCorrect = selectedAnswers[idx] === q.correctAnswer;
                 return (
                   <div
                     key={idx}
-                    className={`flex items-center justify-between p-3 rounded-lg ${
+                    className={`flex items-center justify-between p-2 sm:p-3 rounded-lg ${
                       isCorrect ? 'bg-logic-900/20 border border-logic-600' : 'bg-red-900/20 border border-red-600'
                     }`}
                   >
@@ -221,20 +221,20 @@ export default function QuizModal({ sparkData, onClose }) {
             </button>
           </div>
 
-          <div className="p-8">
-            <div className="mb-6">
+          <div className="p-4 sm:p-8">
+            <div className="mb-4 sm:mb-6">
               <span className={`text-xs font-semibold uppercase ${getPhaseColor(q.phase)}`}>
                 {q.phase === 'general' ? 'Framework Knowledge' : `${q.phase} Phase`}
               </span>
-              <h3 className="text-xl font-semibold mt-2">{q.question}</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mt-2">{q.question}</h3>
             </div>
 
-            <div className="space-y-3 mb-8">
+            <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
               {q.options.map((option, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleAnswerSelect(currentQuestion, idx)}
-                  className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                  className={`w-full text-left p-3 sm:p-4 rounded-lg border-2 transition-all ${
                     selectedAnswers[currentQuestion] === idx
                       ? 'border-imagination-500 bg-imagination-900/20'
                       : 'theme-border theme-border-hover theme-card'
@@ -277,7 +277,7 @@ export default function QuizModal({ sparkData, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
       <div className="theme-panel rounded-xl border-2 border-imagination-600 w-full max-w-2xl shadow-2xl">
         <div className="bg-imagination-600 px-6 py-4 rounded-t-xl flex items-center justify-between">
           <div className="flex items-center space-x-3">
