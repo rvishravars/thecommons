@@ -15,7 +15,28 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     try {
       console.log('🔍 Loading sparks...');
       // Fetch spark files from the public/sparks directory
-      const sparkFiles = ['reputation-shield.spark.md']; // In production, this could be dynamic
+      // Try to get the list dynamically first, fall back to known files
+      let sparkFiles = [];
+      
+      try {
+        // Attempt to fetch the sparks directory listing
+        const indexResponse = await fetch('/sparks/');
+        if (indexResponse.ok) {
+          const html = await indexResponse.text();
+          // Extract .spark.md filenames from the directory listing
+          const matches = html.match(/[\w-]+\.spark\.md/g);
+          if (matches) {
+            sparkFiles = [...new Set(matches)]; // Remove duplicates
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Could not fetch directory listing, using fallback list');
+      }
+      
+      // Fallback list if directory listing fails
+      if (sparkFiles.length === 0) {
+        sparkFiles = ['reputation-shield.spark.md', 'scribe-v2-implementation.md'];
+      }
       
       console.log('📂 Spark files to load:', sparkFiles);
       
