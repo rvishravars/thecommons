@@ -26,6 +26,7 @@ A React-based LEGO-style interface for building and visualizing **Sparks** in Th
 
 ## 🎯 Features
 
+- **GitHub Authentication**: Login with your GitHub account using Personal Access Token (PAT)
 - **Visual Assembly**: Build sparks using a 3-lane LEGO-style interface (Intuition, Imagination, Logic)
 - **Building Blocks**: Modular components for each phase with expandable form fields
 - **Full-Screen Editor**: Maximize any block for focused, distraction-free editing
@@ -132,9 +133,11 @@ spark-assembly-lab/
 │   │   ├── BuildingBlock.jsx       # Expandable form component
 │   │   ├── SparkSelector.jsx       # Sidebar for existing sparks
 │   │   ├── MarkdownPreview.jsx     # Live markdown preview
-│   │   ├── Header.jsx              # App header
+│   │   ├── GitHubAuth.jsx          # GitHub authentication component
+│   │   ├── Header.jsx              # App header with auth
 │   │   └── Toast.jsx               # Toast notification
 │   ├── utils/
+│   │   ├── github.js               # GitHub API utilities
 │   │   ├── sparkParser.js          # Markdown parsing & generation
 │   │   └── ToastContext.jsx        # Toast notification provider
 │   ├── types/
@@ -171,9 +174,26 @@ spark-assembly-lab/
 - **Markdown**: react-markdown + gray-matter
 - **Drag & Drop**: react-dnd (prepared for future enhancements)
 - **Icons**: lucide-react
+- **Authentication**: GitHub Personal Access Token (PAT)
+- **API**: GitHub REST API v3
 - **Containerization**: Docker
 
 ## 📖 Usage Guide
+
+### GitHub Authentication
+
+The app uses a simple Personal Access Token (PAT) authentication system:
+
+1. Click the **Login** button in the header (top-right)
+2. A token input field will appear
+3. Get your token using one of these methods:
+   - **CLI Method**: Run `gh auth token` in your terminal (requires GitHub CLI)
+   - **Web Method**: Click "Create new token" to open GitHub Settings and generate a new token
+4. Paste your token into the input field and click **Login**
+5. Your profile will appear in the header showing your avatar and username
+6. Click **Logout** (arrow icon) to sign out
+
+**Note:** Your token is stored locally in your browser and never sent to any server except GitHub's API for validation.
 
 ### Creating a New Spark
 
@@ -235,7 +255,7 @@ docker compose down -v
 
 - [ ] Drag-and-drop block reordering
 - [ ] Collaborative editing with real-time sync
-- [ ] GitHub integration for direct PR creation
+- [ ] GitHub integration for direct PR creation with authenticated user
 - [ ] Spark comparison view
 - [ ] Contribution history timeline
 - [ ] CS point calculator
@@ -243,6 +263,7 @@ docker compose down -v
 - [ ] Dark/Light theme toggle
 - [ ] Mobile responsive design
 - [ ] Spark dependency graph visualization
+- [ ] Integration with GitHub GraphQL API for advanced features
 
 ## 📝 Contributing
 
