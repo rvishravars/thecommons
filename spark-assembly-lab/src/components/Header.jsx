@@ -1,4 +1,5 @@
 import { Boxes, Github, Menu } from 'lucide-react';
+import GitHubAuth from './GitHubAuth';
 
 const THEME_OPTIONS = [
   { value: 'studio', label: 'Studio Noir' },
@@ -66,6 +67,8 @@ export default function Header({ theme, onThemeChange, onMenuToggle }) {
               ))}
             </select>
           </div>
+
+          <GitHubAuth />
 
           <a
             href="https://github.com/rvishravars/thecommons"
