@@ -46,27 +46,6 @@
     --phase-input-placeholder: rgba(45, 29, 13, 0.6);
   }
 
-  [data-theme="ledger"] {
-    --app-bg: #f6f7f9;
-    --bg-darker: #f6f7f9;
-    --bg-dark: #eef1f5;
-    --panel: #ffffff;
-    --panel-strong: #f7f8fa;
-    --panel-soft: rgba(255, 255, 255, 0.85);
-    --panel-muted: #e2e8f0;
-    --panel-muted-hover: #cbd5e1;
-    --border-color: #d0d7de;
-    --border-hover: #94a3b8;
-    --text-primary: #1f2937;
-    --text-muted: #4b5563;
-    --text-subtle: #6b7280;
-    --text-faint: #9ca3af;
-    --overlay: rgba(15, 23, 42, 0.45);
-    --phase-input-bg: rgba(15, 23, 42, 0.04);
-    --phase-input-text: #1f2937;
-    --phase-input-placeholder: rgba(31, 41, 55, 0.5);
-  }
-
   body {
     @apply font-sans;
     background: var(--app-bg);

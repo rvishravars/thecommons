@@ -11,50 +11,54 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
   const loadSparks = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       console.log('🔍 Loading sparks...');
-      // Fetch spark files from the public/sparks directory
-      // Try to get the list dynamically first, fall back to known files
       let sparkFiles = [];
-      
       try {
-        // Attempt to fetch the sparks directory listing
-        const indexResponse = await fetch('/sparks/');
+        // First try to fetch the generated sparks.json index
+        const indexResponse = await fetch('/sparks.json');
         if (indexResponse.ok) {
-          const html = await indexResponse.text();
-          // Extract .spark.md filenames from the directory listing
-          const matches = html.match(/[\w-]+\.spark\.md/g);
-          if (matches) {
-            sparkFiles = [...new Set(matches)]; // Remove duplicates
+          sparkFiles = await indexResponse.json();
+          console.log('✅ Loaded sparks from sparks.json');
+        } else {
+          // Fallback: Attempt to fetch the sparks directory listing (dev mode)
+          const dirResponse = await fetch('/sparks/');
+          if (dirResponse.ok) {
+            const html = await dirResponse.text();
+            const matches = html.match(/[\w-]+\.spark\.md/g);
+            if (matches) {
+              sparkFiles = [...new Set(matches)];
+              console.log('✅ Loaded sparks from directory listing');
+            }
           }
         }
       } catch (err) {
-        console.warn('⚠️ Could not fetch directory listing, using fallback list');
+        console.warn('⚠️ Could not fetch spark index or directory listing', err);
       }
-      
-      // Fallback list if directory listing fails
+
+      // Secondary fallback if all else fails
       if (sparkFiles.length === 0) {
-        sparkFiles = ['reputation-shield.spark.md', 'scribe-v2-implementation.md'];
+        sparkFiles = ['reputation-shield.spark.md'];
       }
-      
+
       console.log('📂 Spark files to load:', sparkFiles);
-      
+
       const loadedSparks = await Promise.all(
         sparkFiles.map(async (filename) => {
           try {
             console.log(`📥 Fetching ${filename}...`);
             const response = await fetch(`/sparks/${filename}`);
             console.log(`📡 Response status for ${filename}:`, response.status);
-            
+
             if (!response.ok) throw new Error(`Failed to load ${filename}: ${response.statusText}`);
-            
+
             const content = await response.text();
             console.log(`✅ Loaded ${filename}, length:`, content.length);
-            
+
             const parsed = parseSparkFile(content);
             console.log(`🔧 Parsed ${filename}:`, parsed);
-            
+
             return {
               id: filename.replace('.spark.md', ''),
               name: parsed.name,
@@ -68,7 +72,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
           }
         })
       );
-      
+
       const validSparks = loadedSparks.filter(Boolean);
       console.log('✨ Valid sparks loaded:', validSparks);
       setSparks(validSparks);
@@ -121,13 +125,13 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
-        
+
         {error && (
           <div className="bg-red-900/20 border border-red-600 rounded-lg p-3 mb-3 text-sm text-red-400">
             {error}
           </div>
         )}
-        
+
         <div className="space-y-2">
           {loading && sparks.length === 0 ? (
             <div className="text-center py-8 theme-subtle">
@@ -145,11 +149,10 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
               <button
                 key={spark.id}
                 onClick={() => onSparkSelect(spark.data)}
-                className={`w-full rounded-lg border-2 p-3 text-left transition-all hover:border-imagination-500 ${
-                  selectedSpark?.name === spark.name
-                    ? 'border-imagination-500 theme-card'
-                    : 'theme-border theme-card-soft'
-                }`}
+                className={`w-full rounded-lg border-2 p-3 text-left transition-all hover:border-imagination-500 ${selectedSpark?.name === spark.name
+                  ? 'border-imagination-500 theme-card'
+                  : 'theme-border theme-card-soft'
+                  }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-2">
@@ -160,7 +163,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="mt-2 flex items-center space-x-2">
                   <span
                     className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${getStabilityColor(
@@ -175,7 +178,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
           )}
         </div>
       </div>
-      
+
       <div className="border-t theme-border p-4 theme-sidebar-footer">
         <div className="text-xs theme-subtle">
           <p className="font-semibold mb-2">Stability Levels:</p>

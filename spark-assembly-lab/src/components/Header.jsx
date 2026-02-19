@@ -3,7 +3,6 @@ import { Boxes, Github } from 'lucide-react';
 const THEME_OPTIONS = [
   { value: 'studio', label: 'Studio Noir' },
   { value: 'wonderworks', label: 'WonderWorks' },
-  { value: 'ledger', label: 'Ledger Light' },
 ];
 
 export default function Header({ theme, onThemeChange }) {
@@ -42,6 +41,18 @@ export default function Header({ theme, onThemeChange }) {
             </select>
           </div>
 
+          <div className="flex space-x-2 text-xs">
+            <span className="inline-flex items-center rounded-full bg-intuition-600 px-3 py-1">
+              <span className="mr-1">🧠</span> Intuition
+            </span>
+            <span className="inline-flex items-center rounded-full bg-imagination-600 px-3 py-1">
+              <span className="mr-1">🎨</span> Imagination
+            </span>
+            <span className="inline-flex items-center rounded-full bg-logic-600 px-3 py-1">
+              <span className="mr-1">🛠️</span> Logic
+            </span>
+          </div>
+          
           <a
             href="https://github.com/rvishravars/thecommons"
             target="_blank"
