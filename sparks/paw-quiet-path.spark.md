@@ -1,12 +1,3 @@
----
-name: The "Paw-Quiet Path"
-designer: rvishravars
-phase: SHAPE
-status: Draft
-stability: 2
-clutch_power: 15
----
-
 ## 🧠 Phase 1: The Intuition (!HUNCH)
 *Status: [Active]* *Scout: @rvishravars*
 

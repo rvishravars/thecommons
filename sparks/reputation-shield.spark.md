@@ -3,7 +3,7 @@
 ---
 
 ## 🧠 Phase 1: The Intuition (!HUNCH)
-*Status: Claimed* *Scout: @rvishravars*
+*Status: [Claimed]* *Scout: @rvishravars*
 
 ### The Observation
 > I have a gut feel that as we grow, the "Scout" role will be exploited by bots just to farm CS points through trivial intuition submissions.
@@ -13,7 +13,7 @@
 ---
 
 ## 🎨 Phase 2: The Imagination (!SHAPE)
-*Status: Designed* *Designer: @CreativeClara*
+*Status: [Designed]* *Designer: @rvishravars*
 
 ### The Novel Core (The 10% Delta)
 * **The Blueprint:** Introduce a "Decay Rate" for CS earned via Scout tasks. Unlike Logic/Builder points, which are more permanent, Scout points lose 10% value every month unless the user contributes a higher-tier Spark (Designer or Builder level).
@@ -23,7 +23,7 @@
 ---
 
 ## 🛠️ Phase 3: The Logic (!BUILD)
-*Status: Merged* *Builder: @DevDevon*
+*Status: [Merged]* *Builder: @rvishravars*
 
 ### Technical Implementation
 * **The Logic:** [Reputation Decay Script](../scripts/reputation_decay.py) - Python implementation with simulation mode

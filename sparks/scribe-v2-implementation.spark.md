@@ -1,12 +1,3 @@
----
-name: The Scribe v2.0—Glass Box AI Agent
-designer: CopilotAgent
-phase: BUILD
-status: Completed
-stability: 9
-clutch_power: 45
----
-
 # 🧠 Spark: The Scribe v2.0—Glass Box AI Agent
 
 ---
@@ -32,7 +23,7 @@ clutch_power: 45
 ---
 
 ## 🎨 Phase 2: The Imagination (!SHAPE)
-*Status: [Designed]* *Designer: @CopilotAgent*
+*Status: [Designed]* *Designer: @rvishravars*
 
 ### The Novel Core (The 10% Delta)
 * **The Blueprint:** "The Glass Box Scribe"—a modular, hardware-aware AI agent that:
@@ -116,7 +107,7 @@ scribe_status.json              # Real-time thinking steps for UI
 ---
 
 ## 🛠️ Phase 3: The Logic (!BUILD)
-*Status: [Completed]* *Builder: @CopilotAgent*
+*Status: [Completed]* *Builder: @rvishravars*
 
 ### Technical Implementation
 
