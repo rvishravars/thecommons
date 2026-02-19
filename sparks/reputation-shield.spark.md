@@ -3,7 +3,7 @@
 ---
 
 ## 🧠 Phase 1: The Intuition (!HUNCH)
-*Status: Claimed* *Scout: @IntuitionIvan*
+*Status: Claimed* *Scout: @rvishravars*
 
 ### The Observation
 > I have a gut feel that as we grow, the "Scout" role will be exploited by bots just to farm CS points through trivial intuition submissions.

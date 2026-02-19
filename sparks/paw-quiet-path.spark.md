@@ -1,6 +1,6 @@
 ---
 name: The "Paw-Quiet Path"
-designer: Aroha_SmallScout
+designer: rvishravars
 phase: SHAPE
 status: Draft
 stability: 2
@@ -8,7 +8,7 @@ clutch_power: 15
 ---
 
 ## 🧠 Phase 1: The Intuition (!HUNCH)
-*Status: [Active]* *Scout: @Aroha_SmallScout*
+*Status: [Active]* *Scout: @rvishravars*
 
 ### The Observation
 "In our neighborhood in New Zealand, some dogs are off-leash and run fast. When they are loud or rowdy, I feel scared walking home from school. Adults say to stay calm, but I do not always know the safest path or what to do in the moment."
@@ -19,7 +19,7 @@ clutch_power: 15
 ---
 
 ## 🎨 Phase 2: The Imagination (!SHAPE)
-*Status: [Pending]* *Designer: @Aroha_SmallScout*
+*Status: [Pending]* *Designer: @rvishravars*
 
 ### The Novel Core (The 10% Delta)
 "We create a **Paw-Quiet Path** system that helps a child pick a calmer route and quietly alert a trusted adult without calling attention."
@@ -31,7 +31,7 @@ clutch_power: 15
 ---
 
 ## 🛠️ Phase 3: The Logic (!BUILD)
-*Status: [In-Progress]* *Builder: @Aroha_SmallScout*
+*Status: [In-Progress]* *Builder: @rvishravars*
 
 ### Technical Implementation
 "It must work quietly, use minimal data, and never encourage confrontation. The goal is to move away and get support, not to engage."
