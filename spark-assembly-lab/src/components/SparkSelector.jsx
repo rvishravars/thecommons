@@ -8,6 +8,17 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const buildSparkEntry = (filename, content) => {
+    const parsed = parseSparkFile(content);
+    return {
+      id: filename.replace('.spark.md', ''),
+      name: parsed.name,
+      file: filename,
+      stability: parsed.stability,
+      data: parsed,
+    };
+  };
+
   const loadSparks = async () => {
     setLoading(true);
     setError(null);
@@ -15,6 +26,30 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     try {
       console.log('🔍 Loading sparks...');
       let sparkFiles = [];
+
+      try {
+        const apiResponse = await fetch('/api/sparks');
+        if (apiResponse.ok) {
+          const apiData = await apiResponse.json();
+          if (Array.isArray(apiData.files) && apiData.files.length > 0) {
+            const apiContentFiles = apiData.files.filter((file) => file?.content);
+            if (apiContentFiles.length > 0) {
+              const parsedSparks = apiContentFiles.map((file) =>
+                buildSparkEntry(file.name || file.path || 'spark', file.content)
+              );
+              setSparks(parsedSparks);
+              setLoading(false);
+              return;
+            }
+            sparkFiles = apiData.files
+              .map((file) => file?.name || file?.path)
+              .filter(Boolean);
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Could not fetch sparks from backend', err);
+      }
+
       try {
         // First try to fetch the generated sparks.json index
         const indexResponse = await fetch('/sparks.json');
@@ -56,16 +91,10 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
             const content = await response.text();
             console.log(`✅ Loaded ${filename}, length:`, content.length);
 
-            const parsed = parseSparkFile(content);
-            console.log(`🔧 Parsed ${filename}:`, parsed);
+            const sparkEntry = buildSparkEntry(filename, content);
+            console.log(`🔧 Parsed ${filename}:`, sparkEntry);
 
-            return {
-              id: filename.replace('.spark.md', ''),
-              name: parsed.name,
-              file: filename,
-              stability: parsed.stability,
-              data: parsed,
-            };
+            return sparkEntry;
           } catch (err) {
             console.error(`❌ Error loading ${filename}:`, err);
             return null;
