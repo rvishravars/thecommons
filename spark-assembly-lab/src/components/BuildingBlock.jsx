@@ -62,40 +62,40 @@ export default function BuildingBlock({ title, description, icon, color, value, 
 
       {/* Full Screen Modal */}
       {isExpanded && (
-        <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="theme-panel rounded-xl border-2 border-${color}-600 w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl">
+        <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+          <div className="theme-panel rounded-xl border-2 border-${color}-600 w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] flex flex-col shadow-2xl">
             {/* Modal Header */}
-            <div className={`bg-${color}-600 px-6 py-4 rounded-t-xl flex items-center justify-between`}>
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">{icon}</span>
-                <div>
-                  <h2 className="text-xl font-bold">{title}</h2>
-                  <p className="text-sm opacity-90">{description}</p>
+            <div className={`bg-${color}-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl flex items-center justify-between`}>
+              <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                <span className="text-xl sm:text-2xl flex-shrink-0">{icon}</span>
+                <div className="min-w-0">
+                  <h2 className="text-base sm:text-xl font-bold truncate">{title}</h2>
+                  <p className="text-xs sm:text-sm opacity-90 truncate">{description}</p>
                 </div>
               </div>
               <button
                 onClick={handleClose}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
                 title="Close"
               >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
             </div>
 
             {/* Modal Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6">
               <textarea
                 value={value}
                 onChange={(e) => onUpdate(e.target.value)}
                 placeholder={`Enter ${title.toLowerCase()}...\n\nTip: Use markdown formatting for better structure.`}
-                className="w-full h-full theme-input rounded border p-4 text-base focus:outline-none focus:ring-2 focus:ring-${color}-500 font-mono resize-none min-h-[500px]"
+                className="w-full h-full theme-input rounded border p-3 sm:p-4 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-${color}-500 font-mono resize-none min-h-[400px] sm:min-h-[500px]"
                 autoFocus
               />
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t theme-border flex justify-between items-center">
-              <div className="text-sm theme-muted">
+            <div className="px-3 sm:px-6 py-3 sm:py-4 border-t theme-border flex justify-between items-center">
+              <div className="text-xs sm:text-sm theme-muted">
                 {value.length} characters
               </div>
               <button

@@ -31,9 +31,11 @@ A React-based LEGO-style interface for building and visualizing **Sparks** in Th
 - **Building Blocks**: Modular components for each phase with expandable form fields
 - **Full-Screen Editor**: Maximize any block for focused, distraction-free editing
 - **Quiz Me**: Interactive AI-powered quiz system to test understanding of spark content
+- **External Repo Loading**: Load sparks from any GitHub repository dynamically
+- **Mobile Responsive**: Fully optimized for mobile devices with drawer navigation
 - **Live Preview**: Real-time markdown preview of your spark
 - **Stability Tracking**: Visual indicators showing completion status (0/3 to 3/3 Stable)
-- **Smart Loading**: Automatically loads existing sparks from the `/sparks/` directory
+- **Smart Loading**: Automatically loads existing sparks from the `/sparks/` directory or external repos
 - **Export**: Download sparks as properly formatted markdown files
 - **Toast Notifications**: User-friendly feedback for actions
 - **Theme**: Blueprint-inspired design with phase-specific colors (Blue, Yellow, Green)
@@ -209,10 +211,32 @@ The app uses a simple Personal Access Token (PAT) authentication system:
 
 ### Loading Existing Sparks
 
-1. Existing sparks from `/sparks/*.spark.md` are automatically loaded
+1. **Enter Repository URL**: 
+   - Enter a GitHub repository URL in the "Git Repository" input at the top of the sidebar
+   - Supported formats:
+     - `https://github.com/owner/repo`
+     - `github.com/owner/repo`
+     - `owner/repo`
+   - Click the search icon or press Enter to load sparks from that repository
+   - The app will search for all `.spark.md` files in the repository
+   - Your choice is saved in localStorage and persists across sessions
 2. Click on any spark in the sidebar to load it
 3. The stability indicator shows completion level
-4. Click **"Refresh"** icon to reload sparks
+4. Click **"Refresh"** icon to reload sparks from the current source
+
+### Server Configuration (Optional)
+
+The server supports environment variables for configuration:
+
+```bash
+# GitHub authentication (optional)
+GITHUB_TOKEN=your_token_here      # For private repos or higher rate limits
+
+# Cache settings
+SPARK_CACHE_TTL_SECONDS=60        # Cache duration (default: 60 seconds)
+```
+
+The application does not have a default repository - users must specify a repository URL to load sparks.
 
 ### Stability Levels
 
