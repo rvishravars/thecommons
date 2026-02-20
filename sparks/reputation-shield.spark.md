@@ -1,4 +1,4 @@
-# 🧩 Spark Template: The Reputation Shield
+# 🧩 The Reputation Shield
 
 ---
 
