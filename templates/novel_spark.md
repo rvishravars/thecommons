@@ -1,4 +1,4 @@
-# 🧩 Spark Template: [Name of Your Brick]
+# [NAME]
 
 ---
 

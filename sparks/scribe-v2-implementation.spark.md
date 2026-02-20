@@ -112,12 +112,12 @@ scribe_status.json              # Real-time thinking steps for UI
 ### Technical Implementation
 
 **The Logic:** The Glass Box Scribe is fully operational with a modular architecture:
-- **Core Router** ([scribe_brain.py](../scribe/scribe_brain.py)): Hardware-aware inference engine with automatic device detection (NVIDIA GPU → Apple Metal → Multi-thread CPU → Groq failover)
+- **Core Router** ([scribe_brain.py](../spark-assembly-lab/scribe/scribe_brain.py)): Hardware-aware inference engine with automatic device detection (NVIDIA GPU → Apple Metal → Multi-thread CPU → Groq failover)
 - **Nano-Model** (Qwen2.5-1.5B-Instruct-GGUF Q4_K_M): Locally running 1B parameter model optimized for CPU
-- **System Prompts** ([hunch_eval.md](../scribe/prompts/hunch_eval.md), [shape_eval.md](../scribe/prompts/shape_eval.md)): Phase-specific validation prompts
-- **Stability Audit** ([stability_audit.py](../scribe/logic/stability_audit.py)): Refactored novelty_scan.py with Clutch Power language
-- **GitHub Bot** ([.github/workflows/scribe-bot.yml](../.github/workflows/scribe-bot.yml)): Automated PR bot for stability reports
-- **Glass Box Logger** ([glass_box_logger.py](../scribe/utils/glass_box_logger.py)): Transparent reasoning output formatter
+- **System Prompts** ([hunch_eval.md](../spark-assembly-lab/scribe/prompts/hunch_eval.md), [shape_eval.md](../spark-assembly-lab/scribe/prompts/shape_eval.md)): Phase-specific validation prompts
+- **Stability Audit** ([stability_audit.py](../spark-assembly-lab/scribe/logic/stability_audit.py)): Refactored novelty_scan.py with Clutch Power language
+- **Glass Box Logger** ([glass_box_logger.py](../spark-assembly-lab/scribe/utils/glass_box_logger.py)): Transparent reasoning output formatter
+- **Execution**: Scribe now runs inside Spark Assembly Lab (frontend + backend). CI bot has been retired.
 
 **Clutch Power Test:** Successfully validated through comprehensive testing:
 - ✅ Model downloads and loads correctly on CPU, GPU, and Apple Metal devices

@@ -5,6 +5,8 @@ import SparkSelector from './components/SparkSelector';
 import AssemblyCanvas from './components/AssemblyCanvas';
 import Header from './components/Header';
 import { Sparkles, X } from 'lucide-react';
+import { generateSparkMarkdown } from './utils/sparkParser';
+import { getStoredUserInfo } from './utils/github';
 
 // Main application component
 function AppMain() {
@@ -13,25 +15,35 @@ function AppMain() {
   const [selectedSpark, setSelectedSpark] = useState(null);
   const [repoUrl, setRepoUrl] = useState(() => localStorage.getItem('sparkRepoUrl') || 'https://github.com/rvishravars/thecommons');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [originalSparkData, setOriginalSparkData] = useState(null);
   const [sparkData, setSparkData] = useState({
     name: 'New Spark',
     phases: {
-      intuition: { status: 'Active', observation: '', gap: '', why: '' },
-      imagination: { status: 'Pending', novel_core: '', blueprint: '', interface: '', prior_art: '' },
-      logic: { status: 'In-Progress', technical_impl: '', clutch_test: '', dependencies: '' },
+      intuition: { status: 'Active', observation: '', gap: '', why: '', notes: '' },
+      imagination: { status: 'Pending', novel_core: '', blueprint: '', interface: '', prior_art: '', notes: '' },
+      logic: { status: 'In-Progress', technical_impl: '', clutch_test: '', dependencies: '', notes: '' },
     },
     contributors: { scout: '', designer: '', builder: '' },
   });
+  const [user, setUser] = useState(() => getStoredUserInfo());
 
   const handleSparkSelect = (spark) => {
     setSelectedSpark(spark);
     if (spark) {
       // Load spark data from parsed file
-      setSparkData({
+      const loaded = {
         name: spark.name,
         phases: spark.phases,
         contributors: spark.contributors,
-      });
+        sourcePath: spark.sourcePath || spark.sourceFile || null,
+      };
+      loaded.phases = {
+        intuition: { ...loaded.phases.intuition, notes: loaded.phases.intuition?.notes || '' },
+        imagination: { ...loaded.phases.imagination, notes: loaded.phases.imagination?.notes || '' },
+        logic: { ...loaded.phases.logic, notes: loaded.phases.logic?.notes || '' },
+      };
+      setSparkData(loaded);
+      setOriginalSparkData(JSON.parse(JSON.stringify(loaded)));
     }
     // Close mobile menu after selection
     setIsMobileMenuOpen(false);
@@ -39,6 +51,16 @@ function AppMain() {
 
   const handleSparkUpdate = (updatedData) => {
     setSparkData(updatedData);
+    // Also update selectedSpark to keep it in sync
+    if (selectedSpark) {
+      setSelectedSpark({
+        ...selectedSpark,
+        name: updatedData.name,
+        phases: updatedData.phases,
+        contributors: updatedData.contributors,
+        rawContent: generateSparkMarkdown(updatedData)
+      });
+    }
   };
 
   const handleRepoChange = (newRepoUrl) => {
@@ -53,12 +75,19 @@ function AppMain() {
     setSparkData({
       name: 'New Spark',
       phases: {
-        intuition: { status: 'Active', observation: '', gap: '', why: '' },
-        imagination: { status: 'Pending', novel_core: '', blueprint: '', interface: '', prior_art: '' },
-        logic: { status: 'In-Progress', technical_impl: '', clutch_test: '', dependencies: '' },
+        intuition: { status: 'Active', observation: '', gap: '', why: '', notes: '' },
+        imagination: { status: 'Pending', novel_core: '', blueprint: '', interface: '', prior_art: '', notes: '' },
+        logic: { status: 'In-Progress', technical_impl: '', clutch_test: '', dependencies: '', notes: '' },
       },
       contributors: { scout: '', designer: '', builder: '' },
+      sourcePath: null,
     });
+    setOriginalSparkData(null);
+  };
+
+  const handleResetSpark = () => {
+    if (!originalSparkData) return;
+    setSparkData(JSON.parse(JSON.stringify(originalSparkData)));
   };
 
   useEffect(() => {
@@ -68,17 +97,19 @@ function AppMain() {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="flex h-screen flex-col theme-app" data-theme={theme}>
-        <Header 
-          theme={theme} 
+        <Header
+          theme={theme}
           onThemeChange={setTheme}
           onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           isMobileMenuOpen={isMobileMenuOpen}
+          user={user}
+          onUserChange={setUser}
         />
-        
+
         <div className="flex flex-1 overflow-hidden relative">
           {/* Mobile Overlay */}
           {isMobileMenuOpen && (
-            <div 
+            <div
               className="fixed inset-0 bg-black/50 z-40 lg:hidden"
               onClick={() => setIsMobileMenuOpen(false)}
             />
@@ -99,13 +130,14 @@ function AppMain() {
             >
               <X className="h-5 w-5" />
             </button>
-            
+
             <SparkSelector
               selectedSpark={selectedSpark}
               onSparkSelect={handleSparkSelect}
               onNewSpark={handleNewSpark}
               repoUrl={repoUrl}
               onRepoChange={handleRepoChange}
+              currentSparkData={sparkData}
             />
           </aside>
 
@@ -115,6 +147,10 @@ function AppMain() {
               <AssemblyCanvas
                 sparkData={sparkData}
                 onSparkUpdate={handleSparkUpdate}
+                repoUrl={repoUrl}
+                originalSparkData={originalSparkData}
+                onResetSpark={handleResetSpark}
+                isReadOnly={!user}
               />
             ) : (
               <div className="flex h-full items-center justify-center p-4">

@@ -86,7 +86,7 @@ class ModelDownloader:
         logger.warning(f"   {self.HF_URL}")
         logger.warning("")
         logger.warning("📥 OPTION 1: Automatic Download (may be slow on first run)")
-        logger.warning("   Run: python scribe/models/downloader.py --download")
+        logger.warning("   Run: python spark-assembly-lab/scribe/models/downloader.py --download")
         logger.warning("")
         logger.warning("📁 OPTION 2: Manual Download")
         logger.warning("   1. Visit: https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF")

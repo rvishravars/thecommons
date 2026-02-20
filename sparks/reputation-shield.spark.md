@@ -26,8 +26,8 @@
 *Status: [Merged]* *Builder: @rvishravars*
 
 ### Technical Implementation
-* **The Logic:** [Reputation Decay Script](../scripts/reputation_decay.py) - Python implementation with simulation mode
-* **Documentation:** [REPUTATION_DECAY.md](../scripts/REPUTATION_DECAY.md) - Complete usage guide and API reference
+* **The Logic:** Implemented in the Spark Assembly Lab backend (reputation service TBD)
+* **Documentation:** See Spark Assembly Lab deployment docs for backend integration
 * **Clutch Power Test:** Ran a simulation against 3 months of contribution data. The script successfully:
   - Applied 10% monthly decay to Scout-only contributors
   - Protected users with higher-tier contributions from decay

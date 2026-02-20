@@ -46,13 +46,12 @@ def main():
     # 1. File structure
     print("\n📁 Checking File Structure:")
     files = [
-        "scribe/scribe_brain.py",
-        "scribe/prompts/hunch_eval.md",
-        "scribe/prompts/shape_eval.md",
-        "scribe/logic/stability_audit.py",
-        "scribe/models/downloader.py",
-        ".github/workflows/scribe-bot.yml",
-        "sparks/scribe-v2-implementation.md"
+        "scribe_brain.py",
+        "prompts/hunch_eval.md",
+        "prompts/shape_eval.md",
+        "logic/stability_audit.py",
+        "models/downloader.py",
+        "../sparks/scribe-v2-implementation.md"
     ]
     
     all_exist = True
@@ -66,9 +65,9 @@ def main():
     # 2. Python syntax
     print("\n🐍 Checking Python Syntax:")
     py_files = [
-        "scribe/scribe_brain.py",
-        "scribe/logic/stability_audit.py",
-        "scribe/models/downloader.py"
+        "scribe_brain.py",
+        "logic/stability_audit.py",
+        "models/downloader.py"
     ]
     
     syntax_ok = True
@@ -80,7 +79,7 @@ def main():
     # 3. Demo mode
     print("\n🎬 Testing Demo Mode:")
     demo_ok = run_command(
-        f"python3 {base_path / 'scribe/scribe_brain.py'} --demo 2>&1 | grep -q 'Demo complete'",
+        f"python3 {base_path / 'scribe_brain.py'} --demo 2>&1 | grep -q 'Demo complete'",
         "Demo mode execution"
     )
     results["demo"] = demo_ok
@@ -88,7 +87,7 @@ def main():
     # 4. Stability auditor
     print("\n🧱 Testing Stability Auditor:")
     audit_ok = run_command(
-        f"python3 {base_path / 'scribe/logic/stability_audit.py'} --dir {base_path / 'sparks'} 2>&1 | grep -q 'Stability Report'",
+        f"python3 {base_path / 'logic/stability_audit.py'} --dir {base_path.parent / 'sparks'} 2>&1 | grep -q 'Stability Report'",
         "Stability audit execution"
     )
     results["audit"] = audit_ok
@@ -96,7 +95,7 @@ def main():
     # 5. Model downloader
     print("\n📦 Checking Model Downloader:")
     dl_ok = run_command(
-        f"python3 {base_path / 'scribe/models/downloader.py'} --verify 2>&1 | grep -q 'Model'",
+        f"python3 {base_path / 'models/downloader.py'} --verify 2>&1 | grep -q 'Model'",
         "Model downloader check"
     )
     results["downloader"] = dl_ok
@@ -145,8 +144,8 @@ def main():
     if all_ok:
         print("🎉 ALL CHECKS PASSED - SCRIBE V2.0 IS READY TO USE!")
         print("\n🚀 Next Steps:")
-        print("   1. python3 scribe/scribe_brain.py --demo")
-        print("   2. python3 scribe/logic/stability_audit.py --dir sparks/")
+        print("   1. python3 scribe_brain.py --demo")
+        print("   2. python3 logic/stability_audit.py --dir ../sparks/")
         print("   3. Read SCRIBE_TESTING_GUIDE.md for full setup")
         return 0
     else:
@@ -154,7 +153,7 @@ def main():
         print("\n💡 Troubleshooting:")
         print("   • Check that you're in the thecommons directory")
         print("   • Ensure Python 3.8+ is installed")
-        print("   • Run: pip install -r scripts/requirements.txt")
+        print("   • Run: pip install -r scribe/requirements.txt")
         print("   • See SCRIBE_TESTING_GUIDE.md for help")
         return 1
 

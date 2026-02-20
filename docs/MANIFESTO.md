@@ -34,12 +34,12 @@ $$Weight = log_{10}(CS)$$
 
 ### 3. The Scribe: Distributed Intelligence
 The AI Scribe is the **Instruction Manual**, not the Master Builder.
-* **3.1 Frugal Compute:** The Scribe utilizes low-cost "Mini-Models" for basic checks and a community-powered **DePIN Grid** for heavy logic audits to ensure zero cost-barriers.
-* **3.2 The Standard Gauge:** The Scribe’s primary function is **Compatibility Verification**—ensuring every new "brick" adheres to the Commons technical standards.
+*   **3.1 Frugal Compute:** The Scribe utilizes low-cost "Mini-Models" for basic checks and a community-powered **DePIN Grid** for heavy logic audits to ensure zero cost-barriers.
+*   **3.2 The Standard Gauge:** The Scribe’s primary function is **Compatibility Verification**—ensuring every new "brick" adheres to the Commons technical standards.
 
 ### 4. Conflict & Dispute Resolution (The Logic Audit)
-* **4.1 The Challenge:** Contributors may file a `!CHALLENGE` if they believe a Spark lacks Logic (it's "wobbly") or Imagination (it's a duplicate brick).
-* **4.2 The Cooling Rack:** If a Spark receives >5 critical flaws in 24 hours, the AI locks the thread for 12 hours to prevent dogpiling and allow the Builder to apply "Clutch Power" (fixes).
+*   **4.1 The Challenge:** Contributors may file a `!CHALLENGE` if they believe a Spark lacks Logic (it's "wobbly") or Imagination (it's a duplicate brick).
+*   **4.2 The Cooling Rack:** If a Spark receives >5 critical flaws in 24 hours, the AI locks the thread for 12 hours to prevent dogpiling and allow the Builder to apply "Clutch Power" (fixes).
 
 ## 🏛️ Theoretical Foundation
 
@@ -98,7 +98,7 @@ The heaviest lift. Turn a Blueprint into a functional reality.
 * [x] **Manifesto v2.0:** Integrated LEGO-style meritocracy (Intuition/Imagination/Logic).
 * [ ] **The DePIN Grid:** Set up the community-powered GPU node for the Scribe.
 * [ ] **The "Snap" Bot:** Automate the multi-role reward system (Echo & Prototype bonuses).
-* [ ] **Modular Spark Template:** Create the `!SHAPE` markdown template for Designers.
+* [ ] **Modular Spark:** Create the `!SHAPE` markdown template for Designers.
 
 ---
 > *"The Commons rewards the intuition to see the gap, the imagination to design the piece, and the logic to make it stick."*

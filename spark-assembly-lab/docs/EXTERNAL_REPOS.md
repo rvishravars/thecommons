@@ -170,7 +170,7 @@ SparkSelector Component
     ↓
 API Call: /api/sparks?repo=...
     ↓
-Express Server (server/index.js)
+Flask Server (server_py/app.py)
     ↓
 GitHub API
     ├─ Code Search (/search/code)

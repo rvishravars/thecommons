@@ -2,7 +2,7 @@ import { User } from 'lucide-react';
 import BuildingBlock from './BuildingBlock';
 import { BlockTypes, BlockMetadata, PhaseTypes } from '../types/spark';
 
-export default function PhaseLane({ phase, title, description, color, data, contributor, onUpdate, onContributorUpdate }) {
+export default function PhaseLane({ phase, title, description, color, data, contributor, onUpdate, onContributorUpdate, onEditDone }) {
   // Define which blocks belong to this phase
   const getBlocksForPhase = () => {
     switch (phase) {
@@ -52,6 +52,7 @@ export default function PhaseLane({ phase, title, description, color, data, cont
               color={color}
               value={data[blockType] || ''}
               onUpdate={(value) => onUpdate(blockType, value)}
+              onDone={onEditDone}
             />
           );
         })}

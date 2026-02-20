@@ -1,0 +1,10 @@
+services:
+  spark-assembly-lab:
+    build:
+      context: ..
+      dockerfile: spark-assembly-lab/Dockerfile.prod
+    container_name: spark-assembly-lab-prod
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env

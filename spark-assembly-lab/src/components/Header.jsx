@@ -7,7 +7,7 @@ const THEME_OPTIONS = [
   { value: 'ledger', label: 'Ledger Light' },
 ];
 
-export default function Header({ theme, onThemeChange, onMenuToggle }) {
+export default function Header({ theme, onThemeChange, onMenuToggle, user, onUserChange }) {
   return (
     <header className="border-b theme-border theme-surface px-4 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-between">
@@ -20,7 +20,7 @@ export default function Header({ theme, onThemeChange, onMenuToggle }) {
           >
             <Menu className="h-6 w-6" />
           </button>
-          
+
           <Boxes className="h-6 w-6 sm:h-8 sm:w-8 text-imagination-500 flex-shrink-0" />
           <div className="min-w-0">
             <h1 className="text-lg sm:text-2xl font-bold font-mono truncate">
@@ -31,7 +31,7 @@ export default function Header({ theme, onThemeChange, onMenuToggle }) {
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2 sm:space-x-4">
           <div className="hidden md:flex items-center space-x-2">
             <label htmlFor="theme-select" className="text-xs uppercase tracking-wider theme-subtle whitespace-nowrap">
@@ -51,7 +51,7 @@ export default function Header({ theme, onThemeChange, onMenuToggle }) {
               ))}
             </select>
           </div>
-          
+
           {/* Mobile Theme Selector - Icon only */}
           <div className="md:hidden">
             <select
@@ -68,7 +68,7 @@ export default function Header({ theme, onThemeChange, onMenuToggle }) {
             </select>
           </div>
 
-          <GitHubAuth />
+          <GitHubAuth user={user} onUserChange={onUserChange} />
 
           <a
             href="https://github.com/rvishravars/thecommons"

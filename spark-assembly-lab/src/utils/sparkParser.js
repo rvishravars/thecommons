@@ -18,12 +18,21 @@ export function parseSparkFile(content) {
     }
   }
 
-  // If no name in frontmatter, try title formats
-  if (name === 'Untitled Spark') {
-    // Try formats: # [emoji] Spark [Template]: [name]
-    const titleMatch = content.match(/^# .*?Spark.*?:? +(.+)$/m);
-    if (titleMatch) {
-      name = titleMatch[1].trim();
+  // If no name in frontmatter, try the first H1 heading
+  const lines = content.split('\n');
+  for (let line of lines) {
+    line = line.trim();
+    if (line.startsWith('#')) {
+      // Extract the title part after #
+      const rawTitle = line.replace(/^#\s*/, '').trim();
+      if (!rawTitle) continue;
+
+      // Strip optional emoji and brand prefixes (Spark, Template)
+      // This regex is more broad than the previous one to handle various characters/emojis
+      const cleanTitle = rawTitle.replace(/^(?:[^\w\s]|\s)*(?:Spark|Template)\s*[:\s]\s*/i, '').trim();
+
+      name = cleanTitle || rawTitle;
+      break;
     }
   }
 
@@ -53,6 +62,7 @@ export function parseSparkFile(content) {
         observation: intuition.content.observation || '',
         gap: intuition.content.gap || '',
         why: intuition.content.why || '',
+        notes: extractPhaseNotes(intuition.raw),
       },
       imagination: {
         status: imagination.status,
@@ -60,12 +70,14 @@ export function parseSparkFile(content) {
         blueprint: imagination.content.blueprint || '',
         interface: imagination.content.interface || '',
         prior_art: imagination.content.prior_art || '',
+        notes: extractPhaseNotes(imagination.raw),
       },
       logic: {
         status: logic.status,
         technical_impl: logic.content.technical_impl || '',
         clutch_test: logic.content.clutch_test || '',
         dependencies: logic.content.dependencies || '',
+        notes: extractPhaseNotes(logic.raw),
       },
     },
     contributors: {
@@ -78,6 +90,146 @@ export function parseSparkFile(content) {
 
   console.log('✅ Parsed result:', result);
   return result;
+}
+
+function extractPhaseNotes(rawPhase) {
+  if (!rawPhase) return '';
+  let notes = rawPhase
+    .replace(/^##[^\n]*\n/, '')
+    .replace(/^\*Status:[^\n]*\n?/m, '')
+    .replace(/^\*Scout:[^\n]*\n?/m, '')
+    .replace(/^\*Designer:[^\n]*\n?/m, '')
+    .replace(/^\*Builder:[^\n]*\n?/m, '')
+    .replace(/\n?---\s*$/m, '')
+    .trim();
+  return notes;
+}
+
+export function buildMissionSummary(parsedSpark) {
+  const intuition = parsedSpark?.phases?.intuition || {};
+  const imagination = parsedSpark?.phases?.imagination || {};
+  const logic = parsedSpark?.phases?.logic || {};
+
+  const checks = {
+    intuition_complete: Boolean(intuition.gap && intuition.why),
+    imagination_complete: Boolean(imagination.blueprint && imagination.interface),
+    logic_complete: Boolean(logic.technical_impl && logic.clutch_test),
+    interface_snappable: Boolean(imagination.interface),
+    logic_testable: Boolean(logic.clutch_test),
+  };
+
+  const stablePhases = [
+    checks.intuition_complete,
+    checks.imagination_complete,
+    checks.logic_complete,
+  ].filter(Boolean).length;
+
+  let status = 'RED';
+  if (stablePhases === 3) {
+    status = 'GREEN';
+  } else if (stablePhases >= 1) {
+    status = 'YELLOW';
+  }
+
+  const criticalFlaws = [];
+  if (!intuition.gap) {
+    criticalFlaws.push('Missing gap definition in Intuition');
+  }
+  if (!imagination.interface) {
+    criticalFlaws.push('Missing interface specification');
+  }
+  if (!logic.clutch_test) {
+    criticalFlaws.push('Missing Clutch Power Test');
+  }
+  if (!logic.dependencies) {
+    criticalFlaws.push('Missing dependency list');
+  }
+
+  const recommendation = status === 'GREEN'
+    ? 'Final Lock'
+    : status === 'YELLOW'
+      ? 'Request Refinement'
+      : 'Reject';
+
+  const scribeReport = status === 'GREEN'
+    ? `✅ Fully stable across all three phases.`
+    : status === 'YELLOW'
+      ? `⚠️ Needs refinement before merge.`
+      : `❌ Unstable. Critical phases are missing or empty.`;
+
+  const meritPlan = [];
+  if (parsedSpark?.contributors?.scout) {
+    meritPlan.push({
+      handle: `@${parsedSpark.contributors.scout}`,
+      role: 'Scout',
+      reward: '+5 CS',
+    });
+  }
+  if (parsedSpark?.contributors?.designer) {
+    meritPlan.push({
+      handle: `@${parsedSpark.contributors.designer}`,
+      role: 'Designer',
+      reward: status === 'GREEN' ? '+15 CS (+5 Echo bonus)' : '+15 CS',
+    });
+  }
+  if (parsedSpark?.contributors?.builder) {
+    meritPlan.push({
+      handle: `@${parsedSpark.contributors.builder}`,
+      role: 'Builder',
+      reward: status === 'GREEN' ? '+25 CS (+10 Prototype bonus)' : '+25 CS',
+    });
+  }
+
+  return {
+    status,
+    recommendation,
+    scribe_report: scribeReport,
+    critical_flaws: criticalFlaws,
+    checks,
+    merit_plan: meritPlan,
+  };
+}
+
+export function validateSparkData(sparkData) {
+  const errors = [];
+  const name = (sparkData?.name || '').trim();
+  const contributors = sparkData?.contributors || {};
+  const phases = sparkData?.phases || {};
+
+  const handlePattern = /^[A-Za-z0-9-]+$/;
+
+  if (!name) {
+    errors.push('Spark name is required');
+  }
+
+  if (!contributors.scout || !handlePattern.test(contributors.scout)) {
+    errors.push('Intuition requires a valid scout handle');
+  }
+  if (!contributors.designer || !handlePattern.test(contributors.designer)) {
+    errors.push('Imagination requires a valid designer handle');
+  }
+  if (!contributors.builder || !handlePattern.test(contributors.builder)) {
+    errors.push('Logic requires a valid builder handle');
+  }
+
+  const intuition = phases.intuition || {};
+  const imagination = phases.imagination || {};
+  const logic = phases.logic || {};
+
+  if (!intuition.notes && (!intuition.observation || !intuition.gap || !intuition.why)) {
+    errors.push('Intuition must include observation, gap, and why');
+  }
+  if (!imagination.notes && (!imagination.novel_core || !imagination.blueprint || !imagination.interface)) {
+    errors.push('Imagination must include novel core, blueprint, and interface');
+  }
+  if (!logic.notes && (!logic.technical_impl || !logic.clutch_test || !logic.dependencies)) {
+    errors.push('Logic must include technical implementation, clutch test, and dependencies');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
 }
 
 /**
@@ -94,7 +246,7 @@ function extractPhase(content, headerPattern) {
   // Extract status (supports both *Status: [Active]* and *Status: Claimed*)
   let statusMatch = phaseContent.match(/\*Status: \[([^\]]+)\]\*/);
   let status = statusMatch ? statusMatch[1].split('/')[0].trim() : null;
-  
+
   // Fallback to format without brackets
   if (!status) {
     statusMatch = phaseContent.match(/\*Status:\s*([^*]+)\*/);
@@ -169,19 +321,36 @@ function calculateStability(phases) {
  */
 export function generateSparkMarkdown(sparkData) {
   const { name, phases, contributors = {} } = sparkData;
+  const sanitizeField = (value, label) => {
+    if (!value) return value;
+    const normalized = value.replace(/\r\n/g, '\n').trim();
+    const labelPattern = new RegExp(`^\\s*[>*-]?\\s*\\*{0,2}${label}\\*{0,2}\\s*:?\\s*`, 'gmi');
+    let cleaned = normalized.replace(labelPattern, '');
+    cleaned = cleaned.replace(/^\s*>\s+/gm, '');
 
-  let markdown = `# 🧩 Spark Template: ${name}\n\n---\n\n`;
+    const lines = cleaned
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const deduped = lines.filter((line, index) => index === 0 || line !== lines[index - 1]);
+
+    return deduped.join(' ').trim();
+  };
+
+  let markdown = `# ${name}\n\n---\n\n`;
 
   // Phase 1: Intuition
   markdown += `## 🧠 Phase 1: The Intuition (!HUNCH)\n`;
   markdown += `*Status: [${phases.intuition.status || 'Active'}]* `;
   markdown += `*Scout: @${contributors.scout || 'YourGitHubHandle'}*\n\n`;
 
-  if (phases.intuition.observation || phases.intuition.gap || phases.intuition.why) {
+  if (phases.intuition.notes) {
+    markdown += `${phases.intuition.notes.trim()}\n\n`;
+  } else if (phases.intuition.observation || phases.intuition.gap || phases.intuition.why) {
     markdown += `### The Observation\n`;
-    markdown += `> ${phases.intuition.observation || 'Use your intuition here. What is missing?'}\n`;
-    markdown += `* **The Gap:** ${phases.intuition.gap || '(Describe the gap)'}\n`;
-    markdown += `* **The "Why":** ${phases.intuition.why || '(Explain why this matters)'}\n\n`;
+    markdown += `> ${sanitizeField(phases.intuition.observation, 'The Observation') || 'Use your intuition here. What is missing?'}\n`;
+    markdown += `* **The Gap:** ${sanitizeField(phases.intuition.gap, 'The Gap') || '(Describe the gap)'}\n`;
+    markdown += `* **The "Why":** ${sanitizeField(phases.intuition.why, 'The "Why"') || '(Explain why this matters)'}\n\n`;
   }
 
   markdown += `---\n\n`;
@@ -191,11 +360,14 @@ export function generateSparkMarkdown(sparkData) {
   markdown += `*Status: [${phases.imagination.status || 'Pending'}]* `;
   markdown += `*Designer: @${contributors.designer || 'Handle'}*\n\n`;
 
-  if (phases.imagination.novel_core || phases.imagination.blueprint || phases.imagination.interface) {
+  if (phases.imagination.notes) {
+    markdown += `${phases.imagination.notes.trim()}\n\n`;
+  } else if (phases.imagination.novel_core || phases.imagination.blueprint || phases.imagination.interface) {
     markdown += `### The Novel Core (The 10% Delta)\n`;
-    markdown += `* **The Blueprint:** ${phases.imagination.blueprint || '(Describe the unique design)'}\n`;
-    markdown += `* **The Interface:** ${phases.imagination.interface || '(How does this snap into the ecosystem?)'}\n`;
-    markdown += `* **Prior Art:** ${phases.imagination.prior_art || '(Why existing solutions don\'t work)'}\n\n`;
+    markdown += `* **The Novel Core:** ${sanitizeField(phases.imagination.novel_core, 'The Novel Core') || '(Describe the 10% delta)'}\n`;
+    markdown += `* **The Blueprint:** ${sanitizeField(phases.imagination.blueprint, 'The Blueprint') || '(Describe the unique design)'}\n`;
+    markdown += `* **The Interface:** ${sanitizeField(phases.imagination.interface, 'The Interface') || '(How does this snap into the ecosystem?)'}\n`;
+    markdown += `* **Prior Art:** ${sanitizeField(phases.imagination.prior_art, 'Prior Art') || '(Why existing solutions don\'t work)'}\n\n`;
   }
 
   markdown += `---\n\n`;
@@ -205,11 +377,13 @@ export function generateSparkMarkdown(sparkData) {
   markdown += `*Status: [${phases.logic.status || 'In-Progress'}]* `;
   markdown += `*Builder: @${contributors.builder || 'Handle'}*\n\n`;
 
-  if (phases.logic.technical_impl || phases.logic.clutch_test || phases.logic.dependencies) {
+  if (phases.logic.notes) {
+    markdown += `${phases.logic.notes.trim()}\n\n`;
+  } else if (phases.logic.technical_impl || phases.logic.clutch_test || phases.logic.dependencies) {
     markdown += `### Technical Implementation\n`;
-    markdown += `* **The Logic:** ${phases.logic.technical_impl || '(Technical documentation or code)'}\n`;
-    markdown += `* **Clutch Power Test:** ${phases.logic.clutch_test || '(Explain verification)'}\n`;
-    markdown += `* **Dependencies:** ${phases.logic.dependencies || '(List dependencies)'}\n\n`;
+    markdown += `* **The Logic:** ${sanitizeField(phases.logic.technical_impl, 'The Logic') || '(Technical documentation or code)'}\n`;
+    markdown += `* **Clutch Power Test:** ${sanitizeField(phases.logic.clutch_test, 'Clutch Power Test') || '(Explain verification)'}\n`;
+    markdown += `* **Dependencies:** ${sanitizeField(phases.logic.dependencies, 'Dependencies') || '(List dependencies)'}\n\n`;
   }
 
   markdown += `---\n\n`;

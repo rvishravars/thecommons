@@ -1,14 +1,16 @@
 services:
   spark-assembly-lab:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: spark-assembly-lab/Dockerfile
     container_name: spark-assembly-lab
+    working_dir: /app/spark-assembly-lab
+    command: ["sh", "-c", "python server_py/app.py & sleep 1 && npx vite --host 0.0.0.0 --port 3000"]
     ports:
       - "3000:3000"
       - "8080:8080"
     volumes:
-      - .:/app
-      - /app/node_modules
+      - ..:/app
+      - /app/spark-assembly-lab/node_modules
     env_file:
       - .env
