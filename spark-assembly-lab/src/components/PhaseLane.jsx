@@ -31,9 +31,9 @@ export default function PhaseLane({ phase, title, description, color, data, cont
           <input
             type="text"
             value={contributor || ''}
-            onChange={(e) => onContributorUpdate(e.target.value)}
+            readOnly
             placeholder="@github-handle"
-            className="flex-1 phase-input rounded px-2 py-1 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-white/30"
+            className="flex-1 phase-input rounded px-2 py-1 text-xs sm:text-sm bg-black/20 cursor-not-allowed"
           />
         </div>
       </div>

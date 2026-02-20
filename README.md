@@ -34,24 +34,11 @@ New to the Commons? Here is how you earn your seat at the table by adding mass t
 3.  **Phase 3: Builder (+25 CS):** Use your **Logic**. Write the code or technical specs to turn a design into a functional brick using `!BUILD`.
 
 
-### Visual Tour
+### Visual Tour & Demo
 
-Here's a glimpse of the [Spark Assembly Lab](spark-assembly-lab/README.md), where ideas are built:
+Try the **[Live Demo](https://spark-assembly-lab-bgbmwuia5q-uc.a.run.app/)** to see the [Spark Assembly Lab](spark-assembly-lab/README.md) in action. Build Sparks using the LEGO-style three-phase interface: 🧠 Intuition, 🎨 Imagination, 🛠️ Logic.
 
-| **Assembly Canvas** |
-|:---:|
-| <img src="spark-assembly-lab/docs/screenshots/assembly-canvas.png" width="800" alt="Assembly Canvas"> |
-| _The main interface for assembling your spark_ |
-
-| **Fullscreen Editor** | **Quiz Mode** |
-|:---:|:---:|
-| <img src="spark-assembly-lab/docs/screenshots/fullscreen-editor.png" width="400" alt="Fullscreen Editor"> | <img src="spark-assembly-lab/docs/screenshots/quiz-mode.png" width="400" alt="Quiz Mode"> |
-| _Distraction-free writing experience_ | _AI-powered validation for your ideas_ |
-
-| **Spark Selector** |
-|:---:|
-| <img src="spark-assembly-lab/docs/screenshots/spark-selector.png" width="400" alt="Spark Selector"> |
-| _Manage and switch between your sparks_ |
+👉 **[Launch Spark Assembly Lab](https://spark-assembly-lab-bgbmwuia5q-uc.a.run.app/)** *(Work in Progress)*
 
 
 ---
@@ -64,6 +51,35 @@ The Commons is assisted by an AI Scribe that ensures every new brick follows the
 * **`!SHAPE`**: Validates a blueprint and checks for "Prior Art" (Novelty Audit).
 * **`!BUILD`**: Runs a stability check to ensure your logic doesn't break existing bricks.
 * **`!VOTE_VETO`**: A community safety-valve to halt structural changes.
+
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+graph TB
+    A["Frontend<br/>React/Vite"]
+    B["Backend<br/>Node.js"]
+    C["Scribe Agent<br/>Python AI"]
+    D["ML Models<br/>Qwen2.5"]
+    E["Local Cache<br/>Status/JSON"]
+    F["GitHub<br/>Auth + Storage<br/>+ Versioning"]
+    
+    A -->|Auth| F
+    A --> B
+    B -->|Read/Write/Version| F
+    B --> C
+    C --> D
+    C --> E
+    B --> E
+```
+
+TheCommons is built on a modular architecture where:
+- **Frontend** (React/Vite) provides the LEGO-style assembly interface
+- **Backend** (Node.js) orchestrates all operations
+- **GitHub** serves as the single source of truth for auth, storage, and version control
+- **Scribe Agent** (Python AI) evaluates submissions using ML models
+- **Local Cache** stores temporary evaluation results
 
 ---
 
