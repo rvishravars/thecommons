@@ -1,4 +1,4 @@
-# 🧩 Reputation Shield — The CS Decay Algorithm
+# 🧩 The Reputation Shield
 
 ---
 
