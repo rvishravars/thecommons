@@ -1,4 +1,4 @@
-# 🧩 Spark Template: The Paw quite path
+# 🧩 The Paw quite path
 
 ---
 
