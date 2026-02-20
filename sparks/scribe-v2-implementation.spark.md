@@ -1,4 +1,4 @@
-# 🧠 Spark: The Scribe v2.0—Glass Box AI Agent
+# 🧠 The Scribe v2.0—Glass Box AI Agent
 
 ---
 
