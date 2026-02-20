@@ -54,8 +54,8 @@ The **AI Scribe** uses the Scribe v2.0 script to check the "Clutch Power" of you
 
 ```bash
 # Audit a specific brick
-python3 scribe/logic/stability_audit.py --file sparks/your-brick-name.md
+python3 spark-assembly-lab/scribe/logic/stability_audit.py --file sparks/your-brick-name.md
 
 # Audit all bricks
   # Use --dir for directory or --file for single file
-python3 scribe/logic/stability_audit.py
+python3 spark-assembly-lab/scribe/logic/stability_audit.py

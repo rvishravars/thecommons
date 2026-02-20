@@ -1,33 +1,19 @@
 import { useState, useEffect } from 'react';
 import { LogOut, LogIn, Loader, Copy, Check, X, HelpCircle } from 'lucide-react';
-import { 
-  getStoredUserInfo, 
+import {
+  getStoredUserInfo,
   clearUserAuth,
   loginWithToken,
   openTokenCreationPage
 } from '../utils/github';
 
-export default function GitHubAuth() {
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+export default function GitHubAuth({ user, onUserChange }) {
+  const [isLoading, setIsLoading] = useState(false);
   const [showTokenInput, setShowTokenInput] = useState(false);
   const [tokenInput, setTokenInput] = useState('');
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
-
-  // Check for existing auth on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      const storedUser = getStoredUserInfo();
-      if (storedUser) {
-        setUser(storedUser);
-      }
-      setIsLoading(false);
-    };
-
-    checkAuth();
-  }, []);
 
   const handleTokenSubmit = async (e) => {
     e.preventDefault();
@@ -35,21 +21,21 @@ export default function GitHubAuth() {
     setIsLoading(true);
 
     const result = await loginWithToken(tokenInput);
-    
+
     if (result.success && result.user) {
-      setUser(result.user);
+      onUserChange(result.user);
       setTokenInput('');
       setShowTokenInput(false);
     } else {
       setError(result.error || 'Failed to authenticate');
     }
-    
+
     setIsLoading(false);
   };
 
   const handleLogout = () => {
     clearUserAuth();
-    setUser(null);
+    onUserChange(null);
     setTokenInput('');
     setShowTokenInput(false);
     setError(null);
@@ -75,8 +61,8 @@ export default function GitHubAuth() {
       <div className="flex items-center space-x-2">
         <div className="hidden sm:flex items-center space-x-2">
           {user.avatar_url && (
-            <img 
-              src={user.avatar_url} 
+            <img
+              src={user.avatar_url}
               alt={user.login}
               className="h-6 w-6 rounded-full"
             />

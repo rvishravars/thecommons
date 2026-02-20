@@ -28,6 +28,12 @@ Act as the Advisor to the Baseplate Architect (Repo Owner). Provide:
 - A one-sentence 'Scribe Report' summarizing the audit for the Quiz Me modal.
 - A 'Merit Distribution' plan that calculates the CS rewards to be finalized upon merge.
 
+### MISSION 4: SUBMISSION (UI)
+Enable Spark Assembly Lab to submit edits back to GitHub:
+- Create or update the Spark file in a new branch
+- Open a Pull Request with the updated content
+- Require a GitHub token with repo write permissions
+
 ### OUTPUT SCHEMA (Strict JSON Only)
 {
   "spark_info": { "id": "string", "name": "string", "stability_score": 0-3 },

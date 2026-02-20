@@ -21,6 +21,8 @@ from typing import Optional, Dict, Any
 from dataclasses import dataclass, asdict
 from enum import Enum
 
+from missions import evaluate_spark_mission
+
 # Try importing hardware acceleration libraries
 try:
     import torch
@@ -448,6 +450,37 @@ class ScribeBrain:
             "reasoning": result.reasoning
         }, indent=2)
 
+    def evaluate_spark_missions(self, spark_content: str) -> Dict[str, Any]:
+        """Run the Scribe-Architect missions pipeline on a full Spark file."""
+        start_time = time.time()
+        initial_memory = psutil.Process().memory_info().rss / (1024 * 1024)
+
+        self.update_status("Executing Scribe-Architect missions...")
+        mission_output = evaluate_spark_mission(spark_content)
+
+        elapsed_ms = (time.time() - start_time) * 1000
+        final_memory = psutil.Process().memory_info().rss / (1024 * 1024)
+        memory_used = final_memory - initial_memory
+
+        glass_box = GlassBoxLogger.create_reasoning_log(
+            hardware_used=self.hardware.value,
+            time_elapsed_ms=elapsed_ms,
+            memory_used_mb=memory_used,
+            prompts_tested=["missions"],
+            decision_path=[
+                "Parsed Spark markdown into JSON",
+                "Audited stability and completeness",
+                "Generated governance advisory"
+            ],
+            stability_score=mission_output.get("spark_info", {}).get("stability_score", 0),
+            critical_flaws=mission_output.get("audit", {}).get("critical_flaws", []),
+            recommendations=[]
+        )
+
+        mission_output["audit"]["glass_box"] = glass_box
+        self.update_status("✅ Mission evaluation complete")
+        return mission_output
+
 
 def main():
     """Main entry point for the Scribe Brain."""
@@ -457,6 +490,7 @@ def main():
     parser.add_argument("--demo", action="store_true", help="Run in demo mode (no inference)")
     parser.add_argument("--eval-file", type=str, help="Spark file to evaluate")
     parser.add_argument("--phase", choices=["hunch", "shape"], default="hunch", help="Evaluation phase")
+    parser.add_argument("--missions", action="store_true", help="Run Scribe-Architect missions on a full Spark")
     args = parser.parse_args()
 
     logger.info("🧠 Initializing Scribe v2.0 Brain...")
@@ -469,32 +503,52 @@ def main():
     brain = ScribeBrain()
     logger.info(f"Hardware selected: {brain.hardware.value}")
 
-    # Example: Evaluate a sample hunch
-    sample_hunch = """
-    I notice that our Spark files don't have consistent date fields. 
-    It's hard to track when a blueprint was created vs. when it was approved.
-    This makes it difficult to analyze the velocity of the Commons.
-    """
-
-    logger.info("📥 Evaluating sample HUNCH...")
     try:
-        result = brain.evaluate_spark(EvaluationPhase.HUNCH, sample_hunch)
+        if args.missions:
+            if not args.eval_file:
+                logger.error("--missions requires --eval-file")
+                sys.exit(1)
+
+            with open(args.eval_file, "r") as f:
+                spark_content = f.read()
+
+            logger.info("📥 Running Scribe-Architect missions...")
+            mission_result = brain.evaluate_spark_missions(spark_content)
+            logger.info("\n" + json.dumps(mission_result, indent=2))
+            return
+
+        if args.eval_file:
+            with open(args.eval_file, "r") as f:
+                spark_content = f.read()
+
+            logger.info(f"📥 Evaluating {args.phase.upper()} from file...")
+            result = brain.evaluate_spark(EvaluationPhase(args.phase), spark_content)
+        else:
+            # Example: Evaluate a sample hunch
+            sample_hunch = """
+            I notice that our Spark files don't have consistent date fields. 
+            It's hard to track when a blueprint was created vs. when it was approved.
+            This makes it difficult to analyze the velocity of the Commons.
+            """
+
+            logger.info("📥 Evaluating sample HUNCH...")
+            result = brain.evaluate_spark(EvaluationPhase.HUNCH, sample_hunch)
 
         if result:
             logger.info("\n" + brain.output_result(result))
         else:
             logger.error("Evaluation failed")
             logger.info("\n💡 HELP:")
-            logger.info("   1. Download model: python scribe/models/downloader.py --download")
-            logger.info("   2. Or use demo mode: python scribe/scribe_brain.py --demo")
+            logger.info("   1. Download model: python spark-assembly-lab/scribe/models/downloader.py --download")
+            logger.info("   2. Or use demo mode: python spark-assembly-lab/scribe/scribe_brain.py --demo")
             logger.info("   3. Or set Groq API: export GROQ_API_KEY='your-key'")
             sys.exit(1)
     except Exception as e:
         logger.error(f"Fatal error during evaluation: {e}")
         logger.info("\n💡 HELP:")
-        logger.info("   • Run demo mode: python scribe/scribe_brain.py --demo")
-        logger.info("   • Install model: python scribe/models/downloader.py --download")
-        logger.info("   • Check dependencies: pip install -r scribe/requirements.txt")
+        logger.info("   • Run demo mode: python spark-assembly-lab/scribe/scribe_brain.py --demo")
+        logger.info("   • Install model: python spark-assembly-lab/scribe/models/downloader.py --download")
+        logger.info("   • Check dependencies: pip install -r spark-assembly-lab/scribe/requirements.txt")
         sys.exit(1)
 
 
@@ -564,17 +618,17 @@ def demo_mode():
     logger.info("="*60)
     logger.info("\n💡 NEXT STEPS:")
     logger.info("   1. Download Qwen2.5-1.5B model:")
-    logger.info("      python scribe/models/downloader.py --download")
+    logger.info("      python spark-assembly-lab/scribe/models/downloader.py --download")
     logger.info("")
     logger.info("   2. Or set up Groq API fallback:")
     logger.info("      export GROQ_API_KEY='your-groq-api-key'")
     logger.info("      pip install groq>=0.4.0")
     logger.info("")
     logger.info("   3. Run stability audits (no model required):")
-    logger.info("      python scribe/logic/stability_audit.py --dir sparks/")
+    logger.info("      python spark-assembly-lab/scribe/logic/stability_audit.py --dir sparks/")
     logger.info("")
     logger.info("   4. Then run live evaluation:")
-    logger.info("      python scribe/scribe_brain.py")
+    logger.info("      python spark-assembly-lab/scribe/scribe_brain.py")
     logger.info("")
 
 

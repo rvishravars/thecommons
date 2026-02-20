@@ -104,7 +104,7 @@ export const clearUserAuth = () => {
  * Open GitHub token creation page
  */
 export const openTokenCreationPage = () => {
-  const url = 'https://github.com/settings/tokens/new?scopes=read:user&description=Spark%20Assembly%20Lab';
+  const url = 'https://github.com/settings/tokens/new?scopes=read:user,repo&description=Spark%20Assembly%20Lab';
   window.open(url, '_blank');
 };
 

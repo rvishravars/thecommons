@@ -64,19 +64,9 @@ Build and test
 - **Dependencies**: Required sparks or libraries
 - **Reward**: +25 CS (+10 Prototype Bonus)
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Docker Only)
 
-### Easy Setup (Recommended for first-time setup)
-
-```bash
-# From the spark-assembly-lab directory
-./setup.sh
-
-# Then start the development server
-npm run dev
-```
-
-### Using Docker (Recommended)
+### Local Deployment (Docker Compose)
 
 ```bash
 # From the spark-assembly-lab directory
@@ -92,37 +82,26 @@ docker compose up -d
 
 The Docker setup automatically:
 - Installs all dependencies
-- Mounts the `/sparks/` directory for live updates
+- Mounts the repo for live updates
 - Enables hot module replacement (HMR)
-- Runs on port 3000
+- Runs the Flask API on port 8080
 
-### Local Development
+### Cloud Deployment (Cloud Run)
 
 ```bash
-# Install dependencies
-npm install
+# From the repo root
+docker build -f spark-assembly-lab/Dockerfile.prod -t spark-assembly-lab:prod .
 
-# Link the sparks directory (first time setup)
-# This creates a symlink from public/sparks to ../sparks
-rm -rf public/sparks && ln -s ../../sparks public/sparks
+# Run locally on port 8080
+docker run -p 8080:8080 spark-assembly-lab:prod
 
-# Start development server
-npm run dev
-
-# Stop development server
-# Press Ctrl+C in the terminal where npm run dev is running
-
-# Or if running in background, find and kill the process:
-# lsof -ti:3000 | xargs kill -9
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
+# Deploy to Cloud Run (example)
+gcloud run deploy spark-assembly-lab \
+   --source . \
+   --dockerfile spark-assembly-lab/Dockerfile.prod \
+   --region us-central1 \
+   --allow-unauthenticated
 ```
-
-**Note:** The symlink ensures spark files from the parent `/sparks/` directory are accessible during local development. Docker automatically handles this via volume mounts.
 
 ## 📁 Project Structure
 

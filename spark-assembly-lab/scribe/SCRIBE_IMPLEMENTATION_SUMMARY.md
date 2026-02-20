@@ -99,7 +99,7 @@ python scribe/models/downloader.py --download # Fetch if missing
 ### 7. ✅ Stability Auditor Implemented
 **File:** `scribe/logic/stability_audit.py` - Full OOP refactor
 
-**Refactored from:** `scripts/novelty_scan.py`
+**Refactored from:** legacy novelty scan (removed)
 
 **Enhancements:**
 - Class-based architecture (callable by Brain)
@@ -126,26 +126,13 @@ auditor = StabilityAuditor()
 report = auditor.audit_spark(Path("sparks/sample.spark.md"))
 ```
 
-### 8. ✅ GitHub Actions Workflow Created
-**File:** `.github/workflows/scribe-bot.yml`
-
-**Features:**
-- Triggers on PR to Spark files
-- Runs stability audits
-- Generates Glass Box reasoning logs
-- Posts comprehensive PR comments
-- Quality gate for critical flaws
-- Summary reports
-
-**Automated Outputs:**
-- Stability audit results
-- Glass Box reasoning log
-- Critical flaws & warnings
-- Actionable recommendations
+### 8. ✅ GitHub Actions Workflow (Retired)
+CI workflows for Scribe stability audits have been retired.
+All Scribe evaluations now run inside Spark Assembly Lab (frontend + backend).
 
 ### 9. ✅ Dependencies Updated
 
-**Core Requirements (`scripts/requirements.txt`):**
+**Core Requirements (`scribe/requirements.txt`):**
 - requests>=2.31.0 (HTTP)
 - psutil>=5.9.0 (System metrics)
 - llama-cpp-python>=0.2.0 (Local inference)

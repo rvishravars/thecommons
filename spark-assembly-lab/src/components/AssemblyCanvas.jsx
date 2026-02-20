@@ -1,15 +1,23 @@
 import { useState } from 'react';
-import { Download, Copy, Eye, Brain } from 'lucide-react';
-import PhaseLane from './PhaseLane';
+import { Download, Copy, Eye, Brain, GitPullRequest, RotateCcw } from 'lucide-react';
 import MarkdownPreview from './MarkdownPreview';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import QuizModal from './QuizModal';
 import { PhaseTypes } from '../types/spark';
-import { generateSparkMarkdown } from '../utils/sparkParser';
+import { generateSparkMarkdown, validateSparkData } from '../utils/sparkParser';
 import { useToast } from '../utils/ToastContext';
+import { getStoredToken } from '../utils/github';
 
-export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
+export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly }) {
   const [showPreview, setShowPreview] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [syncProgress, setSyncProgress] = useState(0);
+  const [editStatus, setEditStatus] = useState(null);
+  const [editingPhase, setEditingPhase] = useState(null);
+  const [phaseDraft, setPhaseDraft] = useState('');
   const toast = useToast();
 
   const handleBlockUpdate = (phase, blockType, value) => {
@@ -27,6 +35,11 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
   };
 
   const handleDownload = () => {
+    const validation = validateSparkData(sparkData);
+    if (!validation.valid) {
+      toast.error(`Sanctity check failed: ${validation.errors.join('; ')}`);
+      return;
+    }
     const md = generateSparkMarkdown(sparkData);
     const blob = new Blob([md], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
@@ -41,6 +54,11 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
   };
 
   const handleCopyToClipboard = () => {
+    const validation = validateSparkData(sparkData);
+    if (!validation.valid) {
+      toast.error(`Sanctity check failed: ${validation.errors.join('; ')}`);
+      return;
+    }
     const md = generateSparkMarkdown(sparkData);
     navigator.clipboard.writeText(md).then(
       () => toast.success('Markdown copied to clipboard!'),
@@ -57,6 +75,144 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
   };
 
   const stability = calculateStability();
+  const validation = validateSparkData(sparkData);
+  const isDirty = originalSparkData
+    ? JSON.stringify(sparkData) !== JSON.stringify(originalSparkData)
+    : false;
+
+  const handleEditDone = () => {
+    const result = validateSparkData(sparkData);
+    if (result.valid) {
+      setEditStatus({
+        type: 'success',
+        message: 'Saved locally. Ready to submit.',
+      });
+      return;
+    }
+
+    setEditStatus({
+      type: 'error',
+      message: `Validation failed: ${result.errors.join('; ')}`,
+    });
+  };
+
+  const openPhaseEditor = (phaseKey) => {
+    const phase = sparkData.phases[phaseKey];
+    const fallback = buildPhaseNotes(phaseKey, phase);
+    setPhaseDraft(phase.notes || fallback);
+    setEditingPhase(phaseKey);
+  };
+
+  const savePhaseEditor = () => {
+    if (!editingPhase) return;
+    const updated = {
+      ...sparkData,
+      phases: {
+        ...sparkData.phases,
+        [editingPhase]: {
+          ...sparkData.phases[editingPhase],
+          notes: phaseDraft,
+        },
+      },
+    };
+    onSparkUpdate(updated);
+    handleEditDone();
+    setEditingPhase(null);
+  };
+
+  const buildPhaseNotes = (phaseKey, phase) => {
+    if (!phase) return '';
+    if (phaseKey === PhaseTypes.INTUITION) {
+      return `### The Observation\n> ${phase.observation || ''}\n* **The Gap:** ${phase.gap || ''}\n* **The "Why":** ${phase.why || ''}`.trim();
+    }
+    if (phaseKey === PhaseTypes.IMAGINATION) {
+      return `### The Novel Core (The 10% Delta)\n* **The Novel Core:** ${phase.novel_core || ''}\n* **The Blueprint:** ${phase.blueprint || ''}\n* **The Interface:** ${phase.interface || ''}\n* **Prior Art:** ${phase.prior_art || ''}`.trim();
+    }
+    if (phaseKey === PhaseTypes.LOGIC) {
+      return `### Technical Implementation\n* **The Logic:** ${phase.technical_impl || ''}\n* **Clutch Power Test:** ${phase.clutch_test || ''}\n* **Dependencies:** ${phase.dependencies || ''}`.trim();
+    }
+    return '';
+  };
+
+  const handleSubmit = async () => {
+    // If confirmation is not yet shown, show it first
+    if (!showConfirmation) {
+      const validationResult = validateSparkData(sparkData);
+      if (!validationResult.valid) {
+        toast.error(`Sanctity check failed: ${validationResult.errors.join('; ')}`);
+        return;
+      }
+      setShowConfirmation(true);
+      return;
+    }
+
+    const token = getStoredToken();
+    if (!token) {
+      toast.error('GitHub token required to submit a PR');
+      setShowConfirmation(false);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Cool progress simulation
+    for (let i = 0; i <= 100; i += 5) {
+      setSyncProgress(i);
+      await new Promise(r => setTimeout(r, 40));
+    }
+
+    try {
+      const markdown = generateSparkMarkdown(sparkData);
+      const slug = sparkData.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      const path = sparkData.sourcePath || `sparks/${slug || 'new-spark'}.spark.md`;
+      const title = `Spark: ${sparkData.name}`;
+      const body = `Automated submission from Spark Assembly Lab.`;
+
+      const response = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token,
+          repo: repoUrl,
+          path,
+          content: markdown,
+          title,
+          body,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit PR');
+      }
+
+      toast.success(`PR created: ${data.pr_url}`);
+      setShowConfirmation(false);
+      if (data.pr_url) {
+        window.open(data.pr_url, '_blank');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Failed to submit PR');
+      setSyncProgress(0);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleReset = () => {
+    if (!onResetSpark || !originalSparkData) {
+      return;
+    }
+    onResetSpark();
+    setEditStatus({
+      type: 'success',
+      message: 'Changes reset to original content.',
+    });
+    toast.success('Changes reset to original content.');
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -66,28 +222,36 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
           <div className="flex-1 min-w-0">
             <input
               type="text"
+              readOnly={isReadOnly}
               value={sparkData.name}
               onChange={(e) => onSparkUpdate({ ...sparkData, name: e.target.value })}
-              className="text-xl sm:text-2xl font-bold bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-imagination-500 rounded px-2 -ml-2 w-full"
+              className={`text-xl sm:text-2xl font-bold bg-transparent border border-transparent hover:border-imagination-400/50 focus:border-imagination-500 focus:outline-none focus:ring-2 focus:ring-imagination-500 rounded px-2 -ml-2 w-full transition-colors ${isReadOnly ? 'cursor-not-allowed opacity-80' : ''}`}
               placeholder="Spark Name"
             />
             <div className="mt-1 flex items-center space-x-2">
               <span
-                className={`inline-flex items-center rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-semibold ${
-                  stability === 0
-                    ? 'bg-red-600'
-                    : stability === 1
+                className={`inline-flex items-center rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-semibold ${stability === 0
+                  ? 'bg-red-600'
+                  : stability === 1
                     ? 'bg-intuition-600'
                     : stability === 2
-                    ? 'bg-imagination-600'
-                    : 'bg-logic-600'
-                }`}
+                      ? 'bg-imagination-600'
+                      : 'bg-logic-600'
+                  }`}
               >
                 {stability}/3 Stable
               </span>
+              {originalSparkData && originalSparkData.name !== sparkData.name && (
+                <span className="inline-flex items-center rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-semibold bg-yellow-600 text-white">
+                  Edited
+                </span>
+              )}
+              {!validation.valid && (
+                <span className="text-xs text-red-300">Sanctity check failed</span>
+              )}
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setShowQuiz(true)}
@@ -97,7 +261,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
               <span className="hidden sm:inline">Quiz Me</span>
               <span className="sm:hidden">Quiz</span>
             </button>
-            
+
             <button
               onClick={() => setShowPreview(!showPreview)}
               className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors"
@@ -105,7 +269,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
               <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>{showPreview ? 'Edit' : 'Preview'}</span>
             </button>
-            
+
             <button
               onClick={handleCopyToClipboard}
               className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors"
@@ -114,7 +278,17 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
               <span className="hidden sm:inline">Copy MD</span>
               <span className="sm:hidden">Copy</span>
             </button>
-            
+
+            <button
+              onClick={handleReset}
+              disabled={!isDirty || isReadOnly}
+              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors disabled:opacity-50"
+            >
+              <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Reset</span>
+              <span className="sm:hidden">Reset</span>
+            </button>
+
             <button
               onClick={handleDownload}
               className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-imagination-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-imagination-700 transition-colors"
@@ -123,72 +297,206 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate }) {
               <span className="hidden sm:inline">Download</span>
               <span className="sm:hidden">Save</span>
             </button>
+
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting || isReadOnly}
+              className={`flex items-center space-x-1 sm:space-x-2 rounded-lg bg-logic-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-logic-700 transition-colors disabled:opacity-60 ${isReadOnly ? 'cursor-not-allowed grayscale' : ''}`}
+            >
+              <GitPullRequest className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Submit PR</span>
+              <span className="sm:hidden">Submit</span>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Assembly Area */}
+      {editStatus && (
+        <div
+          className={`mx-4 sm:mx-6 mt-4 rounded-lg border px-3 py-2 text-xs sm:text-sm ${editStatus.type === 'success'
+            ? 'border-logic-600/50 bg-logic-600/10 text-logic-200'
+            : 'border-red-600/50 bg-red-900/20 text-red-200'
+            }`}
+        >
+          {editStatus.message}
+        </div>
+      )}
+
       {showPreview ? (
         <MarkdownPreview markdown={generateSparkMarkdown(sparkData)} />
       ) : (
         <div className="flex-1 overflow-x-auto overflow-y-auto">
           <div className="h-full flex flex-col lg:flex-row p-4 sm:p-6 gap-4 sm:gap-6 min-w-full">
-            {/* Intuition Lane */}
-            <PhaseLane
-              phase={PhaseTypes.INTUITION}
-              title="🧠 Intuition (Scout)"
-              description="Identify the gap"
-              color="intuition"
-              data={sparkData.phases.intuition}
-              contributor={sparkData.contributors.scout}
-              onUpdate={(blockType, value) => handleBlockUpdate('intuition', blockType, value)}
-              onContributorUpdate={(value) =>
-                onSparkUpdate({
-                  ...sparkData,
-                  contributors: { ...sparkData.contributors, scout: value },
-                })
-              }
-            />
-
-            {/* Imagination Lane */}
-            <PhaseLane
-              phase={PhaseTypes.IMAGINATION}
-              title="🎨 Imagination (Designer)"
-              description="Design the solution"
-              color="imagination"
-              data={sparkData.phases.imagination}
-              contributor={sparkData.contributors.designer}
-              onUpdate={(blockType, value) => handleBlockUpdate('imagination', blockType, value)}
-              onContributorUpdate={(value) =>
-                onSparkUpdate({
-                  ...sparkData,
-                  contributors: { ...sparkData.contributors, designer: value },
-                })
-              }
-            />
-
-            {/* Logic Lane */}
-            <PhaseLane
-              phase={PhaseTypes.LOGIC}
-              title="🛠️ Logic (Builder)"
-              description="Build and test"
-              color="logic"
-              data={sparkData.phases.logic}
-              contributor={sparkData.contributors.builder}
-              onUpdate={(blockType, value) => handleBlockUpdate('logic', blockType, value)}
-              onContributorUpdate={(value) =>
-                onSparkUpdate({
-                  ...sparkData,
-                  contributors: { ...sparkData.contributors, builder: value },
-                })
-              }
-            />
+            {[
+              {
+                key: PhaseTypes.INTUITION,
+                title: '🧠 Intuition (Scout)',
+                description: 'Identify the gap',
+                color: 'intuition',
+              },
+              {
+                key: PhaseTypes.IMAGINATION,
+                title: '🎨 Imagination (Designer)',
+                description: 'Design the solution',
+                color: 'imagination',
+              },
+              {
+                key: PhaseTypes.LOGIC,
+                title: '🛠️ Logic (Builder)',
+                description: 'Build and test',
+                color: 'logic',
+              },
+            ].map((phase) => (
+              <div key={phase.key} className={`flex-1 min-w-[280px] lg:min-w-[320px] flex flex-col rounded-xl border-2 border-${phase.color}-600 theme-panel-soft`}>
+                <div className={`bg-${phase.color}-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl`}>
+                  <h2 className="text-lg sm:text-xl font-bold">{phase.title}</h2>
+                  <p className="text-xs sm:text-sm mt-1 opacity-90">{phase.description}</p>
+                </div>
+                <div className="flex-1 p-3 sm:p-4 flex flex-col overflow-y-hidden">
+                  <div className="w-full flex-1 theme-input rounded border p-3 sm:p-4 text-sm sm:text-base overflow-y-auto bg-black/10 min-h-[240px]">
+                    <div className="prose prose-invert prose-sm max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {sparkData.phases[phase.key].notes || buildPhaseNotes(phase.key, sparkData.phases[phase.key])}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => openPhaseEditor(phase.key)}
+                    disabled={isReadOnly}
+                    className={`mt-2 text-xs text-${phase.color}-400 hover:text-${phase.color}-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {!isReadOnly && <span>Edit</span>}
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
-      
+
       {/* Quiz Modal */}
       {showQuiz && <QuizModal sparkData={sparkData} onClose={() => setShowQuiz(false)} />}
+
+      {/* Cool PR Confirmation Modal */}
+      {showConfirmation && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 theme-overlay backdrop-blur-md">
+          <div className="w-full max-w-lg overflow-hidden rounded-3xl border-2 border-logic-500 bg-black/80 shadow-[0_0_50px_-12px_rgba(34,197,94,0.5)] backdrop-blur-xl animate-in zoom-in-95 duration-200">
+            {/* Modal Header with Glow */}
+            <div className="relative h-32 w-full overflow-hidden bg-gradient-to-br from-logic-900/50 to-black p-6">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(34,197,94,0.3),_transparent_70%)]" />
+              <div className="relative flex items-center space-x-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-logic-500 shadow-[0_0_20px_rgba(34,197,94,0.6)]">
+                  <GitPullRequest className="h-8 w-8 text-black" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black tracking-tighter text-white">SYNC SPARK</h2>
+                  <p className="text-xs font-bold uppercase tracking-widest text-logic-400">Final Validation Sequence</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-xs font-mono font-bold uppercase tracking-widest">
+                  <span className="text-white/40">Status</span>
+                  <span className="text-logic-400">Ready to Ship</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-mono font-bold uppercase tracking-widest">
+                  <span className="text-white/40">Integrity Check</span>
+                  <span className="text-logic-400">PASSED</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-mono font-bold uppercase tracking-widest">
+                  <span className="text-white/40">Merit Stake</span>
+                  <span className="text-logic-400">Verified</span>
+                </div>
+              </div>
+
+              {/* Progress Bar Container */}
+              <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/5">
+                <div
+                  className="h-full bg-gradient-to-r from-logic-600 to-logic-400 transition-all duration-300 ease-out shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+                  style={{ width: `${syncProgress}%` }}
+                />
+              </div>
+
+              {isSubmitting ? (
+                <div className="py-4 text-center font-mono text-sm font-bold text-logic-400 animate-pulse uppercase tracking-[0.2em]">
+                  Synchronizing with TheCommons...
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <button
+                    onClick={() => setShowConfirmation(false)}
+                    className="flex-1 rounded-xl border border-white/10 bg-white/5 py-4 text-sm font-black uppercase tracking-widest text-white transition-all hover:bg-white/10"
+                  >
+                    Abort
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    className="flex-1 rounded-xl bg-logic-500 py-4 text-sm font-black uppercase tracking-widest text-black shadow-[0_0_30px_rgba(34,197,94,0.4)] transition-all hover:bg-logic-400 hover:shadow-[0_0_40px_rgba(34,197,94,0.6)]"
+                  >
+                    Phase Shift
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-logic-900/20 p-4 text-center border-t border-logic-900/30">
+              <p className="text-[10px] font-mono text-logic-400/60 uppercase tracking-widest">
+                Instruction Set v2.0 // Standard Gauge: 100% Correct
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editingPhase && (
+        <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+          <div className="theme-panel rounded-xl border-2 border-imagination-600 w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] flex flex-col shadow-2xl">
+            <div className="bg-imagination-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-base sm:text-xl font-bold truncate">Edit Phase</h2>
+                <p className="text-xs sm:text-sm opacity-90 truncate">Update the full block for this phase.</p>
+              </div>
+              <button
+                onClick={() => setEditingPhase(null)}
+                className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
+                title="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-3 sm:p-6">
+              <textarea
+                value={phaseDraft}
+                onChange={(e) => setPhaseDraft(e.target.value)}
+                className="w-full h-full theme-input rounded border p-3 sm:p-4 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-imagination-500 font-mono resize-none min-h-[400px] sm:min-h-[500px]"
+                autoFocus
+              />
+            </div>
+
+            <div className="px-3 sm:px-6 py-3 sm:py-4 border-t theme-border flex justify-between items-center">
+              <div className="text-xs sm:text-sm theme-muted">{phaseDraft.length} characters</div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setEditingPhase(null)}
+                  className="px-4 py-2 theme-button rounded-lg font-semibold transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={savePhaseEditor}
+                  className="px-4 py-2 bg-imagination-600 hover:bg-imagination-700 rounded-lg font-semibold transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

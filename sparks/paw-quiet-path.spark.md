@@ -1,4 +1,4 @@
-# 🧠 Spark: The Paw quite path
+# 🧠 The Paw quite path
 
 ---
 ## 🧠 Phase 1: The Intuition (!HUNCH)

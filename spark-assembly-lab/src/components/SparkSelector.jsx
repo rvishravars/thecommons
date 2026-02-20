@@ -1,18 +1,33 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, FileText, Zap, RefreshCw } from 'lucide-react';
-import { parseSparkFile } from '../utils/sparkParser';
+import { buildMissionSummary, parseSparkFile } from '../utils/sparkParser';
+import { getStoredToken } from '../utils/github';
 import RepoInput from './RepoInput';
 
-export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, onRepoChange }) {
+export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, onRepoChange, currentSparkData }) {
   console.log('🚀 SparkSelector component mounted!');
   const [sparks, setSparks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [errorType, setErrorType] = useState(null); // 'repo-not-found', 'no-sparks', 'network-error'
   const [repoInfo, setRepoInfo] = useState(null);
+  const [missionSummary, setMissionSummary] = useState(null);
+  const [missionLoading, setMissionLoading] = useState(false);
+  const [missionError, setMissionError] = useState(null);
+  const [prInfo, setPrInfo] = useState({ count: null, urls: [] });
+  const [refreshToken, setRefreshToken] = useState(0);
 
-  const buildSparkEntry = useCallback((filename, content) => {
+  const getAuditBadge = (status) => {
+    if (status === 'GREEN') return 'bg-logic-600';
+    if (status === 'YELLOW') return 'bg-imagination-600';
+    return 'bg-red-600';
+  };
+
+  const buildSparkEntry = useCallback((filename, content, sourcePath) => {
     const parsed = parseSparkFile(content);
+    parsed.rawContent = content;
+    parsed.sourceFile = filename;
+    parsed.sourcePath = sourcePath || filename;
     return {
       id: filename.replace('.spark.md', ''),
       name: parsed.name,
@@ -22,10 +37,32 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     };
   }, []);
 
+  // Update spark in list when currentSparkData changes
+  useEffect(() => {
+    if (selectedSpark && currentSparkData) {
+      const selectedFile = selectedSpark.sourceFile || selectedSpark.sourcePath;
+      if (selectedFile) {
+        setSparks(prevSparks => 
+          prevSparks.map(spark => {
+            if (spark.file === selectedFile || spark.data.sourcePath === selectedFile) {
+              return {
+                ...spark,
+                name: currentSparkData.name,
+                data: { ...spark.data, ...currentSparkData }
+              };
+            }
+            return spark;
+          })
+        );
+      }
+    }
+  }, [currentSparkData?.name, selectedSpark?.sourceFile, selectedSpark?.sourcePath]);
+
   const loadSparks = useCallback(async () => {
     setLoading(true);
     setError(null);
     setErrorType(null);
+    setRefreshToken((value) => value + 1);
 
     try {
       console.log('🔍 Loading sparks...');
@@ -50,7 +87,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
             const apiContentFiles = apiData.files.filter((file) => file?.content);
             if (apiContentFiles.length > 0) {
               const parsedSparks = apiContentFiles.map((file) =>
-                buildSparkEntry(file.name || file.path || 'spark', file.content)
+                buildSparkEntry(file.name || file.path || 'spark', file.content, file.path)
               );
               setSparks(parsedSparks);
               setLoading(false);
@@ -108,6 +145,92 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     loadSparks();
   }, [loadSparks]);
 
+  useEffect(() => {
+    if (!selectedSpark && sparks.length > 0) {
+      onSparkSelect(sparks[0].data);
+    }
+  }, [sparks, selectedSpark, onSparkSelect]);
+
+  useEffect(() => {
+    if (!selectedSpark?.rawContent) {
+      setMissionSummary(null);
+      setMissionError(null);
+      setMissionLoading(false);
+      setPrInfo({ count: null, urls: [] });
+      return;
+    }
+
+    const controller = new AbortController();
+    const loadMission = async () => {
+      setMissionLoading(true);
+      setMissionError(null);
+
+      try {
+        const response = await fetch('/api/mission', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: selectedSpark.rawContent }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Mission request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setMissionSummary({
+          status: data?.audit?.status || 'RED',
+          recommendation: data?.audit?.recommendation || 'Reject',
+          scribe_report: data?.audit?.scribe_report || 'No report available.',
+          critical_flaws: data?.audit?.critical_flaws || [],
+          merit_plan: data?.merit_plan || [],
+        });
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          return;
+        }
+        setMissionError(err.message || 'Failed to run mission evaluation');
+        setMissionSummary(buildMissionSummary(selectedSpark));
+      } finally {
+        setMissionLoading(false);
+      }
+    };
+
+    loadMission();
+    return () => controller.abort();
+  }, [selectedSpark]);
+
+  useEffect(() => {
+    if (!selectedSpark?.sourcePath || !repoUrl) {
+      setPrInfo({ count: null, urls: [] });
+      return;
+    }
+
+    const controller = new AbortController();
+    const loadPrs = async () => {
+      try {
+        const token = getStoredToken();
+        const response = await fetch(`/api/prs?repo=${encodeURIComponent(repoUrl)}&path=${encodeURIComponent(selectedSpark.sourcePath)}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error('Failed to load PR status');
+        }
+        const data = await response.json();
+        setPrInfo({ count: data.count ?? 0, urls: data.urls || [] });
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          return;
+        }
+        setPrInfo({ count: null, urls: [] });
+      }
+    };
+
+    loadPrs();
+    return () => controller.abort();
+  }, [selectedSpark, repoUrl, refreshToken]);
+
   const getStabilityColor = (stability) => {
     if (stability === 0) return 'bg-red-600';
     if (stability === 1) return 'bg-intuition-600';
@@ -134,6 +257,71 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
+        {missionSummary && (
+          <div className="mb-4 rounded-lg border theme-border theme-card-soft p-3">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-xs uppercase tracking-wider theme-muted font-semibold">
+                  Scribe Summary
+                </p>
+                <p className="text-sm mt-1">{missionSummary.scribe_report}</p>
+                {missionLoading && (
+                  <p className="text-xs theme-subtle mt-1">Running mission evaluation...</p>
+                )}
+                {missionError && (
+                  <p className="text-xs text-red-300 mt-1">{missionError}</p>
+                )}
+              </div>
+              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${getAuditBadge(missionSummary.status)}`}>
+                {missionSummary.status}
+              </span>
+            </div>
+
+            <div className="mt-3 grid grid-cols-2 gap-2 text-xs theme-subtle">
+              <span>
+                Recommendation:{' '}
+                <span className="theme-text font-semibold">{missionSummary.recommendation}</span>
+              </span>
+              <span className="text-right">
+                Stability:{' '}
+                <span className="theme-text font-semibold">{selectedSpark.stability}/3</span>
+              </span>
+            </div>
+
+            {prInfo.count !== null && (
+              <div className="mt-2 text-xs theme-subtle">
+                Open PRs for this spark:{' '}
+                <span className="theme-text font-semibold">{prInfo.count}</span>
+              </div>
+            )}
+
+            {missionSummary.critical_flaws.length > 0 && (
+              <div className="mt-3 text-xs text-red-300">
+                <p className="font-semibold text-red-400">Critical Flaws</p>
+                <ul className="mt-1 space-y-1">
+                  {missionSummary.critical_flaws.map((flaw) => (
+                    <li key={flaw}>• {flaw}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {missionSummary.merit_plan.length > 0 && (
+              <div className="mt-3 text-xs theme-subtle">
+                <p className="font-semibold theme-text">Merit Plan</p>
+                <div className="mt-2 space-y-1">
+                  {missionSummary.merit_plan.map((entry) => (
+                    <div key={`${entry.handle}-${entry.role}`} className="grid grid-cols-[1fr_auto] items-center gap-3">
+                      <span className="truncate">{entry.handle} ({entry.role})</span>
+                      <span className="font-semibold theme-text text-right">{entry.reward}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider theme-muted">
@@ -209,7 +397,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
               <button
                 key={spark.id}
                 onClick={() => onSparkSelect(spark.data)}
-                className={`w-full rounded-lg border-2 p-3 text-left transition-all hover:border-imagination-500 ${selectedSpark?.name === spark.name
+                className={`w-full rounded-lg border-2 p-3 text-left transition-all hover:border-imagination-500 ${(selectedSpark?.sourceFile === spark.file || selectedSpark?.sourcePath === spark.data.sourcePath)
                   ? 'border-imagination-500 theme-card'
                   : 'theme-border theme-card-soft'
                   }`}
