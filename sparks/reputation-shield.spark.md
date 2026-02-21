@@ -2,17 +2,17 @@
 
 ---
 
-## 🧠 Phase 1: The Intuition (!HUNCH)
+## 🧠 Phase 1: The Spark (!HUNCH)
 *Status: [Claimed]* *Scout: @rvishravars*
 
 ### The Observation
-> I have a gut feel that as we grow, the "Scout" role will be exploited by bots just to farm CS points through trivial intuition submissions.
+> I have a gut feel that as we grow, the "Scout" role will be exploited by bots just to farm CS points through trivial spark submissions.
 * **The Gap:** We currently reward all Scout discoveries equally, but 100 tiny observations (typo hunches, broken links) don't equal one high-quality gap analysis.
 * **The "Why":** Builders and Designers will get frustrated if their voting power is diluted by "Point-Farmers" who submit minimal-effort hunches without actual investment in the structure.
 
 ---
 
-## 🎨 Phase 2: The Imagination (!SHAPE)
+## 🎨 Phase 2: The Design (!SHAPE)
 *Status: [Designed]* *Designer: @rvishravars*
 
 ### The Novel Core (The 10% Delta)
@@ -43,8 +43,8 @@
 ## 📊 Contribution Log (CS Tracker)
 | Phase | Contributor | Action | Reward |
 | :--- | :--- | :--- | :--- |
-| **Intuition** | @IntuitionIvan | Submitted Hunch | +5 CS |
-| **Imagination** | @CreativeClara | Designed Shape | +15 CS (+5 Echo Bonus) |
+| **Spark** | @IntuitionIvan | Submitted Hunch | +5 CS |
+| **Design** | @CreativeClara | Designed Shape | +15 CS (+5 Echo Bonus) |
 | **Logic** | @DevDevon | Merged Build | +25 CS (+10 Prototype Bonus) |
 
 ---
