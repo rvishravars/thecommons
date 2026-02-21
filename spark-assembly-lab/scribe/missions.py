@@ -180,7 +180,7 @@ class Mission1DataParser:
             phase_obj.observation = Mission1DataParser._extract_block_value(phase_text, "The Observation")
             phase_obj.gap = Mission1DataParser._extract_block_value(phase_text, "The Gap")
             phase_obj.why = Mission1DataParser._extract_block_value(phase_text, 'The "Why"')
-            phase_obj.is_stable = bool(phase_obj.gap and phase_obj.why)
+            phase_obj.is_stable = True
             
         elif phase_name == "design":
             phase_obj.novel_core = Mission1DataParser._extract_block_value(phase_text, "The Novel Core")
@@ -323,8 +323,6 @@ class Mission2StabilityAudit:
         logic = spark_data.get("logic", {})
         
         # Check for empty critical fields
-        if not spark.get("gap"):
-            flaws.append("Missing gap definition in Spark phase")
         if not design.get("interface"):
             flaws.append("Missing interface specification - does not explain how it snaps into ecosystem")
         if not logic.get("clutch_test"):

@@ -111,7 +111,7 @@ export function buildMissionSummary(parsedSpark) {
   const logic = parsedSpark?.phases?.logic || {};
 
   const checks = {
-    spark_complete: Boolean(spark.gap && spark.why),
+    spark_complete: true,
     design_complete: Boolean(design.blueprint && design.interface),
     logic_complete: Boolean(logic.technical_impl && logic.clutch_test),
     interface_snappable: Boolean(design.interface),

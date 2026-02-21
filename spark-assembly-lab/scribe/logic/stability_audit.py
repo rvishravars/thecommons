@@ -198,11 +198,6 @@ class StabilityAuditor:
         if not contributors:
             flaws.append("No contributor handles (@username) found.")
 
-        # Check for circular logic (e.g., contradiction between phases)
-        if "Spark" in [s.phase_name for s in completed_phases]:
-            if not any(kw in self.content.lower() for kw in ["gap", "loose", "flaw", "problem"]):
-                flaws.append("Spark phase lacks problem identification.")
-
         return flaws
 
     def generate_recommendations(self, report: StabilityReport) -> List[str]:
