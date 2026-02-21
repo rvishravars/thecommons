@@ -398,6 +398,11 @@ def submit_spark():
             payload={"title": title, "body": body, "head": branch_name, "base": base_branch}
         )
 
+        # Invalidate PR cache for this spark
+        cache_key = f"{owner}/{repo}:{path}"
+        if cache_key in pr_cache["data"]:
+            del pr_cache["data"][cache_key]
+
         return jsonify({"pr_url": pr.get("html_url"), "branch": branch_name})
     except Exception as err:
         return jsonify({"error": str(err)}), 502
@@ -479,6 +484,11 @@ def delete_spark():
             method="POST",
             payload={"title": title, "body": body, "head": branch_name, "base": base_branch}
         )
+
+        # Invalidate PR cache for this spark
+        cache_key = f"{owner}/{repo}:{path}"
+        if cache_key in pr_cache["data"]:
+            del pr_cache["data"][cache_key]
 
         return jsonify({"pr_url": pr.get("html_url"), "branch": branch_name})
     except Exception as err:

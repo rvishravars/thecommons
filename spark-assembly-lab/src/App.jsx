@@ -19,6 +19,7 @@ function AppMain() {
   const [sparkData, setSparkData] = useState(null);
   const [user, setUser] = useState(() => getStoredUserInfo());
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [prRefreshCallback, setPrRefreshCallback] = useState(null);
 
   const handleSparkSelect = (spark) => {
     setSelectedSpark(spark);
@@ -140,6 +141,7 @@ function AppMain() {
               repoUrl={repoUrl}
               onRepoChange={handleRepoChange}
               currentSparkData={sparkData}
+              onPRRefresh={setPrRefreshCallback}
             />
           </aside>
 
@@ -153,6 +155,7 @@ function AppMain() {
                 originalSparkData={originalSparkData}
                 onResetSpark={handleResetSpark}
                 isReadOnly={!user}
+                onPRCreated={() => prRefreshCallback?.()}
               />
             ) : (
               <div className="flex h-full items-center justify-center p-4">

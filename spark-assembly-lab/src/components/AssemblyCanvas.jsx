@@ -9,7 +9,7 @@ import { generateSparkMarkdown, validateSparkData } from '../utils/sparkParser';
 import { useToast } from '../utils/ToastContext';
 import { getStoredToken, getStoredUserInfo } from '../utils/github';
 
-export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly }) {
+export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly, onPRCreated }) {
   const [showPreview, setShowPreview] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -215,6 +215,10 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
       if (data.pr_url) {
         window.open(data.pr_url, '_blank');
       }
+      // Refresh PR counts
+      if (onPRCreated) {
+        onPRCreated();
+      }
     } catch (err) {
       toast.error(err.message || 'Failed to submit PR');
       setSyncProgress(0);
@@ -292,6 +296,10 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
       setShowDeleteConfirmation(false);
       if (data.pr_url) {
         window.open(data.pr_url, '_blank');
+      }
+      // Refresh PR counts
+      if (onPRCreated) {
+        onPRCreated();
       }
     } catch (err) {
       toast.error(err.message || 'Failed to submit delete request');

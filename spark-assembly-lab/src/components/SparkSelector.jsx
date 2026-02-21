@@ -4,7 +4,7 @@ import { buildMissionSummary, parseSparkFile } from '../utils/sparkParser';
 import { getStoredToken } from '../utils/github';
 import RepoInput from './RepoInput';
 
-export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, onRepoChange, currentSparkData }) {
+export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, onRepoChange, currentSparkData, onPRRefresh }) {
   console.log('🚀 SparkSelector component mounted!');
   const [sparks, setSparks] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -16,6 +16,15 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
   const [missionError, setMissionError] = useState(null);
   const [prInfo, setPrInfo] = useState({ count: null, urls: [] });
   const [refreshToken, setRefreshToken] = useState(0);
+
+  // Expose refresh function to parent
+  useEffect(() => {
+    if (onPRRefresh) {
+      onPRRefresh(() => {
+        setRefreshToken((value) => value + 1);
+      });
+    }
+  }, [onPRRefresh]);
 
   const getAuditBadge = (status) => {
     if (status === 'GREEN') return 'bg-logic-600';
