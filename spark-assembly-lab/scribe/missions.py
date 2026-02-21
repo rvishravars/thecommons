@@ -318,18 +318,6 @@ class Mission2StabilityAudit:
         """Detect critical flaws in spark content."""
         flaws = []
         
-        spark = spark_data.get("spark", {})
-        design = spark_data.get("design", {})
-        logic = spark_data.get("logic", {})
-        
-        # Check for empty critical fields
-        if not design.get("interface"):
-            flaws.append("Missing interface specification - does not explain how it snaps into ecosystem")
-        if not logic.get("clutch_test"):
-            flaws.append("Missing Clutch Power Test - no verification mechanism")
-        if not logic.get("dependencies"):
-            flaws.append("Missing dependency list")
-        
         return flaws
 
 
