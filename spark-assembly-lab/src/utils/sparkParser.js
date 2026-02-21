@@ -217,12 +217,6 @@ export function validateSparkData(sparkData) {
   const design = phases.design || {};
   const logic = phases.logic || {};
 
-  // Only require Spark to have at least some content (not completely empty)
-  const hasSparkContent = spark.notes || spark.observation || spark.gap || spark.why;
-  if (!hasSparkContent) {
-    errors.push('Spark must include at least observation, gap, or why');
-  }
-
   return {
     valid: errors.length === 0,
     errors,
