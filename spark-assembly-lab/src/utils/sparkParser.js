@@ -273,15 +273,15 @@ function extractBlockContent(phaseText) {
   // Common patterns
   const patterns = {
     observation: new RegExp(`(?:###\\s*The Observation|\\*\\*The Observation:?\\*\\*)\\s*([\\s\\S]*?)(?=${blockTerminator})`),
-    gap: new RegExp(`\\*\\*The Gap:\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
-    why: new RegExp(`\\*\\*The "Why":\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
+    gap: new RegExp(`(?:\\*\\s*)?\\*\\*The Gap:\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
+    why: new RegExp(`(?:\\*\\s*)?\\*\\*The "Why":\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
     novel_core: new RegExp(`(?:###\\s*The Novel Core[^\\n]*|\\*\\*The Novel Core:?\\*\\*)\\s*([\\s\\S]*?)(?=${blockTerminator})`),
-    blueprint: new RegExp(`\\*\\*The Blueprint:\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
-    interface: new RegExp(`\\*\\*The Interface:\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
-    prior_art: new RegExp(`\\*\\*Prior Art:\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
+    blueprint: new RegExp(`(?:\\*\\s*)?\\*\\*The Blueprint:\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
+    interface: new RegExp(`(?:\\*\\s*)?\\*\\*The Interface:\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
+    prior_art: new RegExp(`(?:\\*\\s*)?\\*\\*Prior Art:\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
     technical_impl: new RegExp(`(?:###\\s*Technical Implementation|\\*\\*Technical Specs[^:]*:\\*\\*|\\*\\*The Logic:\\*\\*)\\s*([\\s\\S]*?)(?=${blockTerminator})`),
-    clutch_test: new RegExp(`\\*\\*Clutch Power Test:\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
-    dependencies: new RegExp(`\\*\\*Dependencies:\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
+    clutch_test: new RegExp(`(?:\\*\\s*)?\\*\\*Clutch Power Test:\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
+    dependencies: new RegExp(`(?:\\*\\s*)?\\*\\*Dependencies:\\*\\*\\s*([\\s\\S]*?)(?=${blockTerminator})`),
   };
 
   Object.entries(patterns).forEach(([key, pattern]) => {
