@@ -263,20 +263,13 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
     }
 
     try {
-      // Mark spark as deleted
-      const markedData = {
-        ...sparkData,
-        markedForDeletion: true,
-      };
-
-      const markdown = generateSparkMarkdown(markedData);
       const slug = sparkData.name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
       const path = sparkData.sourcePath || `sparks/${slug || 'new-spark'}.spark.md`;
       const title = `Delete Spark: ${sparkData.name}`;
-      const body = `Request to delete spark: ${sparkData.name}\n\nMarked for deletion by @${user?.login}. To cancel this deletion, close this PR without merging.`;
+      const body = `Request to delete spark: ${sparkData.name}\n\nRequested by @${user?.login}. To cancel this deletion, close this PR without merging.`;
 
       const response = await fetch('/api/delete', {
         method: 'POST',
@@ -285,10 +278,8 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
           token,
           repo: repoUrl,
           path,
-          content: markdown,
           title,
           body,
-          operationType: 'delete',
         }),
       });
 
@@ -371,8 +362,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors"
             >
               <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Copy MD</span>
-              <span className="sm:hidden">Copy</span>
+              <span>Copy</span>
             </button>
 
             <button
@@ -400,8 +390,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               className={`flex items-center space-x-1 sm:space-x-2 rounded-lg bg-logic-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-logic-700 transition-colors disabled:opacity-60 ${isReadOnly ? 'cursor-not-allowed grayscale' : ''}`}
             >
               <GitPullRequest className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Submit PR</span>
-              <span className="sm:hidden">Submit</span>
+              <span>Submit</span>
             </button>
 
             <button
@@ -411,8 +400,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-red-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-60"
             >
               <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Delete Spark</span>
-              <span className="sm:hidden">Delete</span>
+              <span>Delete</span>
             </button>
           </div>
         </div>

@@ -406,19 +406,18 @@ def submit_spark():
 @app.post("/api/delete")
 def delete_spark():
     """
-    Request deletion of a spark by creating a PR with marked_for_deletion flag.
+    Request deletion of a spark by creating a PR that deletes the file.
     Only the spark owner (scout) can request deletion.
     """
     payload = request.get_json(silent=True) or {}
     token = payload.get("token")
     repo_input = payload.get("repo")
     path = payload.get("path")
-    content = payload.get("content")
     title = payload.get("title") or "Delete spark"
     body = payload.get("body") or "Requested deletion of spark from Spark Assembly Lab."
 
-    if not token or not repo_input or not path or not content:
-        return jsonify({"error": "token, repo, path, and content are required"}), 400
+    if not token or not repo_input or not path:
+        return jsonify({"error": "token, repo, and path are required"}), 400
 
     try:
         parsed = parse_repo_url(repo_input)
@@ -445,9 +444,7 @@ def delete_spark():
             payload={"ref": f"refs/heads/{branch_name}", "sha": base_sha}
         )
 
-        encoded = base64.b64encode(content.encode("utf-8")).decode("utf-8")
-
-        # Check for existing file
+        # Check for existing file and get its SHA
         file_sha = None
         try:
             existing = fetch_json_with_token(
@@ -461,19 +458,18 @@ def delete_spark():
         if not file_sha:
             return jsonify({"error": "Spark file not found in repository"}), 404
 
-        # Update file with marked_for_deletion flag
-        commit_payload = {
+        # Delete the file on the new branch
+        delete_payload = {
             "message": title,
-            "content": encoded,
-            "branch": branch_name,
             "sha": file_sha,
+            "branch": branch_name,
         }
 
         fetch_json_with_token(
             f"https://api.github.com/repos/{owner}/{repo}/contents/{urllib.parse.quote(path)}",
             token,
-            method="PUT",
-            payload=commit_payload
+            method="DELETE",
+            payload=delete_payload
         )
 
         # Create deletion PR
