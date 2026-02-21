@@ -24,7 +24,9 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
   };
 
   const buildSparkEntry = useCallback((filename, content, sourcePath) => {
+    console.log(`🛠️ Building spark entry for ${filename}, content length: ${content?.length || 0}`);
     const parsed = parseSparkFile(content);
+    console.log(`✅ Parsed name for ${filename}:`, parsed.name);
     parsed.rawContent = content;
     parsed.sourceFile = filename;
     parsed.sourcePath = sourcePath || filename;
@@ -42,7 +44,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     if (selectedSpark && currentSparkData) {
       const selectedFile = selectedSpark.sourceFile || selectedSpark.sourcePath;
       if (selectedFile) {
-        setSparks(prevSparks => 
+        setSparks(prevSparks =>
           prevSparks.map(spark => {
             if (spark.file === selectedFile || spark.data.sourcePath === selectedFile) {
               return {
@@ -69,20 +71,20 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
 
       try {
         // Build API URL with repo parameter if provided
-        const apiUrl = repoUrl 
+        const apiUrl = repoUrl
           ? `/api/sparks?repo=${encodeURIComponent(repoUrl)}`
           : '/api/sparks';
-        
+
         const apiResponse = await fetch(apiUrl);
-        
+
         if (apiResponse.ok) {
           const apiData = await apiResponse.json();
-          
+
           // Store repo info for display
           if (apiData.owner && apiData.repo) {
             setRepoInfo(`${apiData.owner}/${apiData.repo}`);
           }
-          
+
           if (Array.isArray(apiData.files) && apiData.files.length > 0) {
             const apiContentFiles = apiData.files.filter((file) => file?.content);
             if (apiContentFiles.length > 0) {
@@ -104,7 +106,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         } else {
           const errorData = await apiResponse.json().catch(() => ({ error: 'Unknown error' }));
           const errorMessage = errorData.error || `Failed to fetch sparks: ${apiResponse.status}`;
-          
+
           // Determine error type based on status code and message
           if (apiResponse.status === 404 || errorMessage.includes('GitHub index fetch failed: 404')) {
             setErrorType('repo-not-found');
@@ -231,21 +233,10 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     return () => controller.abort();
   }, [selectedSpark, repoUrl, refreshToken]);
 
-  const getStabilityColor = (stability) => {
-    if (stability === 0) return 'bg-red-600';
-    if (stability === 1) return 'bg-intuition-600';
-    if (stability === 2) return 'bg-imagination-600';
-    return 'bg-logic-600';
-  };
-
-  const getStabilityLabel = (stability) => {
-    return `${stability}/3 Stable`;
-  };
-
   return (
     <div className="flex flex-col h-full">
       <RepoInput onRepoChange={onRepoChange} currentRepo={repoUrl} />
-      
+
       <div className="p-4 border-b theme-border">
         <button
           onClick={onNewSpark}
@@ -277,23 +268,24 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
               </span>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2 text-xs theme-subtle">
-              <span>
-                Recommendation:{' '}
-                <span className="theme-text font-semibold">{missionSummary.recommendation}</span>
-              </span>
-              <span className="text-right">
-                Stability:{' '}
-                <span className="theme-text font-semibold">{selectedSpark.stability}/3</span>
-              </span>
-            </div>
-
-            {prInfo.count !== null && (
-              <div className="mt-2 text-xs theme-subtle">
-                Open PRs for this spark:{' '}
-                <span className="theme-text font-semibold">{prInfo.count}</span>
+            <div className="mt-3 space-y-2">
+              <div className="grid grid-cols-2 gap-4 text-xs theme-subtle">
+                <span>
+                  Recommendation:{' '}
+                  <span className="theme-text font-semibold">{missionSummary.recommendation}</span>
+                </span>
+                <span className="text-right">
+                  Stability:{' '}
+                  <span className="theme-text font-semibold">{selectedSpark.stability}/3</span>
+                </span>
               </div>
-            )}
+              {prInfo.count !== null && (
+                <div className="text-xs theme-subtle">
+                  PRs:{' '}
+                  <span className="theme-text font-semibold">{prInfo.count}</span>
+                </div>
+              )}
+            </div>
 
             {missionSummary.critical_flaws.length > 0 && (
               <div className="mt-3 text-xs text-red-300">
@@ -308,13 +300,13 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
 
             {missionSummary.merit_plan.length > 0 && (
               <div className="mt-3 text-xs theme-subtle">
-                <p className="font-semibold theme-text">Merit Plan</p>
-                <div className="mt-2 space-y-1">
-                  {missionSummary.merit_plan.map((entry) => (
-                    <div key={`${entry.handle}-${entry.role}`} className="grid grid-cols-[1fr_auto] items-center gap-3">
-                      <span className="truncate">{entry.handle} ({entry.role})</span>
-                      <span className="font-semibold theme-text text-right">{entry.reward}</span>
-                    </div>
+                <p className="font-semibold theme-text mb-2">Leadership Board</p>
+                <div className="flex flex-wrap gap-2">
+                  {missionSummary.merit_plan.slice(0, 3).map((entry) => (
+                    <span key={`${entry.handle}-${entry.role}`} className="inline-flex items-center gap-1 rounded-full bg-logic-600/20 px-2 py-1 text-xs">
+                      <span className="font-semibold">{entry.handle.replace('@', '')}</span>
+                      <span className="text-logic-300">{entry.reward}</span>
+                    </span>
                   ))}
                 </div>
               </div>
@@ -325,7 +317,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider theme-muted">
-              Existing Sparks
+              Sparks <span className="theme-text text-xs font-normal ml-1">({sparks.length})</span>
             </h3>
             {repoInfo && (
               <p className="text-xs theme-subtle mt-1">
@@ -411,41 +403,13 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
                     </div>
                   </div>
                 </div>
-
-                <div className="mt-2 flex items-center space-x-2">
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${getStabilityColor(
-                      spark.stability
-                    )}`}
-                  >
-                    {getStabilityLabel(spark.stability)}
-                  </span>
-                </div>
               </button>
             ))
           )}
         </div>
       </div>
 
-      <div className="border-t theme-border p-4 theme-sidebar-footer">
-        <div className="text-xs theme-subtle">
-          <p className="font-semibold mb-2">Stability Levels:</p>
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 rounded-full bg-intuition-600"></div>
-              <span>1/3 - Intuition only</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 rounded-full bg-imagination-600"></div>
-              <span>2/3 - Imagination added</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 rounded-full bg-logic-600"></div>
-              <span>3/3 - Fully built</span>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 }

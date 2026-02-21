@@ -4,13 +4,13 @@ FROM node:20-alpine AS build-stage
 WORKDIR /app/spark-assembly-lab
 
 # Copy package files
-COPY spark-assembly-lab/package*.json ./
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
 # Copy source
-COPY spark-assembly-lab/ ./
+COPY . ./
 
 # Ensure sparks are bundled into the static build
 RUN rm -rf public/sparks
@@ -25,15 +25,15 @@ FROM python:3.11-alpine AS production-stage
 WORKDIR /app/spark-assembly-lab
 
 # Install Python deps
-COPY spark-assembly-lab/server_py/requirements.txt ./server_py/requirements.txt
+COPY server_py/requirements.txt ./server_py/requirements.txt
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir -r server_py/requirements.txt
 
 # Copy built UI and backend
 COPY --from=build-stage /app/spark-assembly-lab/dist ./dist
-COPY spark-assembly-lab/server_py ./server_py
-COPY spark-assembly-lab/scribe ./scribe
+COPY server_py ./server_py
+COPY scribe ./scribe
 
 EXPOSE 8080
 

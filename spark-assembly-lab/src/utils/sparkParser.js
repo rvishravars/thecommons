@@ -28,8 +28,8 @@ export function parseSparkFile(content) {
       if (!rawTitle) continue;
 
       // Strip optional emoji and brand prefixes (Spark, Template)
-      // This regex is more broad than the previous one to handle various characters/emojis
-      const cleanTitle = rawTitle.replace(/^(?:[^\w\s]|\s)*(?:Spark|Template)\s*[:\s]\s*/i, '').trim();
+      // This regex handles: 🧩 Spark: My Name, Spark: My Name, # My Name, etc.
+      const cleanTitle = rawTitle.replace(/^(?:[^\w\s\u{1F300}-\u{1F9FF}]|\s)*(?:Spark|Template|The)\s*[:\s]\s*/iu, '').trim();
 
       name = cleanTitle || rawTitle;
       break;

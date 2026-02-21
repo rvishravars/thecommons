@@ -27,6 +27,17 @@ APP_ROOT = Path(__file__).resolve().parents[1]
 DIST_PATH = APP_ROOT / "dist"
 
 app = Flask(__name__, static_folder=str(DIST_PATH), static_url_path="")
+app.url_map.strict_slashes = False
+
+@app.before_request
+def log_request_info():
+    app.logger.debug('Headers: %s', request.headers)
+    app.logger.debug('Body: %s', request.get_data())
+
+@app.after_request
+def after_request(response):
+    app.logger.debug('Response Status: %s', response.status)
+    return response
 
 cache: Dict[str, Any] = {
     "timestamp": 0,

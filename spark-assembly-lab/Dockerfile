@@ -5,7 +5,7 @@ FROM node:20-alpine
 WORKDIR /app/spark-assembly-lab
 
 # Copy package files
-COPY spark-assembly-lab/package*.json ./
+COPY package*.json ./
 
 # Install Python for Flask backend
 RUN apk add --no-cache python3 py3-pip
@@ -18,10 +18,10 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN npm install
 
 # Copy app source
-COPY spark-assembly-lab/ ./
+COPY . ./
 
 # Copy Scribe core for mission evaluation
-COPY spark-assembly-lab/scribe/ /app/spark-assembly-lab/scribe
+COPY scribe/ /app/spark-assembly-lab/scribe
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r server_py/requirements.txt
