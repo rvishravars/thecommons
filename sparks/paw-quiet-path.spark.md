@@ -2,7 +2,7 @@
 
 ---
 
-## 🧠 Phase 1: The Intuition (!HUNCH)
+## 🧠 Phase 1: The Spark (!HUNCH)
 *Status: [Active]* *Scout: @rvishravars*
 
 ### The Observation
@@ -12,7 +12,7 @@
 
 ---
 
-## 🎨 Phase 2: The Imagination (!SHAPE)
+## 🎨 Phase 2: The Design (!SHAPE)
 *Status: [Pending]* *Designer: @rvishravars*
 
 ### The Novel Core (The 10% Delta)
@@ -39,8 +39,8 @@
 ## 📊 Contribution Log (CS Tracker)
 | Phase | Contributor | Action | Reward |
 | :--- | :--- | :--- | :--- |
-| **Intuition** | @rvishravars | Submitted Hunch | +5 CS |
-| **Imagination** | @rvishravars | Designed Shape | +15 CS (+5 Echo) |
+| **Spark** | @rvishravars | Submitted Hunch | +5 CS |
+| **Design** | @rvishravars | Designed Shape | +15 CS (+5 Echo) |
 | **Logic** | @rvishravars | Merged Build | +25 CS (+10 Prototype) |
 
 ---
