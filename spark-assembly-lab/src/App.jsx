@@ -26,6 +26,7 @@ function AppMain() {
       // Load spark data from parsed file
       const loaded = {
         name: spark.name,
+        markedForDeletion: spark.markedForDeletion || false,
         phases: spark.phases,
         contributors: spark.contributors,
         sourcePath: spark.sourcePath || spark.sourceFile || null,
@@ -72,6 +73,7 @@ function AppMain() {
     const userHandle = user?.login || '';
     setSparkData({
       name: template.name,
+      markedForDeletion: false,
       phases: {
         spark: { status: 'Active', observation: template.spark.observation || '', gap: template.spark.gap || '', why: template.spark.why || '', notes: '' },
         design: { status: 'Pending', novel_core: '', blueprint: '', interface: '', prior_art: '', notes: '' },

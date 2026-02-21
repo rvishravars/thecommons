@@ -403,6 +403,92 @@ def submit_spark():
         return jsonify({"error": str(err)}), 502
 
 
+@app.post("/api/delete")
+def delete_spark():
+    """
+    Request deletion of a spark by creating a PR with marked_for_deletion flag.
+    Only the spark owner (scout) can request deletion.
+    """
+    payload = request.get_json(silent=True) or {}
+    token = payload.get("token")
+    repo_input = payload.get("repo")
+    path = payload.get("path")
+    content = payload.get("content")
+    title = payload.get("title") or "Delete spark"
+    body = payload.get("body") or "Requested deletion of spark from Spark Assembly Lab."
+
+    if not token or not repo_input or not path or not content:
+        return jsonify({"error": "token, repo, path, and content are required"}), 400
+
+    try:
+        parsed = parse_repo_url(repo_input)
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 400
+
+    owner = parsed["owner"]
+    repo = parsed["repo"]
+
+    try:
+        repo_info = fetch_json_with_token(f"https://api.github.com/repos/{owner}/{repo}", token)
+        base_branch = repo_info.get("default_branch", "main")
+        ref = fetch_json_with_token(f"https://api.github.com/repos/{owner}/{repo}/git/ref/heads/{base_branch}", token)
+        base_sha = ref.get("object", {}).get("sha")
+        if not base_sha:
+            return jsonify({"error": "Failed to resolve base branch"}), 502
+
+        # Create deletion branch
+        branch_name = f"delete-spark/{int(time.time())}"
+        fetch_json_with_token(
+            f"https://api.github.com/repos/{owner}/{repo}/git/refs",
+            token,
+            method="POST",
+            payload={"ref": f"refs/heads/{branch_name}", "sha": base_sha}
+        )
+
+        encoded = base64.b64encode(content.encode("utf-8")).decode("utf-8")
+
+        # Check for existing file
+        file_sha = None
+        try:
+            existing = fetch_json_with_token(
+                f"https://api.github.com/repos/{owner}/{repo}/contents/{urllib.parse.quote(path)}?ref={base_branch}",
+                token
+            )
+            file_sha = existing.get("sha")
+        except Exception:
+            file_sha = None
+
+        if not file_sha:
+            return jsonify({"error": "Spark file not found in repository"}), 404
+
+        # Update file with marked_for_deletion flag
+        commit_payload = {
+            "message": title,
+            "content": encoded,
+            "branch": branch_name,
+            "sha": file_sha,
+        }
+
+        fetch_json_with_token(
+            f"https://api.github.com/repos/{owner}/{repo}/contents/{urllib.parse.quote(path)}",
+            token,
+            method="PUT",
+            payload=commit_payload
+        )
+
+        # Create deletion PR
+        pr = fetch_json_with_token(
+            f"https://api.github.com/repos/{owner}/{repo}/pulls",
+            token,
+            method="POST",
+            payload={"title": title, "body": body, "head": branch_name, "base": base_branch}
+        )
+
+        return jsonify({"pr_url": pr.get("html_url"), "branch": branch_name})
+    except Exception as err:
+        return jsonify({"error": str(err)}), 502
+
+
 @app.get("/")
 @app.get("/<path:path>")
 def serve_ui(path: Optional[str] = None):

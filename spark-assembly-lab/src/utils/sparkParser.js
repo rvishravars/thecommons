@@ -7,6 +7,7 @@ export function parseSparkFile(content) {
 
   // Extract spark name - support multiple formats
   let name = 'Untitled Spark';
+  let markedForDeletion = false;
 
   // Try YAML frontmatter first
   const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
@@ -15,6 +16,11 @@ export function parseSparkFile(content) {
     const nameFieldMatch = yaml.match(/^name:\s*(.+)$/m);
     if (nameFieldMatch) {
       name = nameFieldMatch[1].trim().replace(/^["']|["']$/g, '');
+    }
+    // Check for deletion flag
+    const deletionFlagMatch = yaml.match(/^marked_for_deletion:\s*(true|yes)$/mi);
+    if (deletionFlagMatch) {
+      markedForDeletion = true;
     }
   }
 
@@ -55,6 +61,7 @@ export function parseSparkFile(content) {
 
   const result = {
     name,
+    markedForDeletion,
     frontmatter: {},
     phases: {
       spark: {
@@ -311,7 +318,7 @@ function calculateStability(phases) {
  * Generate markdown from spark data
  */
 export function generateSparkMarkdown(sparkData) {
-  const { name, phases, contributors = {} } = sparkData;
+  const { name, phases, contributors = {}, markedForDeletion = false } = sparkData;
   const sanitizeField = (value, label) => {
     if (!value) return value;
     const normalized = value.replace(/\r\n/g, '\n').trim();
@@ -328,7 +335,15 @@ export function generateSparkMarkdown(sparkData) {
     return deduped.join(' ').trim();
   };
 
-  let markdown = `# ${name}\n\n---\n\n`;
+  let markdown = `# ${name}\n\n`;
+  
+  // Add YAML frontmatter with deletion flag
+  if (markedForDeletion) {
+    markdown += `---\nstatus: deletion_pending\nmarked_for_deletion: true\n---\n\n`;
+    markdown += `> ⚠️ **This spark is marked for deletion.** A pull request to remove this spark has been submitted. To cancel the deletion, close the associated pull request without merging.\n\n`;
+  }
+
+  markdown += `---\n\n`;
 
   // Phase 1: Spark
   markdown += `## 🧠 Phase 1: The Spark (!HUNCH)\n`;

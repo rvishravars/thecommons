@@ -19,6 +19,13 @@ export const SparkStatus = {
   DESIGNED: 'Designed',
   IN_PROGRESS: 'In-Progress',
   MERGED: 'Merged',
+  DELETION_PENDING: 'Deletion Pending',
+};
+
+export const OperationType = {
+  CREATE: 'create',
+  UPDATE: 'update',
+  DELETE: 'delete',
 };
 
 // Block type definitions

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download, Copy, Eye, Brain, GitPullRequest, RotateCcw } from 'lucide-react';
+import { Download, Copy, Eye, Brain, GitPullRequest, RotateCcw, Trash2 } from 'lucide-react';
 import MarkdownPreview from './MarkdownPreview';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -7,12 +7,13 @@ import QuizModal from './QuizModal';
 import { PhaseTypes } from '../types/spark';
 import { generateSparkMarkdown, validateSparkData } from '../utils/sparkParser';
 import { useToast } from '../utils/ToastContext';
-import { getStoredToken } from '../utils/github';
+import { getStoredToken, getStoredUserInfo } from '../utils/github';
 
 export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly }) {
   const [showPreview, setShowPreview] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [syncProgress, setSyncProgress] = useState(0);
   const [editStatus, setEditStatus] = useState(null);
@@ -24,6 +25,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
     return isNewTemplate ? [PhaseTypes.SPARK] : [PhaseTypes.SPARK, PhaseTypes.DESIGN, PhaseTypes.LOGIC];
   });
   const toast = useToast();
+  const user = getStoredUserInfo();
 
   // Reset active phases when spark changes
   useEffect(() => {
@@ -233,6 +235,81 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
     toast.success('Changes reset to original content.');
   };
 
+  const handleDeleteRequest = async () => {
+    // Check if user is the owner (scout)
+    if (sparkData.contributors.scout !== user?.login) {
+      toast.error('Only the spark owner (scout) can delete a spark');
+      return;
+    }
+
+    if (!showDeleteConfirmation) {
+      setShowDeleteConfirmation(true);
+      return;
+    }
+
+    const token = getStoredToken();
+    if (!token) {
+      toast.error('GitHub token required to submit a delete request');
+      setShowDeleteConfirmation(false);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Cool progress simulation
+    for (let i = 0; i <= 100; i += 5) {
+      setSyncProgress(i);
+      await new Promise(r => setTimeout(r, 40));
+    }
+
+    try {
+      // Mark spark as deleted
+      const markedData = {
+        ...sparkData,
+        markedForDeletion: true,
+      };
+
+      const markdown = generateSparkMarkdown(markedData);
+      const slug = sparkData.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      const path = sparkData.sourcePath || `sparks/${slug || 'new-spark'}.spark.md`;
+      const title = `Delete Spark: ${sparkData.name}`;
+      const body = `Request to delete spark: ${sparkData.name}\n\nMarked for deletion by @${user?.login}. To cancel this deletion, close this PR without merging.`;
+
+      const response = await fetch('/api/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token,
+          repo: repoUrl,
+          path,
+          content: markdown,
+          title,
+          body,
+          operationType: 'delete',
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit delete request');
+      }
+
+      toast.success(`Delete PR created: ${data.pr_url}`);
+      setShowDeleteConfirmation(false);
+      if (data.pr_url) {
+        window.open(data.pr_url, '_blank');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Failed to submit delete request');
+      setSyncProgress(0);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col">
       {/* Toolbar */}
@@ -325,6 +402,17 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               <GitPullRequest className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Submit PR</span>
               <span className="sm:hidden">Submit</span>
+            </button>
+
+            <button
+              onClick={handleDeleteRequest}
+              disabled={isSubmitting || isReadOnly || !originalSparkData}
+              title={sparkData.contributors.scout !== user?.login ? 'Only the spark owner can delete' : 'Request deletion of this spark'}
+              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-red-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-60"
+            >
+              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Delete Spark</span>
+              <span className="sm:hidden">Delete</span>
             </button>
           </div>
         </div>
@@ -486,6 +574,79 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
             <div className="bg-logic-900/20 p-4 text-center border-t border-logic-900/30">
               <p className="text-[10px] font-mono text-logic-400/60 uppercase tracking-widest">
                 Instruction Set v2.0 // Standard Gauge: 100% Correct
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirmation && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 theme-overlay backdrop-blur-md">
+          <div className="w-full max-w-lg overflow-hidden rounded-3xl border-2 border-red-500 bg-black/80 shadow-[0_0_50px_-12px_rgba(239,68,68,0.5)] backdrop-blur-xl animate-in zoom-in-95 duration-200">
+            {/* Modal Header with Glow */}
+            <div className="relative h-32 w-full overflow-hidden bg-gradient-to-br from-red-900/50 to-black p-6">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_rgba(239,68,68,0.3),_transparent_70%)]" />
+              <div className="relative flex items-center space-x-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.6)]">
+                  <Trash2 className="h-8 w-8 text-black" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black tracking-tighter text-white">DELETE SPARK</h2>
+                  <p className="text-xs font-bold uppercase tracking-widest text-red-400">Permanent Request</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-8 space-y-6">
+              <div className="space-y-4 rounded-lg bg-red-500/10 border border-red-500/20 p-4">
+                <p className="text-sm text-white/90">
+                  You are about to request the deletion of this spark:
+                </p>
+                <p className="text-lg font-bold text-red-400">
+                  "{sparkData.name}"
+                </p>
+                <div className="text-xs text-white/70 space-y-2 pt-2">
+                  <p>• A pull request will be created to remove this spark</p>
+                  <p>• Only you (the scout) can make this request</p>
+                  <p>• You can cancel by closing the PR without merging</p>
+                  <p>• Community review will apply to this deletion</p>
+                </div>
+              </div>
+
+              {/* Progress Bar Container */}
+              <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/5">
+                <div
+                  className="h-full bg-gradient-to-r from-red-600 to-red-400 transition-all duration-300 ease-out shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+                  style={{ width: `${syncProgress}%` }}
+                />
+              </div>
+
+              {isSubmitting ? (
+                <div className="py-4 text-center font-mono text-sm font-bold text-red-400 animate-pulse uppercase tracking-[0.2em]">
+                  Submitting deletion request...
+                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <button
+                    onClick={() => setShowDeleteConfirmation(false)}
+                    className="flex-1 rounded-xl border border-white/10 bg-white/5 py-4 text-sm font-black uppercase tracking-widest text-white transition-all hover:bg-white/10"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteRequest}
+                    className="flex-1 rounded-xl bg-red-500 py-4 text-sm font-black uppercase tracking-widest text-black shadow-[0_0_30px_rgba(239,68,68,0.4)] transition-all hover:bg-red-400 hover:shadow-[0_0_40px_rgba(239,68,68,0.6)]"
+                  >
+                    Confirm Delete
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-red-900/20 p-4 text-center border-t border-red-900/30">
+              <p className="text-[10px] font-mono text-red-400/60 uppercase tracking-widest">
+                This action creates a deletion PR // Community Approval Required
               </p>
             </div>
           </div>
