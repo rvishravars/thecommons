@@ -2,7 +2,7 @@
 
 ---
 
-## 🧠 Phase 1: The Intuition (!HUNCH)
+## 🧠 Phase 1: The Spark (!HUNCH)
 *Status: [Claimed]* *Scout: @rvishravars*
 
 ### The Observation
@@ -10,7 +10,7 @@
 
 * **The Gap:** We need a distributed AI agent that:
   - Runs on standard CPU hardware without external dependencies
-  - Validates `!HUNCH` (Intuition) and `!SHAPE` (Imagination) phases for novelty and logical soundness
+  - Validates `!HUNCH` (Spark) and `!SHAPE` (Design) phases for novelty and logical soundness
   - Outputs a "Glass Box" reasoning log explaining every decision (hardware choice, prompt used, logic path)
   - Posts stability audits to Pull Requests automatically
   - Costs nothing to operate (no commercial APIs required)
@@ -22,7 +22,7 @@
 
 ---
 
-## 🎨 Phase 2: The Imagination (!SHAPE)
+## 🎨 Phase 2: The Design (!SHAPE)
 *Status: [Designed]* *Designer: @rvishravars*
 
 ### The Novel Core (The 10% Delta)
@@ -139,8 +139,8 @@ scribe_status.json              # Real-time thinking steps for UI
 ## 📊 Contribution Log (CS Tracker)
 | Phase | Contributor | Action | Reward |
 | :--- | :--- | :--- | :--- |
-| **Intuition** | @TheCommons | Identified gap | +5 CS |
-| **Imagination** | @CopilotAgent | Designed Glass Box Scribe | +15 CS |
+| **Spark** | @TheCommons | Identified gap | +5 CS |
+| **Design** | @CopilotAgent | Designed Glass Box Scribe | +15 CS |
 | **Logic** | @CopilotAgent | Implemented Glass Box Scribe | +25 CS ✅ |
 
 ---
