@@ -38,39 +38,39 @@ export function parseSparkFile(content) {
 
   console.log('📝 Spark name:', name);
 
-  // Parse Phase 1: Intuition
-  const intuition = extractPhase(content, '## 🧠 Phase 1: The Intuition');
-  console.log('🧠 Intuition phase:', intuition);
+  // Parse Phase 1: Spark
+  const spark = extractPhase(content, '## 🧠 Phase 1: The Spark');
+  console.log('🧠 Spark phase:', spark);
 
-  // Parse Phase 2: Imagination
-  const imagination = extractPhase(content, '## 🎨 Phase 2: The Imagination');
-  console.log('🎨 Imagination phase:', imagination);
+  // Parse Phase 2: Design
+  const design = extractPhase(content, '## 🎨 Phase 2: The Design');
+  console.log('🎨 Design phase:', design);
 
   // Parse Phase 3: Logic
   const logic = extractPhase(content, '## 🛠️ Phase 3: The Logic');
   console.log('🛠️ Logic phase:', logic);
 
-  const stability = calculateStability({ intuition, imagination, logic });
+  const stability = calculateStability({ spark, design, logic });
   console.log('📊 Stability:', stability);
 
   const result = {
     name,
     frontmatter: {},
     phases: {
-      intuition: {
-        status: intuition.status,
-        observation: intuition.content.observation || '',
-        gap: intuition.content.gap || '',
-        why: intuition.content.why || '',
-        notes: extractPhaseNotes(intuition.raw),
+      spark: {
+        status: spark.status,
+        observation: spark.content.observation || '',
+        gap: spark.content.gap || '',
+        why: spark.content.why || '',
+        notes: extractPhaseNotes(spark.raw),
       },
-      imagination: {
-        status: imagination.status,
-        novel_core: imagination.content.novel_core || '',
-        blueprint: imagination.content.blueprint || '',
-        interface: imagination.content.interface || '',
-        prior_art: imagination.content.prior_art || '',
-        notes: extractPhaseNotes(imagination.raw),
+      design: {
+        status: design.status,
+        novel_core: design.content.novel_core || '',
+        blueprint: design.content.blueprint || '',
+        interface: design.content.interface || '',
+        prior_art: design.content.prior_art || '',
+        notes: extractPhaseNotes(design.raw),
       },
       logic: {
         status: logic.status,
@@ -81,8 +81,8 @@ export function parseSparkFile(content) {
       },
     },
     contributors: {
-      scout: intuition.contributor || '',
-      designer: imagination.contributor || '',
+      scout: spark.contributor || '',
+      designer: design.contributor || '',
       builder: logic.contributor || '',
     },
     stability,
@@ -106,21 +106,21 @@ function extractPhaseNotes(rawPhase) {
 }
 
 export function buildMissionSummary(parsedSpark) {
-  const intuition = parsedSpark?.phases?.intuition || {};
-  const imagination = parsedSpark?.phases?.imagination || {};
+  const spark = parsedSpark?.phases?.spark || {};
+  const design = parsedSpark?.phases?.design || {};
   const logic = parsedSpark?.phases?.logic || {};
 
   const checks = {
-    intuition_complete: Boolean(intuition.gap && intuition.why),
-    imagination_complete: Boolean(imagination.blueprint && imagination.interface),
+    spark_complete: Boolean(spark.gap && spark.why),
+    design_complete: Boolean(design.blueprint && design.interface),
     logic_complete: Boolean(logic.technical_impl && logic.clutch_test),
-    interface_snappable: Boolean(imagination.interface),
+    interface_snappable: Boolean(design.interface),
     logic_testable: Boolean(logic.clutch_test),
   };
 
   const stablePhases = [
-    checks.intuition_complete,
-    checks.imagination_complete,
+    checks.spark_complete,
+    checks.design_complete,
     checks.logic_complete,
   ].filter(Boolean).length;
 
@@ -132,10 +132,10 @@ export function buildMissionSummary(parsedSpark) {
   }
 
   const criticalFlaws = [];
-  if (!intuition.gap) {
-    criticalFlaws.push('Missing gap definition in Intuition');
+  if (!spark.gap) {
+    criticalFlaws.push('Missing gap definition in Spark');
   }
-  if (!imagination.interface) {
+  if (!design.interface) {
     criticalFlaws.push('Missing interface specification');
   }
   if (!logic.clutch_test) {
@@ -203,27 +203,24 @@ export function validateSparkData(sparkData) {
   }
 
   if (!contributors.scout || !handlePattern.test(contributors.scout)) {
-    errors.push('Intuition requires a valid scout handle');
+    errors.push('Spark requires a valid scout handle');
   }
-  if (!contributors.designer || !handlePattern.test(contributors.designer)) {
-    errors.push('Imagination requires a valid designer handle');
+  // Designer and builder handles are optional for partial sparks
+  if (contributors.designer && !handlePattern.test(contributors.designer)) {
+    errors.push('Designer handle must be valid');
   }
-  if (!contributors.builder || !handlePattern.test(contributors.builder)) {
-    errors.push('Logic requires a valid builder handle');
+  if (contributors.builder && !handlePattern.test(contributors.builder)) {
+    errors.push('Builder handle must be valid');
   }
 
-  const intuition = phases.intuition || {};
-  const imagination = phases.imagination || {};
+  const spark = phases.spark || {};
+  const design = phases.design || {};
   const logic = phases.logic || {};
 
-  if (!intuition.notes && (!intuition.observation || !intuition.gap || !intuition.why)) {
-    errors.push('Intuition must include observation, gap, and why');
-  }
-  if (!imagination.notes && (!imagination.novel_core || !imagination.blueprint || !imagination.interface)) {
-    errors.push('Imagination must include novel core, blueprint, and interface');
-  }
-  if (!logic.notes && (!logic.technical_impl || !logic.clutch_test || !logic.dependencies)) {
-    errors.push('Logic must include technical implementation, clutch test, and dependencies');
+  // Only require Spark to have at least some content (not completely empty)
+  const hasSparkContent = spark.notes || spark.observation || spark.gap || spark.why;
+  if (!hasSparkContent) {
+    errors.push('Spark must include at least observation, gap, or why');
   }
 
   return {
@@ -303,10 +300,10 @@ function extractBlockContent(phaseText) {
 function calculateStability(phases) {
   let stability = 0;
 
-  if (phases.intuition.status !== 'empty' && Object.keys(phases.intuition.content).length > 0) {
+  if (phases.spark.status !== 'empty' && Object.keys(phases.spark.content).length > 0) {
     stability++;
   }
-  if (phases.imagination.status !== 'empty' && Object.keys(phases.imagination.content).length > 0) {
+  if (phases.design.status !== 'empty' && Object.keys(phases.design.content).length > 0) {
     stability++;
   }
   if (phases.logic.status !== 'empty' && Object.keys(phases.logic.content).length > 0) {
@@ -339,35 +336,35 @@ export function generateSparkMarkdown(sparkData) {
 
   let markdown = `# ${name}\n\n---\n\n`;
 
-  // Phase 1: Intuition
-  markdown += `## 🧠 Phase 1: The Intuition (!HUNCH)\n`;
-  markdown += `*Status: [${phases.intuition.status || 'Active'}]* `;
+  // Phase 1: Spark
+  markdown += `## 🧠 Phase 1: The Spark (!HUNCH)\n`;
+  markdown += `*Status: [${phases.spark.status || 'Active'}]* `;
   markdown += `*Scout: @${contributors.scout || 'YourGitHubHandle'}*\n\n`;
 
-  if (phases.intuition.notes) {
-    markdown += `${phases.intuition.notes.trim()}\n\n`;
-  } else if (phases.intuition.observation || phases.intuition.gap || phases.intuition.why) {
+  if (phases.spark.notes) {
+    markdown += `${phases.spark.notes.trim()}\n\n`;
+  } else if (phases.spark.observation || phases.spark.gap || phases.spark.why) {
     markdown += `### The Observation\n`;
-    markdown += `> ${sanitizeField(phases.intuition.observation, 'The Observation') || 'Use your intuition here. What is missing?'}\n`;
-    markdown += `* **The Gap:** ${sanitizeField(phases.intuition.gap, 'The Gap') || '(Describe the gap)'}\n`;
-    markdown += `* **The "Why":** ${sanitizeField(phases.intuition.why, 'The "Why"') || '(Explain why this matters)'}\n\n`;
+    markdown += `> ${sanitizeField(phases.spark.observation, 'The Observation') || 'Use your intuition here. What is missing?'}\n`;
+    markdown += `* **The Gap:** ${sanitizeField(phases.spark.gap, 'The Gap') || '(Describe the gap)'}\n`;
+    markdown += `* **The "Why":** ${sanitizeField(phases.spark.why, 'The "Why"') || '(Explain why this matters)'}\n\n`;
   }
 
   markdown += `---\n\n`;
 
-  // Phase 2: Imagination
-  markdown += `## 🎨 Phase 2: The Imagination (!SHAPE)\n`;
-  markdown += `*Status: [${phases.imagination.status || 'Pending'}]* `;
+  // Phase 2: Design
+  markdown += `## 🎨 Phase 2: The Design (!SHAPE)\n`;
+  markdown += `*Status: [${phases.design.status || 'Pending'}]* `;
   markdown += `*Designer: @${contributors.designer || 'Handle'}*\n\n`;
 
-  if (phases.imagination.notes) {
-    markdown += `${phases.imagination.notes.trim()}\n\n`;
-  } else if (phases.imagination.novel_core || phases.imagination.blueprint || phases.imagination.interface) {
+  if (phases.design.notes) {
+    markdown += `${phases.design.notes.trim()}\n\n`;
+  } else if (phases.design.novel_core || phases.design.blueprint || phases.design.interface) {
     markdown += `### The Novel Core (The 10% Delta)\n`;
-    markdown += `* **The Novel Core:** ${sanitizeField(phases.imagination.novel_core, 'The Novel Core') || '(Describe the 10% delta)'}\n`;
-    markdown += `* **The Blueprint:** ${sanitizeField(phases.imagination.blueprint, 'The Blueprint') || '(Describe the unique design)'}\n`;
-    markdown += `* **The Interface:** ${sanitizeField(phases.imagination.interface, 'The Interface') || '(How does this snap into the ecosystem?)'}\n`;
-    markdown += `* **Prior Art:** ${sanitizeField(phases.imagination.prior_art, 'Prior Art') || '(Why existing solutions don\'t work)'}\n\n`;
+    markdown += `* **The Novel Core:** ${sanitizeField(phases.design.novel_core, 'The Novel Core') || '(Describe the 10% delta)'}\n`;
+    markdown += `* **The Blueprint:** ${sanitizeField(phases.design.blueprint, 'The Blueprint') || '(Describe the unique design)'}\n`;
+    markdown += `* **The Interface:** ${sanitizeField(phases.design.interface, 'The Interface') || '(How does this snap into the ecosystem?)'}\n`;
+    markdown += `* **Prior Art:** ${sanitizeField(phases.design.prior_art, 'Prior Art') || '(Why existing solutions don\'t work)'}\n\n`;
   }
 
   markdown += `---\n\n`;
@@ -392,8 +389,8 @@ export function generateSparkMarkdown(sparkData) {
   markdown += `## 📊 Contribution Log (CS Tracker)\n`;
   markdown += `| Phase | Contributor | Action | Reward |\n`;
   markdown += `| :--- | :--- | :--- | :--- |\n`;
-  markdown += `| **Intuition** | @${contributors.scout || 'user1'} | Submitted Hunch | +5 CS |\n`;
-  markdown += `| **Imagination** | @${contributors.designer || 'user2'} | Designed Shape | +15 CS (+5 Echo) |\n`;
+  markdown += `| **Spark** | @${contributors.scout || 'user1'} | Submitted Hunch | +5 CS |\n`;
+  markdown += `| **Design** | @${contributors.designer || 'user2'} | Designed Shape | +15 CS (+5 Echo) |\n`;
   markdown += `| **Logic** | @${contributors.builder || 'user3'} | Merged Build | +25 CS (+10 Prototype) |\n\n`;
 
   markdown += `---\n`;

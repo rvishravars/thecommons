@@ -6,7 +6,7 @@ Please capture the following screenshots for the main README:
 
 ### 1. Assembly Canvas (`assembly-canvas.png`)
 **What to capture:**
-- Full interface showing all three phase lanes (Intuition, Imagination, Logic)
+- Full interface showing all three phase lanes (Intuition, Design, Logic)
 - At least one spark loaded with some content
 - Show the toolbar with "Quiz Me", "Preview", "Copy MD", and "Download" buttons
 - Make sure the spark name is visible at the top

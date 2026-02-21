@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Download, Copy, Eye, Brain, GitPullRequest, RotateCcw } from 'lucide-react';
 import MarkdownPreview from './MarkdownPreview';
 import ReactMarkdown from 'react-markdown';
@@ -18,7 +18,22 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
   const [editStatus, setEditStatus] = useState(null);
   const [editingPhase, setEditingPhase] = useState(null);
   const [phaseDraft, setPhaseDraft] = useState('');
+  const [activePhasesForNewSpark, setActivePhasesForNewSpark] = useState(() => {
+    // For new template sparks, start with only Spark
+    const isNewTemplate = ['New Spark', 'School Level', 'University Level'].includes(sparkData?.name);
+    return isNewTemplate ? [PhaseTypes.SPARK] : [PhaseTypes.SPARK, PhaseTypes.DESIGN, PhaseTypes.LOGIC];
+  });
   const toast = useToast();
+
+  // Reset active phases when spark changes
+  useEffect(() => {
+    const isNewTemplate = ['New Spark', 'School Level', 'University Level'].includes(sparkData?.name);
+    if (isNewTemplate) {
+      setActivePhasesForNewSpark([PhaseTypes.SPARK]);
+    } else {
+      setActivePhasesForNewSpark([PhaseTypes.SPARK, PhaseTypes.DESIGN, PhaseTypes.LOGIC]);
+    }
+  }, [sparkData?.name]);
 
   const handleBlockUpdate = (phase, blockType, value) => {
     const updatedData = {
@@ -68,14 +83,18 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
   const calculateStability = () => {
     let count = 0;
-    if (sparkData.phases.intuition.observation || sparkData.phases.intuition.gap) count++;
-    if (sparkData.phases.imagination.blueprint || sparkData.phases.imagination.novel_core) count++;
+    if (sparkData.phases.spark.observation || sparkData.phases.spark.gap) count++;
+    if (sparkData.phases.design.blueprint || sparkData.phases.design.novel_core) count++;
     if (sparkData.phases.logic.technical_impl) count++;
     return count;
   };
 
   const stability = calculateStability();
-  const validation = validateSparkData(sparkData);
+  // Don't validate new sparks during editing, only check when submitting/downloading
+  const isNewTemplate = ['New Spark', 'School Level', 'University Level'].includes(sparkData?.name);
+  const validation = (!originalSparkData || isNewTemplate)
+    ? { valid: true, errors: [] }
+    : validateSparkData(sparkData);
   const isDirty = originalSparkData
     ? JSON.stringify(sparkData) !== JSON.stringify(originalSparkData)
     : false;
@@ -122,10 +141,10 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
   const buildPhaseNotes = (phaseKey, phase) => {
     if (!phase) return '';
-    if (phaseKey === PhaseTypes.INTUITION) {
+    if (phaseKey === PhaseTypes.SPARK) {
       return `### The Observation\n> ${phase.observation || ''}\n* **The Gap:** ${phase.gap || ''}\n* **The "Why":** ${phase.why || ''}`.trim();
     }
-    if (phaseKey === PhaseTypes.IMAGINATION) {
+    if (phaseKey === PhaseTypes.DESIGN) {
       return `### The Novel Core (The 10% Delta)\n* **The Novel Core:** ${phase.novel_core || ''}\n* **The Blueprint:** ${phase.blueprint || ''}\n* **The Interface:** ${phase.interface || ''}\n* **Prior Art:** ${phase.prior_art || ''}`.trim();
     }
     if (phaseKey === PhaseTypes.LOGIC) {
@@ -225,7 +244,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               readOnly={isReadOnly}
               value={sparkData.name}
               onChange={(e) => onSparkUpdate({ ...sparkData, name: e.target.value })}
-              className={`text-xl sm:text-2xl font-bold bg-transparent border border-transparent hover:border-imagination-400/50 focus:border-imagination-500 focus:outline-none focus:ring-2 focus:ring-imagination-500 rounded px-2 -ml-2 w-full transition-colors ${isReadOnly ? 'cursor-not-allowed opacity-80' : ''}`}
+              className={`text-xl sm:text-2xl font-bold bg-transparent border border-transparent hover:border-design-400/50 focus:border-design-500 focus:outline-none focus:ring-2 focus:ring-design-500 rounded px-2 -ml-2 w-full transition-colors ${isReadOnly ? 'cursor-not-allowed opacity-80' : ''}`}
               placeholder="Spark Name"
             />
             <div className="mt-1 flex items-center space-x-2">
@@ -233,9 +252,9 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                 className={`inline-flex items-center rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-semibold ${stability === 0
                   ? 'bg-red-600'
                   : stability === 1
-                    ? 'bg-intuition-600'
+                      ? 'bg-spark-600'
                     : stability === 2
-                      ? 'bg-imagination-600'
+                      ? 'bg-design-600'
                       : 'bg-logic-600'
                   }`}
               >
@@ -255,7 +274,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setShowQuiz(true)}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-imagination-500 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-imagination-600 transition-colors"
+              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-design-500 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-design-600 transition-colors"
             >
               <Brain className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Quiz Me</span>
@@ -291,7 +310,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
             <button
               onClick={handleDownload}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-imagination-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-imagination-700 transition-colors"
+              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-design-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-design-700 transition-colors"
             >
               <Download className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Download</span>
@@ -330,16 +349,16 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
           <div className="h-full flex flex-col lg:flex-row p-4 sm:p-6 gap-4 sm:gap-6 min-w-full">
             {[
               {
-                key: PhaseTypes.INTUITION,
-                title: '🧠 Intuition (Scout)',
-                description: 'Identify the gap',
-                color: 'intuition',
+                key: PhaseTypes.SPARK,
+                title: '🧠 Spark (Scout)',
+                description: 'Identify and submit the gap',
+                color: 'spark',
               },
               {
-                key: PhaseTypes.IMAGINATION,
-                title: '🎨 Imagination (Designer)',
+                key: PhaseTypes.DESIGN,
+                title: '🎨 Design (Designer)',
                 description: 'Design the solution',
-                color: 'imagination',
+                color: 'design',
               },
               {
                 key: PhaseTypes.LOGIC,
@@ -347,7 +366,9 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                 description: 'Build and test',
                 color: 'logic',
               },
-            ].map((phase) => (
+            ]
+            .filter(phase => activePhasesForNewSpark.includes(phase.key))
+            .map((phase) => (
               <div key={phase.key} className={`flex-1 min-w-[280px] lg:min-w-[320px] flex flex-col rounded-xl border-2 border-${phase.color}-600 theme-panel-soft`}>
                 <div className={`bg-${phase.color}-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl`}>
                   <h2 className="text-lg sm:text-xl font-bold">{phase.title}</h2>
@@ -371,6 +392,26 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                 </div>
               </div>
             ))}
+
+            {/* Add Phase Buttons */}
+            <div className="flex flex-col gap-3 mt-6">
+              {!activePhasesForNewSpark.includes(PhaseTypes.DESIGN) && (
+                <button
+                  onClick={() => setActivePhasesForNewSpark([...activePhasesForNewSpark, PhaseTypes.DESIGN])}
+                  className="px-4 py-2 rounded-lg border-2 border-design-500/50 hover:border-design-500 hover:bg-design-500/10 text-design-400 font-semibold transition-all text-sm"
+                >
+                  + Add Design Phase (with AI help coming soon)
+                </button>
+              )}
+              {!activePhasesForNewSpark.includes(PhaseTypes.LOGIC) && (
+                <button
+                  onClick={() => setActivePhasesForNewSpark([...activePhasesForNewSpark, PhaseTypes.LOGIC])}
+                  className="px-4 py-2 rounded-lg border-2 border-logic-500/50 hover:border-logic-500 hover:bg-logic-500/10 text-logic-400 font-semibold transition-all text-sm"
+                >
+                  + Add Logic Phase (with AI help coming soon)
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -453,8 +494,8 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
       {editingPhase && (
         <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
-          <div className="theme-panel rounded-xl border-2 border-imagination-600 w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] flex flex-col shadow-2xl">
-            <div className="bg-imagination-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl flex items-center justify-between">
+          <div className="theme-panel rounded-xl border-2 border-design-600 w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] flex flex-col shadow-2xl">
+            <div className="bg-design-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl flex items-center justify-between">
               <div className="min-w-0 flex-1">
                 <h2 className="text-base sm:text-xl font-bold truncate">Edit Phase</h2>
                 <p className="text-xs sm:text-sm opacity-90 truncate">Update the full block for this phase.</p>
@@ -472,7 +513,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               <textarea
                 value={phaseDraft}
                 onChange={(e) => setPhaseDraft(e.target.value)}
-                className="w-full h-full theme-input rounded border p-3 sm:p-4 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-imagination-500 font-mono resize-none min-h-[400px] sm:min-h-[500px]"
+                className="w-full h-full theme-input rounded border p-3 sm:p-4 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-design-500 font-mono resize-none min-h-[400px] sm:min-h-[500px]"
                 autoFocus
               />
             </div>
@@ -488,7 +529,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                 </button>
                 <button
                   onClick={savePhaseEditor}
-                  className="px-4 py-2 bg-imagination-600 hover:bg-imagination-700 rounded-lg font-semibold transition-colors"
+                  className="px-4 py-2 bg-design-600 hover:bg-design-700 rounded-lg font-semibold transition-colors"
                 >
                   Done
                 </button>

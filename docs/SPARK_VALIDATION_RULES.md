@@ -1,12 +1,12 @@
 # 🧩 Spark Build Validation Rules (v2.0)
 
-All Sparks submitted to TheCommons must follow the **Intuition → Imagination → Logic** assembly line. Our validation ensures that every "brick" has enough **Clutch Power** to hold the structure together.
+All Sparks submitted to TheCommons must follow the **Spark → Design → Logic** assembly line. Our validation ensures that every "brick" has enough **Clutch Power** to hold the structure together.
 
 ---
 
 ## 🏗️ The 3-Phase Assembly Framework
 
-### Phase 1: 🧠 INTUITION (!HUNCH)
+### Phase 1: 🧠 SPARK (!HUNCH)
 *Focus: Problem Discovery & Signal.*
 **Requirements:**
 1.  **The Observation:** What is currently "loose" or missing in the ecosystem?
@@ -16,7 +16,7 @@ All Sparks submitted to TheCommons must follow the **Intuition → Imagination �
 
 ---
 
-### Phase 2: 🎨 IMAGINATION (!SHAPE)
+### Phase 2: 🎨 DESIGN (!SHAPE)
 *Focus: The Blueprint & The Novel Core.*
 **Requirements:**
 1.  **The Novel Core:** Define the specific 10% "Delta" that makes this unique.
@@ -43,7 +43,7 @@ All Sparks submitted to TheCommons must follow the **Intuition → Imagination �
 
 ## 📋 Submission Checklist
 
-- [ ] **Phase Integrity:** At least one Phase (Intuition) is 100% complete.
+- [ ] **Phase Integrity:** At least one Phase (Spark) is 100% complete.
 - [ ] **Handle Mapping:** All active phases have a valid GitHub `@username`.
 - [ ] **Standard Gauge:** Language is clear and technical terms are defined.
 - [ ] **Clutch Check:** Passes the Scribe v2.0 stability audit.

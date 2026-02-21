@@ -16,16 +16,9 @@ function AppMain() {
   const [repoUrl, setRepoUrl] = useState(() => localStorage.getItem('sparkRepoUrl') || 'https://github.com/rvishravars/thecommons');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [originalSparkData, setOriginalSparkData] = useState(null);
-  const [sparkData, setSparkData] = useState({
-    name: 'New Spark',
-    phases: {
-      intuition: { status: 'Active', observation: '', gap: '', why: '', notes: '' },
-      imagination: { status: 'Pending', novel_core: '', blueprint: '', interface: '', prior_art: '', notes: '' },
-      logic: { status: 'In-Progress', technical_impl: '', clutch_test: '', dependencies: '', notes: '' },
-    },
-    contributors: { scout: '', designer: '', builder: '' },
-  });
+  const [sparkData, setSparkData] = useState(null);
   const [user, setUser] = useState(() => getStoredUserInfo());
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
 
   const handleSparkSelect = (spark) => {
     setSelectedSpark(spark);
@@ -38,8 +31,8 @@ function AppMain() {
         sourcePath: spark.sourcePath || spark.sourceFile || null,
       };
       loaded.phases = {
-        intuition: { ...loaded.phases.intuition, notes: loaded.phases.intuition?.notes || '' },
-        imagination: { ...loaded.phases.imagination, notes: loaded.phases.imagination?.notes || '' },
+        spark: { ...loaded.phases.spark, notes: loaded.phases.spark?.notes || '' },
+        design: { ...loaded.phases.design, notes: loaded.phases.design?.notes || '' },
         logic: { ...loaded.phases.logic, notes: loaded.phases.logic?.notes || '' },
       };
       setSparkData(loaded);
@@ -71,18 +64,25 @@ function AppMain() {
   };
 
   const handleNewSpark = () => {
+    setShowTemplateSelector(true);
+  };
+
+  const handleTemplateSelect = (template) => {
     setSelectedSpark(null);
+    const userHandle = user?.login || '';
     setSparkData({
-      name: 'New Spark',
+      name: template.name,
       phases: {
-        intuition: { status: 'Active', observation: '', gap: '', why: '', notes: '' },
-        imagination: { status: 'Pending', novel_core: '', blueprint: '', interface: '', prior_art: '', notes: '' },
+        spark: { status: 'Active', observation: template.spark.observation || '', gap: template.spark.gap || '', why: template.spark.why || '', notes: '' },
+        design: { status: 'Pending', novel_core: '', blueprint: '', interface: '', prior_art: '', notes: '' },
         logic: { status: 'In-Progress', technical_impl: '', clutch_test: '', dependencies: '', notes: '' },
       },
-      contributors: { scout: '', designer: '', builder: '' },
+      contributors: { scout: userHandle, designer: '', builder: '' },
       sourcePath: null,
     });
     setOriginalSparkData(null);
+    setIsMobileMenuOpen(false);
+    setShowTemplateSelector(false);
   };
 
   const handleResetSpark = () => {
@@ -143,7 +143,7 @@ function AppMain() {
 
           {/* Main Canvas */}
           <main className="flex-1 overflow-y-auto w-full">
-            {selectedSpark || sparkData ? (
+            {sparkData && sparkData.name ? (
               <AssemblyCanvas
                 sparkData={sparkData}
                 onSparkUpdate={handleSparkUpdate}
@@ -164,7 +164,7 @@ function AppMain() {
                   </p>
                   <button
                     onClick={() => setIsMobileMenuOpen(true)}
-                    className="mt-4 lg:hidden px-4 py-2 bg-imagination-600 rounded-lg text-sm font-semibold hover:bg-imagination-700 transition-colors"
+                    className="mt-4 lg:hidden px-4 py-2 bg-design-600 rounded-lg text-sm font-semibold hover:bg-design-700 transition-colors"
                   >
                     Browse Sparks
                   </button>
@@ -173,6 +173,58 @@ function AppMain() {
             )}
           </main>
         </div>
+
+        {/* Template Selector Modal */}
+        {showTemplateSelector && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-gray-900 rounded-lg border border-design-500/30 max-w-2xl w-full p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-white">Choose a Template</h2>
+                <button
+                  onClick={() => setShowTemplateSelector(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Generic Template */}
+                <button
+                  onClick={() => handleTemplateSelect({ name: 'New Spark', spark: { observation: '', gap: '', why: '' } })}
+                  className="p-4 rounded-lg border-2 border-design-500/30 hover:border-design-500 hover:bg-design-500/10 transition-all text-left"
+                >
+                  <h3 className="font-semibold text-design-400 mb-2">Generic Spark</h3>
+                  <p className="text-sm text-gray-300">A blank canvas for any idea or project</p>
+                </button>
+
+                {/* School Level Template */}
+                <button
+                  onClick={() => handleTemplateSelect({
+                    name: 'School Level',
+                    spark: { observation: '', gap: '', why: '' }
+                  })}
+                  className="p-4 rounded-lg border-2 border-spark-500/30 hover:border-spark-500 hover:bg-spark-500/10 transition-all text-left"
+                >
+                  <h3 className="font-semibold text-spark-400 mb-2">🏫 School Level</h3>
+                  <p className="text-sm text-gray-300">Educational project for students to explore and learn</p>
+                </button>
+
+                {/* University Level Template */}
+                <button
+                  onClick={() => handleTemplateSelect({
+                    name: 'University Level',
+                    spark: { observation: '', gap: '', why: '' }
+                  })}
+                  className="p-4 rounded-lg border-2 border-logic-500/30 hover:border-logic-500 hover:bg-logic-500/10 transition-all text-left"
+                >
+                  <h3 className="font-semibold text-logic-400 mb-2">🎓 University Level</h3>
+                  <p className="text-sm text-gray-300">Research-focused project with academic rigor</p>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DndProvider>
   );

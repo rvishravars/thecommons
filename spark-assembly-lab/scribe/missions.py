@@ -74,18 +74,18 @@ class Mission1DataParser:
         spark_name = Mission1DataParser._extract_name(content)
         
         # Parse phases
-        intuition = Mission1DataParser._parse_phase(content, "intuition")
-        imagination = Mission1DataParser._parse_phase(content, "imagination")
+        spark = Mission1DataParser._parse_phase(content, "spark")
+        design = Mission1DataParser._parse_phase(content, "design")
         logic = Mission1DataParser._parse_phase(content, "logic")
         
         # Extract contributors
-        contributors = Mission1DataParser._extract_contributors(content, intuition, imagination, logic)
+        contributors = Mission1DataParser._extract_contributors(content, spark, design, logic)
         
         return {
             "spark_id": spark_id,
             "spark_name": spark_name,
-            "intuition": asdict(intuition),
-            "imagination": asdict(imagination),
+            "spark": asdict(spark),
+            "design": asdict(design),
             "logic": asdict(logic),
             "contributors": contributors
         }
@@ -151,14 +151,14 @@ class Mission1DataParser:
         
         Args:
             content: Full markdown content
-            phase_name: "intuition", "imagination", or "logic"
+            phase_name: "spark", "design", or "logic"
             
         Returns:
             PhaseContent object with extracted fields
         """
         phase_headers = {
-            "intuition": r"## 🧠 Phase 1: The Intuition",
-            "imagination": r"## 🎨 Phase 2: The Imagination",
+            "spark": r"## 🧠 Phase 1: The Spark",
+            "design": r"## 🎨 Phase 2: The Design",
             "logic": r"## 🛠️ Phase 3: The Logic"
         }
         
@@ -176,13 +176,13 @@ class Mission1DataParser:
         phase_obj = PhaseContent()
         
         # Extract fields based on phase
-        if phase_name == "intuition":
+        if phase_name == "spark":
             phase_obj.observation = Mission1DataParser._extract_block_value(phase_text, "The Observation")
             phase_obj.gap = Mission1DataParser._extract_block_value(phase_text, "The Gap")
             phase_obj.why = Mission1DataParser._extract_block_value(phase_text, 'The "Why"')
             phase_obj.is_stable = bool(phase_obj.gap and phase_obj.why)
             
-        elif phase_name == "imagination":
+        elif phase_name == "design":
             phase_obj.novel_core = Mission1DataParser._extract_block_value(phase_text, "The Novel Core")
             phase_obj.blueprint = Mission1DataParser._extract_block_value(phase_text, "The Blueprint")
             phase_obj.interface = Mission1DataParser._extract_block_value(phase_text, "The Interface")
@@ -226,7 +226,7 @@ class Mission1DataParser:
         return ""
 
     @staticmethod
-    def _extract_contributors(content: str, intuition: PhaseContent, imagination: PhaseContent, logic: PhaseContent) -> Dict[str, str]:
+    def _extract_contributors(content: str, spark: PhaseContent, design: PhaseContent, logic: PhaseContent) -> Dict[str, str]:
         """Extract contributor handles from phase sections."""
         contributors = {
             "scout": "",
@@ -236,8 +236,8 @@ class Mission1DataParser:
         
         # Extract from phase status lines (e.g., "@username")
         patterns = {
-            "intuition": (r"## 🧠 Phase 1.*?@([\w-]+)", "scout"),
-            "imagination": (r"## 🎨 Phase 2.*?@([\w-]+)", "designer"),
+            "spark": (r"## 🧠 Phase 1.*?@([\w-]+)", "scout"),
+            "design": (r"## 🎨 Phase 2.*?@([\w-]+)", "designer"),
             "logic": (r"## 🛠️ Phase 3.*?@([\w-]+)", "builder")
         }
         
@@ -266,14 +266,14 @@ class Mission2StabilityAudit:
         Returns:
             Tuple of (status, scribe_report, audit_details)
         """
-        intuition = spark_data.get("intuition", {})
-        imagination = spark_data.get("imagination", {})
+        spark = spark_data.get("spark", {})
+        design = spark_data.get("design", {})
         logic = spark_data.get("logic", {})
         
         # Count stable phases
         stable_phases = sum([
-            bool(intuition.get("is_stable")),
-            bool(imagination.get("is_stable")),
+            bool(spark.get("is_stable")),
+            bool(design.get("is_stable")),
             bool(logic.get("is_stable"))
         ])
         
@@ -284,10 +284,10 @@ class Mission2StabilityAudit:
         elif stable_phases >= 1:
             status = AuditStatus.YELLOW
             missing = []
-            if not intuition.get("is_stable"):
-                missing.append("Phase 1 (Intuition)")
-            if not imagination.get("is_stable"):
-                missing.append("Phase 2 (Imagination)")
+            if not spark.get("is_stable"):
+                missing.append("Phase 1 (Spark)")
+            if not design.get("is_stable"):
+                missing.append("Phase 2 (Design)")
             if not logic.get("is_stable"):
                 missing.append("Phase 3 (Logic)")
             report = f"⚠️  Needs refinement: {', '.join(missing)} incomplete."
@@ -303,10 +303,10 @@ class Mission2StabilityAudit:
             "total_phases": 3,
             "critical_flaws": critical_flaws,
             "checks": {
-                "intuition_complete": intuition.get("is_stable", False),
-                "imagination_complete": imagination.get("is_stable", False),
+                "spark_complete": spark.get("is_stable", False),
+                "design_complete": design.get("is_stable", False),
                 "logic_complete": logic.get("is_stable", False),
-                "interface_snappable": bool(imagination.get("interface", "")),
+                "interface_snappable": bool(design.get("interface", "")),
                 "logic_testable": bool(logic.get("clutch_test", ""))
             }
         }
@@ -318,14 +318,14 @@ class Mission2StabilityAudit:
         """Detect critical flaws in spark content."""
         flaws = []
         
-        intuition = spark_data.get("intuition", {})
-        imagination = spark_data.get("imagination", {})
+        spark = spark_data.get("spark", {})
+        design = spark_data.get("design", {})
         logic = spark_data.get("logic", {})
         
         # Check for empty critical fields
-        if not intuition.get("gap"):
-            flaws.append("Missing gap definition in Intuition phase")
-        if not imagination.get("interface"):
+        if not spark.get("gap"):
+            flaws.append("Missing gap definition in Spark phase")
+        if not design.get("interface"):
             flaws.append("Missing interface specification - does not explain how it snaps into ecosystem")
         if not logic.get("clutch_test"):
             flaws.append("Missing Clutch Power Test - no verification mechanism")
@@ -395,20 +395,20 @@ class Mission3GovernanceAdvisory:
         merit = []
         contributors = spark_data.get("contributors", {})
         
-        # Scout: +5 CS for completing intuition
+        # Scout: +5 CS for completing spark
         if contributors.get("scout"):
             scout_reward = "+5 CS"
-            if spark_data.get("intuition", {}).get("is_stable"):
+            if spark_data.get("spark", {}).get("is_stable"):
                 merit.append({
                     "handle": f"@{contributors['scout']}",
                     "role": MeritRole.SCOUT.value,
                     "reward": scout_reward
                 })
         
-        # Designer: +15 CS for completing imagination (+ echo bonus if stable)
+        # Designer: +15 CS for completing design (+ echo bonus if stable)
         if contributors.get("designer"):
             designer_reward = "+15 CS"
-            if spark_data.get("imagination", {}).get("is_stable") and audit_status == AuditStatus.GREEN:
+            if spark_data.get("design", {}).get("is_stable") and audit_status == AuditStatus.GREEN:
                 designer_reward = "+15 CS (+5 Echo bonus)"
             merit.append({
                 "handle": f"@{contributors['designer']}",
@@ -469,17 +469,17 @@ def evaluate_spark_mission(content: str) -> Dict[str, Any]:
             "stability_score": audit_details.get("stable_phases", 0)
         },
         "content": {
-            "intuition": {
-                "observation": spark_data.get("intuition", {}).get("observation", ""),
-                "gap": spark_data.get("intuition", {}).get("gap", ""),
-                "why": spark_data.get("intuition", {}).get("why", ""),
-                "is_stable": spark_data.get("intuition", {}).get("is_stable", False)
+            "spark": {
+                "observation": spark_data.get("spark", {}).get("observation", ""),
+                "gap": spark_data.get("spark", {}).get("gap", ""),
+                "why": spark_data.get("spark", {}).get("why", ""),
+                "is_stable": spark_data.get("spark", {}).get("is_stable", False)
             },
-            "imagination": {
-                "core": spark_data.get("imagination", {}).get("novel_core", ""),
-                "blueprint": spark_data.get("imagination", {}).get("blueprint", ""),
-                "interface": spark_data.get("imagination", {}).get("interface", ""),
-                "is_stable": spark_data.get("imagination", {}).get("is_stable", False)
+            "design": {
+                "core": spark_data.get("design", {}).get("novel_core", ""),
+                "blueprint": spark_data.get("design", {}).get("blueprint", ""),
+                "interface": spark_data.get("design", {}).get("interface", ""),
+                "is_stable": spark_data.get("design", {}).get("is_stable", False)
             },
             "logic": {
                 "implementation": spark_data.get("logic", {}).get("technical_impl", ""),

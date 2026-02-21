@@ -19,7 +19,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
 
   const getAuditBadge = (status) => {
     if (status === 'GREEN') return 'bg-logic-600';
-    if (status === 'YELLOW') return 'bg-imagination-600';
+    if (status === 'YELLOW') return 'bg-design-600';
     return 'bg-red-600';
   };
 
@@ -91,6 +91,8 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
               const parsedSparks = apiContentFiles.map((file) =>
                 buildSparkEntry(file.name || file.path || 'spark', file.content, file.path)
               );
+              // Sort by name in reverse order (latest first)
+              parsedSparks.sort((a, b) => b.name.localeCompare(a.name));
               setSparks(parsedSparks);
               setLoading(false);
               return;
@@ -148,10 +150,10 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
   }, [loadSparks]);
 
   useEffect(() => {
-    if (!selectedSpark && sparks.length > 0) {
+    if (!selectedSpark && sparks.length > 0 && !currentSparkData) {
       onSparkSelect(sparks[0].data);
     }
-  }, [sparks, selectedSpark, onSparkSelect]);
+  }, [sparks, selectedSpark, onSparkSelect, currentSparkData]);
 
   useEffect(() => {
     if (!selectedSpark?.rawContent) {
@@ -240,7 +242,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
       <div className="p-4 border-b theme-border">
         <button
           onClick={onNewSpark}
-          className="w-full flex items-center justify-center space-x-2 rounded-lg bg-imagination-600 px-4 py-3 text-sm font-semibold hover:bg-imagination-700 transition-colors"
+          className="w-full flex items-center justify-center space-x-2 rounded-lg bg-design-600 px-4 py-3 text-sm font-semibold hover:bg-design-700 transition-colors"
         >
           <Plus className="h-4 w-4" />
           <span>New Spark</span>
@@ -274,10 +276,12 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
                   Recommendation:{' '}
                   <span className="theme-text font-semibold">{missionSummary.recommendation}</span>
                 </span>
-                <span className="text-right">
-                  Stability:{' '}
-                  <span className="theme-text font-semibold">{selectedSpark.stability}/3</span>
-                </span>
+                {selectedSpark && (
+                  <span className="text-right">
+                    Stability:{' '}
+                    <span className="theme-text font-semibold">{selectedSpark.stability}/3</span>
+                  </span>
+                )}
               </div>
               {prInfo.count !== null && (
                 <div className="text-xs theme-subtle">
@@ -389,14 +393,14 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
               <button
                 key={spark.id}
                 onClick={() => onSparkSelect(spark.data)}
-                className={`w-full rounded-lg border-2 p-3 text-left transition-all hover:border-imagination-500 ${(selectedSpark?.sourceFile === spark.file || selectedSpark?.sourcePath === spark.data.sourcePath)
-                  ? 'border-imagination-500 theme-card'
+                className={`w-full rounded-lg border-2 p-3 text-left transition-all hover:border-design-500 ${(selectedSpark?.sourceFile === spark.file || selectedSpark?.sourcePath === spark.data.sourcePath)
+                  ? 'border-design-500 theme-card'
                   : 'theme-border theme-card-soft'
                   }`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-2">
-                    <Zap className="h-4 w-4 mt-0.5 text-imagination-500" />
+                    <Zap className="h-4 w-4 mt-0.5 text-design-500" />
                     <div>
                       <h4 className="font-semibold text-sm">{spark.name}</h4>
                       <p className="text-xs theme-muted mt-1">{spark.file}</p>

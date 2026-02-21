@@ -6,30 +6,30 @@ module.exports = {
   ],
   safelist: [
     // Safelist all phase color variants for dynamic class names
-    'border-intuition-500',
-    'border-intuition-600',
-    'bg-intuition-600',
-    'bg-intuition-700',
-    'bg-intuition-900/20',
-    'text-intuition-300',
-    'text-intuition-400',
-    'ring-intuition-500',
-    'hover:text-intuition-300',
-    'hover:bg-intuition-600/20',
-    'hover:bg-intuition-700',
-    'focus:ring-intuition-500',
-    'border-imagination-500',
-    'border-imagination-600',
-    'bg-imagination-600',
-    'bg-imagination-700',
-    'bg-imagination-900/20',
-    'text-imagination-300',
-    'text-imagination-400',
-    'ring-imagination-500',
-    'hover:text-imagination-300',
-    'hover:bg-imagination-600/20',
-    'hover:bg-imagination-700',
-    'focus:ring-imagination-500',
+    'border-spark-500',
+    'border-spark-600',
+    'bg-spark-600',
+    'bg-spark-700',
+    'bg-spark-900/20',
+    'text-spark-300',
+    'text-spark-400',
+    'ring-spark-500',
+    'hover:text-spark-300',
+    'hover:bg-spark-600/20',
+    'hover:bg-spark-700',
+    'focus:ring-spark-500',
+    'border-design-500',
+    'border-design-600',
+    'bg-design-600',
+    'bg-design-700',
+    'bg-design-900/20',
+    'text-design-300',
+    'text-design-400',
+    'ring-design-500',
+    'hover:text-design-300',
+    'hover:bg-design-600/20',
+    'hover:bg-design-700',
+    'focus:ring-design-500',
     'border-logic-500',
     'border-logic-600',
     'bg-logic-600',
@@ -46,7 +46,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        intuition: {
+        spark: {
           50: '#e6f2ff',
           100: '#b3d9ff',
           300: '#4da6ff',
@@ -56,7 +56,7 @@ module.exports = {
           700: '#003d7a',
           900: '#001a33',
         },
-        imagination: {
+        design: {
           50: '#fff9e6',
           100: '#fff0b3',
           300: '#ffe066',
@@ -91,8 +91,8 @@ module.exports = {
           css: {
             '--tw-prose-body': theme('colors.gray[300]'),
             '--tw-prose-headings': theme('colors.commons.light'),
-            '--tw-prose-links': theme('colors.imagination[500]'),
-            '--tw-prose-code': theme('colors.intuition[400]'),
+            '--tw-prose-links': theme('colors.design[500]'),
+            '--tw-prose-code': theme('colors.spark[400]'),
             '--tw-prose-quotes': theme('colors.gray[400]'),
           }
         }

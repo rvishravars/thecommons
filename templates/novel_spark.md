@@ -2,17 +2,17 @@
 
 ---
 
-## 🧠 Phase 1: The Intuition (!HUNCH)
+## 🧠 Phase 1: The Spark (!HUNCH)
 *Status: [Active / Claimed]* *Scout: @[YourGitHubHandle]*
 
 ### The Observation
-> Use your intuition here. What is missing? What feels "off" in the current ecosystem?
+> Use your spark here. What is missing? What feels "off" in the current ecosystem?
 * **The Gap:** (e.g., "Our current notification system is too noisy.")
 * **The "Why":** (e.g., "Users are ignoring important alerts because of minor update pings.")
 
 ---
 
-## 🎨 Phase 2: The Imagination (!SHAPE)
+## 🎨 Phase 2: The Design (!SHAPE)
 *Status: [Pending / Designed]* *Designer: @[Handle]*
 
 ### The Novel Core (The 10% Delta)
@@ -37,8 +37,8 @@
 ## 📊 Contribution Log (CS Tracker)
 | Phase | Contributor | Action | Reward |
 | :--- | :--- | :--- | :--- |
-| **Intuition** | @user1 | Submitted Hunch | +5 CS |
-| **Imagination** | @user2 | Designed Shape | +15 CS (+5 Echo) |
+| **Spark** | @user1 | Submitted Hunch | +5 CS |
+| **Design** | @user2 | Designed Shape | +15 CS (+5 Echo) |
 | **Logic** | @user3 | Merged Build | +25 CS (+10 Prototype) |
 
 ---

@@ -10,9 +10,9 @@ The Scribe v2.0 Glass Box AI Agent has been successfully implemented according t
 
 ### 1. ✅ Spark File Created
 **File:** [sparks/scribe-v2-implementation.md](../sparks/scribe-v2-implementation.md)
-- **Phase:** !SHAPE (Imagination) - Design blueprint for v2.0
+- **Phase:** !SHAPE (Design) - Design blueprint for v2.0
 - **Designer:** @CopilotAgent
-- **Status:** Complete with all three phases (Intuition, Imagination, Logic)
+- **Status:** Complete with all three phases (Intuition, Design, Logic)
 - **Key Innovation:** Glass Box Scribe with deterministic hardware switching
 
 ### 2. ✅ Git Branch Created
@@ -156,7 +156,7 @@ The entire Scribe implementation uses MANIFESTO terminology consistently:
 | **Clutch Power** | Specificity & actionability scores |
 | **Stability** | Structural soundness of Sparks |
 | **Snap** | How cleanly designs integrate (Integration score) |
-| **Novel Core** | 10% delta validated in Imagination phase |
+| **Novel Core** | 10% delta validated in Design phase |
 | **Bricks** | Modular Spark components |
 
 ---

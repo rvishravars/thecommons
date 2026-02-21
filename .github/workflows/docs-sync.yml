@@ -34,7 +34,7 @@ jobs:
           
           # 2. Concept Alignment (The LEGO Trinity)
           # We check that the new v2.0 vocabulary is consistent across the project
-          CORE_CONCEPTS=("Intuition" "Imagination" "Logic" "Clutch Power" "Novel Core" "Scout" "Designer" "Builder")
+          CORE_CONCEPTS=("Intuition" "Design" "Logic" "Clutch Power" "Novel Core" "Scout" "Designer" "Builder")
           
           for concept in "${CORE_CONCEPTS[@]}"; do
             if ! grep -qi "$concept" README.md; then

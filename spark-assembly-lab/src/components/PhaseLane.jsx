@@ -6,9 +6,9 @@ export default function PhaseLane({ phase, title, description, color, data, cont
   // Define which blocks belong to this phase
   const getBlocksForPhase = () => {
     switch (phase) {
-      case PhaseTypes.INTUITION:
+      case PhaseTypes.SPARK:
         return [BlockTypes.OBSERVATION, BlockTypes.GAP, BlockTypes.WHY];
-      case PhaseTypes.IMAGINATION:
+      case PhaseTypes.DESIGN:
         return [BlockTypes.NOVEL_CORE, BlockTypes.BLUEPRINT, BlockTypes.INTERFACE, BlockTypes.PRIOR_ART];
       case PhaseTypes.LOGIC:
         return [BlockTypes.TECHNICAL_IMPL, BlockTypes.CLUTCH_TEST, BlockTypes.DEPENDENCIES];
@@ -63,8 +63,8 @@ export default function PhaseLane({ phase, title, description, color, data, cont
         <div className="text-xs sm:text-sm font-semibold">
           <span className="theme-muted">Reward: </span>
           <span className={`text-${color}-400`}>
-            {phase === PhaseTypes.INTUITION && '+5 CS'}
-            {phase === PhaseTypes.IMAGINATION && '+15 CS (+5 Echo)'}
+            {phase === PhaseTypes.SPARK && '+5 CS'}
+            {phase === PhaseTypes.DESIGN && '+15 CS (+5 Echo)'}
             {phase === PhaseTypes.LOGIC && '+25 CS (+10 Prototype)'}
           </span>
         </div>

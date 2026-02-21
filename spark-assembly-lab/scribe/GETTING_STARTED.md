@@ -5,7 +5,7 @@ Welcome to the Scribe v2.0 Glass Box AI Agent for TheCommons! This guide will he
 ## 📋 Quick Overview
 
 The Scribe v2.0 is an intelligent quality-assurance system that:
-- ✅ **Validates Sparks** for structural integrity (Intuition → Imagination → Logic phases)
+- ✅ **Validates Sparks** for structural integrity (Intuition → Design → Logic phases)
 - 🔍 **Evaluates Novelty** to ensure unique ideas
 - 📊 **Generates Glass Box Logs** showing all reasoning transparently
 - 🔄 **Switches Hardware** automatically (GPU → CPU → Cloud API)
@@ -75,7 +75,7 @@ python3 scribe/scribe_brain.py --help    # See all options
 
 ### 2. Stability Auditor (`scribe/logic/stability_audit.py`)
 Validates Spark structural integrity:
-- Checks all 3 phases are present (Intuition/Imagination/Logic)
+- Checks all 3 phases are present (Intuition/Design/Logic)
 - Verifies contributor handles (@username)
 - Calculates novelty scores (0-100)
 - Identifies critical flaws
@@ -94,7 +94,7 @@ python3 scribe/logic/stability_audit.py --json  # Machine-readable output
 - Checks: specificity, actionability, novelty, scope alignment
 
 **Shape Evaluator** (`scribe/prompts/shape_eval.md`)
-- Validates !SHAPE (Imagination) submissions  
+- Validates !SHAPE (Design) submissions  
 - Checks: Novel Core clarity, buildability, integration, prior art, risk awareness
 
 ### 4. Model Downloader (`scribe/models/downloader.py`)
@@ -158,7 +158,7 @@ Example minimal Spark:
 ```markdown
 # 🧩 Example Spark
 
-## 🧠 Phase 1: The Intuition (!HUNCH)
+## 🧠 Phase 1: The Spark (!HUNCH)
 *Status: Claimed* *Scout: @yourname*
 
 ### The Observation
@@ -166,7 +166,7 @@ Example minimal Spark:
 - **The Gap:** Timestamps are missing
 - **The "Why":** Can't analyze velocity
 
-## 🎨 Phase 2: The Imagination (!SHAPE)
+## 🎨 Phase 2: The Design (!SHAPE)
 *Status: Designed* *Designer: @yourname*
 
 ### The Novel Core (The 10% Delta)

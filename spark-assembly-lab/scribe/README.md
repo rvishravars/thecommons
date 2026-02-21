@@ -7,7 +7,7 @@ The Scribe v2.0 is TheCommons' deterministic, hardware-agnostic AI agent for eva
 The Scribe enforces TheCommons Manifesto through three key functions:
 
 1. **!HUNCH Evaluator** - Validates Intuition submissions for clarity and specificity
-2. **!SHAPE Evaluator** - Validates Imagination submissions for novelty and feasibility
+2. **!SHAPE Evaluator** - Validates Design submissions for novelty and feasibility
 3. **Stability Auditor** - Checks all Sparks for structural integrity and LEGO-alignment
 
 Every decision includes a **Glass Box reasoning log** explaining which hardware was used, which prompts were tested, and the logic path taken.

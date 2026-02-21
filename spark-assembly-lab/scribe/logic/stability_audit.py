@@ -44,13 +44,13 @@ class StabilityAuditor:
 
     # Phase definitions aligned with MANIFESTO
     PHASES = {
-        "Intuition (!HUNCH)": {
+        "Spark (!HUNCH)": {
             "order": 1,
             "patterns": [r"The Observation", r"The Gap", r"The \"Why\""],
             "required_role": r"\*Scout: @([\w-]+)",
             "role_title": "Scout"
         },
-        "Imagination (!SHAPE)": {
+        "Design (!SHAPE)": {
             "order": 2,
             "patterns": [r"The Novel Core", r"The Blueprint", r"The Interface"],
             "required_role": r"\*Designer: @([\w-]+)",
@@ -179,9 +179,9 @@ class StabilityAuditor:
 
         # Check if any phase is present (minimum requirement)
         if not any(status.is_complete for status in phase_statuses):
-            flaws.append("No complete phases found. Required: at minimum valid Intuition (!HUNCH).")
+            flaws.append("No complete phases found. Required: at minimum valid Spark (!HUNCH).")
 
-        # Check for orphaned phases (e.g., Logic without Intuition/Imagination)
+        # Check for orphaned phases (e.g., Logic without Spark/Design)
         completed_phases = [s for s in phase_statuses if s.is_complete]
         if completed_phases:
             max_order = max(self.PHASES[s.phase_name]["order"] for s in completed_phases)
@@ -199,9 +199,9 @@ class StabilityAuditor:
             flaws.append("No contributor handles (@username) found.")
 
         # Check for circular logic (e.g., contradiction between phases)
-        if "Intuition" in [s.phase_name for s in completed_phases]:
+        if "Spark" in [s.phase_name for s in completed_phases]:
             if not any(kw in self.content.lower() for kw in ["gap", "loose", "flaw", "problem"]):
-                flaws.append("Intuition phase lacks problem identification.")
+                flaws.append("Spark phase lacks problem identification.")
 
         return flaws
 
@@ -226,7 +226,7 @@ class StabilityAuditor:
                 recommendations.append("Articulate the 10% delta more clearly against Prior Art.")
 
         if "No complete phases" in str(report.critical_flaws):
-            recommendations.append("Start by completing the Intuition (!HUNCH) phase with clear observation of a Loose Stud.")
+            recommendations.append("Start by completing the Spark (!HUNCH) phase with clear observation of a Loose Stud.")
 
         return recommendations
 
@@ -253,7 +253,7 @@ class StabilityAuditor:
             if not status.is_complete and status.has_role:
                 warnings.append(f"{status.phase_name} is incomplete (missing: {', '.join(status.missing_patterns)})")
 
-        # Is valid if at least Intuition phase is complete
+        # Is valid if at least Spark phase is complete
         is_valid = completion_level >= 1
 
         # Generate recommendations

@@ -11,8 +11,8 @@ const iconMap = {
 const colorMap = {
   success: 'bg-logic-600 border-logic-500',
   error: 'bg-red-600 border-red-500',
-  info: 'bg-intuition-600 border-intuition-500',
-  warning: 'bg-imagination-600 border-imagination-500',
+  info: 'bg-spark-600 border-spark-500',
+  warning: 'bg-design-600 border-design-500',
 };
 
 export default function Toast({ message, type = 'info', duration = 3000, onClose }) {

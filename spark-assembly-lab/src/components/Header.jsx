@@ -21,7 +21,7 @@ export default function Header({ theme, onThemeChange, onMenuToggle, user, onUse
             <Menu className="h-6 w-6" />
           </button>
 
-          <Boxes className="h-6 w-6 sm:h-8 sm:w-8 text-imagination-500 flex-shrink-0" />
+          <Boxes className="h-6 w-6 sm:h-8 sm:w-8 text-design-500 flex-shrink-0" />
           <div className="min-w-0">
             <h1 className="text-lg sm:text-2xl font-bold font-mono truncate">
               Spark Assembly Lab

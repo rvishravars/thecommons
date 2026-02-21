@@ -113,7 +113,7 @@ python3 -c "from groq import Groq; print('✅ Groq OK')" || echo "⚠️  Groq n
 ✅ Status: Valid|Invalid
 📊 Completion Level: X/3 phases
 💎 Novelty Score: 0-100
-🔨 Phase Status: [Intuition, Imagination, Logic]
+🔨 Phase Status: [Intuition, Design, Logic]
 ⚠️  Warnings: [if any]
 💡 Recommendations: [if any]
 ```

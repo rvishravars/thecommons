@@ -1,8 +1,8 @@
 // Types for the Spark Assembly Lab
 
 export const PhaseTypes = {
-  INTUITION: 'intuition',
-  IMAGINATION: 'imagination',
+  SPARK: 'spark',
+  DESIGN: 'design',
   LOGIC: 'logic',
 };
 
@@ -23,12 +23,12 @@ export const SparkStatus = {
 
 // Block type definitions
 export const BlockTypes = {
-  // Intuition blocks
+  // Spark blocks
   OBSERVATION: 'observation',
   GAP: 'gap',
   WHY: 'why',
   
-  // Imagination blocks
+  // Design blocks
   NOVEL_CORE: 'novel_core',
   BLUEPRINT: 'blueprint',
   INTERFACE: 'interface',
@@ -44,50 +44,50 @@ export const BlockMetadata = {
   [BlockTypes.OBSERVATION]: {
     title: 'The Observation',
     description: 'What is missing? What feels "off"?',
-    phase: PhaseTypes.INTUITION,
-    color: 'intuition',
+    phase: PhaseTypes.SPARK,
+    color: 'spark',
     icon: '👁️',
   },
   [BlockTypes.GAP]: {
     title: 'The Gap',
     description: 'Identify the specific problem',
-    phase: PhaseTypes.INTUITION,
-    color: 'intuition',
+    phase: PhaseTypes.SPARK,
+    color: 'spark',
     icon: '🔍',
   },
   [BlockTypes.WHY]: {
     title: 'The "Why"',
     description: 'Explain why this matters',
-    phase: PhaseTypes.INTUITION,
-    color: 'intuition',
+    phase: PhaseTypes.SPARK,
+    color: 'spark',
     icon: '❓',
   },
   [BlockTypes.NOVEL_CORE]: {
     title: 'The Novel Core',
     description: 'The 10% Delta - what makes this unique',
-    phase: PhaseTypes.IMAGINATION,
-    color: 'imagination',
+    phase: PhaseTypes.DESIGN,
+    color: 'design',
     icon: '💡',
   },
   [BlockTypes.BLUEPRINT]: {
     title: 'The Blueprint',
     description: 'Describe the unique design',
-    phase: PhaseTypes.IMAGINATION,
-    color: 'imagination',
+    phase: PhaseTypes.DESIGN,
+    color: 'design',
     icon: '📐',
   },
   [BlockTypes.INTERFACE]: {
     title: 'The Interface',
     description: 'How does this snap into the ecosystem?',
-    phase: PhaseTypes.IMAGINATION,
-    color: 'imagination',
+    phase: PhaseTypes.DESIGN,
+    color: 'design',
     icon: '🔗',
   },
   [BlockTypes.PRIOR_ART]: {
     title: 'Prior Art',
     description: 'Why existing solutions don\'t work',
-    phase: PhaseTypes.IMAGINATION,
-    color: 'imagination',
+    phase: PhaseTypes.DESIGN,
+    color: 'design',
     icon: '📚',
   },
   [BlockTypes.TECHNICAL_IMPL]: {

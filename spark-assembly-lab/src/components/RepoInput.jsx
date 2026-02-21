@@ -42,12 +42,12 @@ export default function RepoInput({ onRepoChange, currentRepo }) {
               value={repoUrl}
               onChange={(e) => setRepoUrl(e.target.value)}
               placeholder="https://github.com/owner/repo or owner/repo"
-              className="flex-1 px-3 py-2 text-sm rounded-lg theme-input focus:outline-none focus:ring-2 focus:ring-imagination-500"
+              className="flex-1 px-3 py-2 text-sm rounded-lg theme-input focus:outline-none focus:ring-2 focus:ring-design-500"
               autoFocus
             />
             <button
               type="submit"
-              className="p-2 rounded-lg bg-imagination-600 hover:bg-imagination-700 transition-colors"
+              className="p-2 rounded-lg bg-design-600 hover:bg-design-700 transition-colors"
               title="Load Sparks"
             >
               <Search className="h-4 w-4" />

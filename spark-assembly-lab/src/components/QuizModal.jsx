@@ -21,33 +21,33 @@ export default function QuizModal({ sparkData, onClose }) {
     // Generate quiz questions from spark content
     const quizQuestions = [];
     
-    // Question 1: About Intuition phase
-    if (sparkData.phases.intuition.gap) {
+    // Question 1: About Spark phase
+    if (sparkData.phases.spark.gap) {
       quizQuestions.push({
         question: `What is the main gap identified in the "${sparkData.name}" spark?`,
         options: [
-          sparkData.phases.intuition.gap || 'N/A',
+          sparkData.phases.spark.gap || 'N/A',
           'There is no gap mentioned',
           'The system works perfectly',
           'Users are completely satisfied',
         ],
         correctAnswer: 0,
-        phase: 'intuition',
+        phase: 'spark',
       });
     }
 
-    // Question 2: About Imagination phase
-    if (sparkData.phases.imagination.novel_core || sparkData.phases.imagination.blueprint) {
+    // Question 2: About Design phase
+    if (sparkData.phases.design.novel_core || sparkData.phases.design.blueprint) {
       quizQuestions.push({
         question: `What is the Novel Core (10% Delta) of this spark?`,
         options: [
           'It uses existing technology',
-          sparkData.phases.imagination.blueprint || sparkData.phases.imagination.novel_core || 'N/A',
+          sparkData.phases.design.blueprint || sparkData.phases.design.novel_core || 'N/A',
           'It copies other solutions',
           'It makes no changes',
         ],
         correctAnswer: 1,
-        phase: 'imagination',
+        phase: 'design',
       });
     }
 
@@ -56,8 +56,8 @@ export default function QuizModal({ sparkData, onClose }) {
       quizQuestions.push({
         question: `Which phase focuses on technical implementation and testing?`,
         options: [
-          'Intuition - Scout discovers the gap',
-          'Imagination - Designer creates blueprint',
+          'Spark - Scout submits the gap/hunch',
+          'Design - Designer creates blueprint',
           'Logic - Builder implements and tests',
           'None of the above',
         ],
@@ -140,8 +140,8 @@ export default function QuizModal({ sparkData, onClose }) {
   };
 
   const getPhaseColor = (phase) => {
-    if (phase === 'intuition') return 'text-intuition-400';
-    if (phase === 'imagination') return 'text-imagination-400';
+    if (phase === 'spark') return 'text-spark-400';
+    if (phase === 'design') return 'text-design-400';
     if (phase === 'logic') return 'text-logic-400';
     return 'theme-muted';
   };
@@ -150,8 +150,8 @@ export default function QuizModal({ sparkData, onClose }) {
     const score = calculateScore();
     return (
       <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
-        <div className="theme-panel rounded-xl border-2 border-imagination-600 w-full max-w-2xl shadow-2xl max-h-[95vh] overflow-y-auto">
-          <div className="bg-imagination-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl flex items-center justify-between sticky top-0">
+        <div className="theme-panel rounded-xl border-2 border-design-600 w-full max-w-2xl shadow-2xl max-h-[95vh] overflow-y-auto">
+          <div className="bg-design-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl flex items-center justify-between sticky top-0">
             <div className="flex items-center space-x-2 sm:space-x-3">
               <Award className="h-6 w-6 sm:h-8 sm:w-8" />
               <h2 className="text-lg sm:text-2xl font-bold">Quiz Results</h2>
@@ -192,7 +192,7 @@ export default function QuizModal({ sparkData, onClose }) {
 
             <button
               onClick={onClose}
-              className="px-6 py-3 bg-imagination-600 hover:bg-imagination-700 rounded-lg font-semibold transition-colors"
+              className="px-6 py-3 bg-design-600 hover:bg-design-700 rounded-lg font-semibold transition-colors"
             >
               Close
             </button>
@@ -208,8 +208,8 @@ export default function QuizModal({ sparkData, onClose }) {
 
     return (
       <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="theme-panel rounded-xl border-2 border-imagination-600 w-full max-w-2xl shadow-2xl">
-          <div className="bg-imagination-600 px-6 py-4 rounded-t-xl flex items-center justify-between">
+        <div className="theme-panel rounded-xl border-2 border-design-600 w-full max-w-2xl shadow-2xl">
+          <div className="bg-design-600 px-6 py-4 rounded-t-xl flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <Brain className="h-6 w-6" />
               <h2 className="text-xl font-bold">
@@ -236,7 +236,7 @@ export default function QuizModal({ sparkData, onClose }) {
                   onClick={() => handleAnswerSelect(currentQuestion, idx)}
                   className={`w-full text-left p-3 sm:p-4 rounded-lg border-2 transition-all ${
                     selectedAnswers[currentQuestion] === idx
-                      ? 'border-imagination-500 bg-imagination-900/20'
+                      ? 'border-design-500 bg-design-900/20'
                       : 'theme-border theme-border-hover theme-card'
                   }`}
                 >
@@ -244,7 +244,7 @@ export default function QuizModal({ sparkData, onClose }) {
                     <div
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                         selectedAnswers[currentQuestion] === idx
-                          ? 'border-imagination-500 bg-imagination-500'
+                          ? 'border-design-500 bg-design-500'
                           : 'theme-border'
                       }`}
                     >
@@ -265,7 +265,7 @@ export default function QuizModal({ sparkData, onClose }) {
               <button
                 onClick={handleNext}
                 disabled={!hasAnswered}
-                className="px-6 py-2 bg-imagination-600 hover:bg-imagination-700 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2 bg-design-600 hover:bg-design-700 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {currentQuestion < questions.length - 1 ? 'Next' : 'Finish'}
               </button>
@@ -278,8 +278,8 @@ export default function QuizModal({ sparkData, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
-      <div className="theme-panel rounded-xl border-2 border-imagination-600 w-full max-w-2xl shadow-2xl">
-        <div className="bg-imagination-600 px-6 py-4 rounded-t-xl flex items-center justify-between">
+      <div className="theme-panel rounded-xl border-2 border-design-600 w-full max-w-2xl shadow-2xl">
+        <div className="bg-design-600 px-6 py-4 rounded-t-xl flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Brain className="h-8 w-8" />
             <div>
@@ -307,7 +307,7 @@ export default function QuizModal({ sparkData, onClose }) {
                 onClick={() => setSelectedAI(provider.id)}
                 className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                   selectedAI === provider.id
-                    ? 'border-imagination-500 bg-imagination-900/20'
+                    ? 'border-design-500 bg-design-900/20'
                     : 'theme-border theme-border-hover theme-card'
                 }`}
               >
@@ -327,7 +327,7 @@ export default function QuizModal({ sparkData, onClose }) {
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="Enter your API key..."
-                className="w-full theme-input rounded border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-imagination-500"
+                className="w-full theme-input rounded border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-design-500"
               />
               <p className="text-xs theme-subtle mt-1">Coming soon! Local template available now.</p>
             </div>
@@ -336,7 +336,7 @@ export default function QuizModal({ sparkData, onClose }) {
           <button
             onClick={handleStartQuiz}
             disabled={!selectedAI || loading}
-            className="w-full px-6 py-3 bg-imagination-600 hover:bg-imagination-700 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-6 py-3 bg-design-600 hover:bg-design-700 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Generating Quiz...' : 'Start Quiz'}
           </button>

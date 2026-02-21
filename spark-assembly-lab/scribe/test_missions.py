@@ -13,7 +13,7 @@ EXAMPLE_SPARK = """# 🧩 Spark: GitHub Reputation Decay Algorithm
 
 ---
 
-## 🧠 Phase 1: The Intuition (!HUNCH)
+## 🧠 Phase 1: The Spark (!HUNCH)
 
 *Status: [Active]* *Scout: @vishravars*
 
@@ -25,7 +25,7 @@ EXAMPLE_SPARK = """# 🧩 Spark: GitHub Reputation Decay Algorithm
 
 ---
 
-## 🎨 Phase 2: The Imagination (!SHAPE)
+## 🎨 Phase 2: The Design (!SHAPE)
 
 *Status: [Active]* *Designer: @designer-handle*
 
@@ -71,13 +71,13 @@ The reputation decay algorithm is handled in the Spark Assembly Lab backend:
 
 | Phase | Contributor | Action | Reward |
 | :--- | :--- | :--- | :--- |
-| **Intuition** | @vishravars | Submitted Hunch | +5 CS |
-| **Imagination** | @designer-handle | Designed Shape | +15 CS (+5 Echo) |
+| **Spark** | @vishravars | Submitted Hunch | +5 CS |
+| **Design** | @designer-handle | Designed Shape | +15 CS (+5 Echo) |
 | **Logic** | @builder-handle | Merged Build | +25 CS (+10 Prototype) |
 
 ---
 
-> *The Commons rewards the intuition to see the gap, the imagination to design the piece, and the logic to make it stick.*
+> *The Commons rewards the spark to see the gap, the design to design the piece, and the logic to make it stick.*
 """
 
 

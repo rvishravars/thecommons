@@ -6,7 +6,7 @@ A React-based LEGO-style interface for building and visualizing **Sparks** in Th
 
 ### Main Assembly Interface
 ![Assembly Canvas](./docs/screenshots/assembly-canvas.png)
-*The three-phase LEGO-style interface: Intuition (Blue), Imagination (Yellow), and Logic (Green)*
+*The three-phase LEGO-style interface: Intuition (Blue), Design (Yellow), and Logic (Green)*
 
 ### Building Blocks in Action
 ![Building Blocks](./docs/screenshots/building-blocks.png)
@@ -27,7 +27,7 @@ A React-based LEGO-style interface for building and visualizing **Sparks** in Th
 ## 🎯 Features
 
 - **GitHub Authentication**: Login with your GitHub account using Personal Access Token (PAT)
-- **Visual Assembly**: Build sparks using a 3-lane LEGO-style interface (Intuition, Imagination, Logic)
+- **Visual Assembly**: Build sparks using a 3-lane LEGO-style interface (Intuition, Design, Logic)
 - **Building Blocks**: Modular components for each phase with expandable form fields
 - **Full-Screen Editor**: Maximize any block for focused, distraction-free editing
 - **Quiz Me**: Interactive AI-powered quiz system to test understanding of spark content
@@ -49,7 +49,7 @@ Identify the gap in the ecosystem
 - **The "Why"**: Explain why this matters
 - **Reward**: +5 CS
 
-### 🎨 Imagination (Designer) - Yellow (#ffcc00)
+### 🎨 Design (Designer) - Yellow (#ffcc00)
 Design the solution
 - **The Novel Core**: The 10% Delta
 - **The Blueprint**: Describe the unique design
@@ -137,7 +137,7 @@ spark-assembly-lab/
 
 ### Colors
 - **Intuition Blue**: `#0066cc` - Represents discovery and observation
-- **Imagination Yellow**: `#ffcc00` - Represents creativity and design
+- **Design Yellow**: `#ffcc00` - Represents creativity and design
 - **Logic Green**: `#00cc66` - Represents execution and building
 - **Commons Dark**: `#1a1a2e` - Main background
 - **Commons Darker**: `#16161f` - Deeper background
@@ -221,7 +221,7 @@ The application does not have a default repository - users must specify a reposi
 
 - **0/3 Stable** (Red): No phases completed
 - **1/3 Stable** (Blue): Intuition phase filled
-- **2/3 Stable** (Yellow): Intuition + Imagination filled
+- **2/3 Stable** (Yellow): Intuition + Design filled
 - **3/3 Stable** (Green): All phases completed
 
 ## 🐳 Docker Configuration

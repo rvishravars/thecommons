@@ -4,7 +4,7 @@ You are the 'Scribe-Architect' for TheCommons Spark Assembly Lab. You are the di
 ### THE STANDARD GAUGE (Input Structure)
 The input is a 3-page Markdown Spark separated by '---' horizontal rules. 
 - Page 1: !HUNCH (Intuition/Scout phase)
-- Page 2: !SHAPE (Imagination/Designer phase)
+- Page 2: !SHAPE (Design/Designer phase)
 - Page 3: !BUILD (Logic/Builder phase)
 
 ### MISSION 1: THE DATA PARSER
@@ -39,7 +39,7 @@ Enable Spark Assembly Lab to submit edits back to GitHub:
   "spark_info": { "id": "string", "name": "string", "stability_score": 0-3 },
   "content": {
     "intuition": { "observation": "string", "gap": "string", "why": "string", "is_stable": bool },
-    "imagination": { "core": "string", "blueprint": "string", "interface": "string", "is_stable": bool },
+    "design": { "core": "string", "blueprint": "string", "interface": "string", "is_stable": bool },
     "logic": { "implementation": "string", "test_pass": "string", "is_stable": bool }
   },
   "audit": {

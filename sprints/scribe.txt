@@ -7,7 +7,7 @@ Goal: Implement The Scribe v2.0—a hardware-agnostic, "Glass Box" AI agent for 
 
 Workflow Constraints:
 
-Spark First: Create sparks/scribe-v2-implementation.md as a !SHAPE (Imagination) phase. Use the @handle of the current user as the Designer. Define the "Novel Core" as a Deterministic Hardware-Switching Pipeline.
+Spark First: Create sparks/scribe-v2-implementation.md as a !SHAPE (Design) phase. Use the @handle of the current user as the Designer. Define the "Novel Core" as a Deterministic Hardware-Switching Pipeline.
 
 Git Branch: Create and switch to a new branch named feat/scribe-v2-nano.
 
@@ -29,7 +29,7 @@ scribe/prompts/:
 
 hunch_eval.md: System prompt to validate !HUNCH (Intuition).
 
-shape_eval.md: System prompt to validate !SHAPE (Imagination) for novelty and "Prior Art."
+shape_eval.md: System prompt to validate !SHAPE (Design) for novelty and "Prior Art."
 
 scribe/scribe_brain.py: The core router.
 
