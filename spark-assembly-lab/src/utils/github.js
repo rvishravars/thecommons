@@ -108,5 +108,171 @@ export const openTokenCreationPage = () => {
   window.open(url, '_blank');
 };
 
+/**
+ * Parse repository URL into owner and repo
+ */
+export const parseRepoUrl = (input) => {
+  const cleanInput = input.trim()
+    .replace(/https?:\/\//, '')
+    .replace(/github\.com\//, '');
+  
+  const parts = cleanInput.split('/').filter(part => part);
+  
+  if (parts.length >= 2) {
+    return {
+      owner: parts[0],
+      repo: parts[1].replace('.git', ''),
+    };
+  }
+  
+  throw new Error('Invalid repository format. Use: owner/repo or https://github.com/owner/repo');
+};
+
+/**
+ * Build GitHub API headers with optional authentication
+ */
+const buildGitHubHeaders = () => {
+  const headers = {
+    'Accept': 'application/vnd.github+json',
+    'User-Agent': 'spark-assembly-lab',
+  };
+  
+  const token = getStoredToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  return headers;
+};
+
+/**
+ * Search for .spark.md files in a repository
+ */
+const searchSparkFiles = async (owner, repo) => {
+  const query = `filename:.spark.md repo:${owner}/${repo}`;
+  const url = `https://api.github.com/search/code?q=${encodeURIComponent(query)}`;
+  
+  const response = await fetch(url, {
+    headers: buildGitHubHeaders(),
+  });
+  
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error('GitHub API rate limit exceeded. Please add a GitHub token or try again later.');
+    }
+    throw new Error(`GitHub search failed: ${response.status}`);
+  }
+  
+  const data = await response.json();
+  return data.items || [];
+};
+
+/**
+ * List files in a directory
+ */
+const listDirectory = async (owner, repo, path = 'sparks', branch = 'main') => {
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
+  
+  const response = await fetch(url, {
+    headers: buildGitHubHeaders(),
+  });
+  
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error(`Repository '${owner}/${repo}' not found or the '${path}' directory doesn't exist`);
+    }
+    if (response.status === 403) {
+      throw new Error('GitHub API rate limit exceeded. Please add a GitHub token or try again later.');
+    }
+    throw new Error(`GitHub API error: ${response.status}`);
+  }
+  
+  const items = await response.json();
+  return items.filter(item => 
+    item.type === 'file' && item.name.endsWith('.spark.md')
+  );
+};
+
+/**
+ * Fetch file content from GitHub
+ */
+const fetchFileContent = async (owner, repo, path, branch = 'main') => {
+  // Use raw.githubusercontent.com for direct content access (no rate limiting)
+  const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
+  
+  const response = await fetch(url);
+  
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${path}: ${response.status}`);
+  }
+  
+  return await response.text();
+};
+
+/**
+ * Load all sparks from a GitHub repository
+ */
+export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPath = 'sparks') => {
+  try {
+    // Parse repository URL
+    const { owner, repo } = parseRepoUrl(repoInput);
+    
+    let sparkItems = [];
+    
+    // Try searching first (faster, works across the whole repo)
+    try {
+      sparkItems = await searchSparkFiles(owner, repo);
+    } catch (searchErr) {
+      console.warn('Search failed, falling back to directory listing:', searchErr);
+    }
+    
+    // If search didn't work or returned nothing, try directory listing
+    if (sparkItems.length === 0) {
+      sparkItems = await listDirectory(owner, repo, searchPath, branch);
+    }
+    
+    if (sparkItems.length === 0) {
+      return {
+        success: true,
+        owner,
+        repo,
+        branch,
+        files: [],
+        message: 'No .spark.md files found in this repository',
+      };
+    }
+    
+    // Fetch content for each spark file
+    const files = [];
+    for (const item of sparkItems) {
+      try {
+        const path = item.path || item.name;
+        const content = await fetchFileContent(owner, repo, path, branch);
+        files.push({
+          name: item.name || path.split('/').pop(),
+          path: path,
+          content: content,
+        });
+      } catch (err) {
+        console.warn(`Failed to fetch ${item.name || item.path}:`, err);
+        // Continue with other files
+      }
+    }
+    
+    return {
+      success: true,
+      owner,
+      repo,
+      branch,
+      files,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err.message || 'Failed to load sparks from GitHub',
+    };
+  }
+};
+
 
 
