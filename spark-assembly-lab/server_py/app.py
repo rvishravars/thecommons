@@ -22,6 +22,19 @@ except ImportError:
     sys.path.append(str(Path(__file__).resolve().parents[1]))
     from scribe.missions import evaluate_spark_mission
 
+# Import AI SDKs
+try:
+    import openai
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+
+try:
+    import anthropic
+    ANTHROPIC_AVAILABLE = True
+except ImportError:
+    ANTHROPIC_AVAILABLE = False
+
 
 APP_ROOT = Path(__file__).resolve().parents[1]
 DIST_PATH = APP_ROOT / "dist"
@@ -287,6 +300,147 @@ def run_mission_file():
 
     result = evaluate_spark_mission(content)
     return jsonify(result)
+
+
+def generate_quiz_prompt(spark_content: str, spark_data: Dict[str, Any]) -> str:
+    """Generate a prompt for AI to create quiz questions based on spark content."""
+    prompt = f"""You are an expert quiz generator for TheCommons Spark Assembly Lab. 
+    
+Generate 5 multiple-choice quiz questions based on the following Spark document. Questions should test understanding of:
+1. The problem/gap identified in the SPARK phase
+2. The Novel Core (10% Delta) in the DESIGN phase  
+3. The technical implementation in the LOGIC phase
+4. TheCommons framework concepts (roles, rewards, assembly line)
+5. The overall spark's value proposition
+
+Spark Name: {spark_data.get('name', 'Unknown')}
+
+Spark Content:
+{spark_content[:3000]}
+
+Return ONLY a valid JSON array with this exact structure (no markdown, no explanation):
+[
+  {{
+    "question": "Question text here?",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correctAnswer": 0,
+    "phase": "spark"
+  }}
+]
+
+Phase values must be one of: "spark", "design", "logic", or "general".
+correctAnswer is the 0-based index of the correct option.
+Make questions engaging and educational."""
+    return prompt
+
+
+def generate_quiz_with_openai(spark_content: str, spark_data: Dict[str, Any], api_key: str) -> List[Dict[str, Any]]:
+    """Generate quiz questions using OpenAI GPT-4."""
+    if not OPENAI_AVAILABLE:
+        raise RuntimeError("OpenAI SDK not installed")
+    
+    client = openai.OpenAI(api_key=api_key)
+    prompt = generate_quiz_prompt(spark_content, spark_data)
+    
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4-turbo-preview",
+            messages=[
+                {"role": "system", "content": "You are a quiz generator that returns only valid JSON arrays."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=2000
+        )
+        
+        content = response.choices[0].message.content
+        # Clean up potential markdown code blocks
+        content = content.strip()
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+        content = content.strip()
+        
+        questions = json.loads(content)
+        return questions
+    except Exception as err:
+        raise RuntimeError(f"OpenAI API error: {err}")
+
+
+def generate_quiz_with_anthropic(spark_content: str, spark_data: Dict[str, Any], api_key: str) -> List[Dict[str, Any]]:
+    """Generate quiz questions using Anthropic Claude."""
+    if not ANTHROPIC_AVAILABLE:
+        raise RuntimeError("Anthropic SDK not installed")
+    
+    client = anthropic.Anthropic(api_key=api_key)
+    prompt = generate_quiz_prompt(spark_content, spark_data)
+    
+    try:
+        message = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=2000,
+            temperature=0.7,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+        
+        content = message.content[0].text
+        # Clean up potential markdown code blocks
+        content = content.strip()
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+        content = content.strip()
+        
+        questions = json.loads(content)
+        return questions
+    except Exception as err:
+        raise RuntimeError(f"Anthropic API error: {err}")
+
+
+@app.post("/api/quiz/generate")
+def generate_quiz():
+    """Generate AI-powered quiz questions for a spark."""
+    payload = request.get_json(silent=True) or {}
+    provider = payload.get("provider")  # 'openai' or 'anthropic'
+    api_key = payload.get("apiKey")
+    spark_content = payload.get("sparkContent")
+    spark_data = payload.get("sparkData")
+    
+    if not provider or not spark_content or not spark_data:
+        return jsonify({"error": "provider, sparkContent, and sparkData are required"}), 400
+    
+    if provider not in ["openai", "anthropic"]:
+        return jsonify({"error": "provider must be 'openai' or 'anthropic'"}), 400
+    
+    if not api_key:
+        # Try to get from environment
+        if provider == "openai":
+            api_key = os.environ.get("OPENAI_API_KEY")
+        elif provider == "anthropic":
+            api_key = os.environ.get("ANTHROPIC_API_KEY")
+        
+        if not api_key:
+            return jsonify({"error": f"API key required for {provider}"}), 400
+    
+    try:
+        if provider == "openai":
+            questions = generate_quiz_with_openai(spark_content, spark_data, api_key)
+        else:  # anthropic
+            questions = generate_quiz_with_anthropic(spark_content, spark_data, api_key)
+        
+        return jsonify({"questions": questions})
+    except RuntimeError as err:
+        return jsonify({"error": str(err)}), 502
+    except Exception as err:
+        return jsonify({"error": f"Quiz generation failed: {err}"}), 500
 
 
 @app.get("/api/prs")

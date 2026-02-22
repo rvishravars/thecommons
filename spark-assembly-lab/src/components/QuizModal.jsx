@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { X, Brain, CheckCircle, XCircle, Award } from 'lucide-react';
+import { X, Brain, CheckCircle, XCircle, Award, AlertCircle } from 'lucide-react';
+import { generateSparkMarkdown } from '../utils/sparkParser';
 
 const AI_PROVIDERS = [
   { id: 'openai', name: 'OpenAI (GPT-4)', icon: '🤖' },
@@ -16,6 +17,7 @@ export default function QuizModal({ sparkData, onClose }) {
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const generateLocalQuiz = () => {
     // Generate quiz questions from spark content
@@ -95,18 +97,64 @@ export default function QuizModal({ sparkData, onClose }) {
     return quizQuestions;
   };
 
-  const handleStartQuiz = () => {
-    if (selectedAI === 'local') {
-      setLoading(true);
-      setTimeout(() => {
+  const generateAIQuiz = async (provider) => {
+    try {
+      setError(null);
+      const sparkContent = generateSparkMarkdown(sparkData);
+      
+      const response = await fetch('/api/quiz/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          provider,
+          apiKey: apiKey || undefined,
+          sparkContent,
+          sparkData: {
+            name: sparkData.name,
+            phases: sparkData.phases,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate quiz');
+      }
+
+      const data = await response.json();
+      return data.questions;
+    } catch (err) {
+      console.error('AI quiz generation error:', err);
+      throw err;
+    }
+  };
+
+  const handleStartQuiz = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (selectedAI === 'local') {
+        // Use local template
+        await new Promise(resolve => setTimeout(resolve, 500));
         const quiz = generateLocalQuiz();
         setQuestions(quiz);
         setQuizStarted(true);
-        setLoading(false);
-      }, 500);
-    } else {
-      // For AI providers, would integrate with their APIs
-      alert(`AI integration for ${selectedAI} coming soon! API Key: ${apiKey ? 'Provided' : 'Not provided'}`);
+      } else if (selectedAI === 'openai' || selectedAI === 'anthropic') {
+        // Use AI provider
+        const quiz = await generateAIQuiz(selectedAI);
+        if (!quiz || quiz.length === 0) {
+          throw new Error('No questions generated');
+        }
+        setQuestions(quiz);
+        setQuizStarted(true);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to generate quiz. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -329,7 +377,20 @@ export default function QuizModal({ sparkData, onClose }) {
                 placeholder="Enter your API key..."
                 className="w-full theme-input rounded border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-design-500"
               />
-              <p className="text-xs theme-subtle mt-1">Coming soon! Local template available now.</p>
+              <p className="text-xs theme-subtle mt-1">
+                {selectedAI === 'openai' 
+                  ? 'Enter your OpenAI API key or set OPENAI_API_KEY environment variable'
+                  : 'Enter your Anthropic API key or set ANTHROPIC_API_KEY environment variable'}
+              </p>
+            </div>
+          )}
+
+          {error && (
+            <div className="mb-6 p-4 rounded-lg bg-red-900/20 border border-red-600 flex items-start space-x-3">
+              <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm text-red-200">{error}</p>
+              </div>
             </div>
           )}
 
