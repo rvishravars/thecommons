@@ -339,7 +339,13 @@ def generate_quiz_with_openai(spark_content: str, spark_data: Dict[str, Any], ap
     if not OPENAI_AVAILABLE:
         raise RuntimeError("OpenAI SDK not installed")
     
-    client = openai.OpenAI(api_key=api_key)
+    try:
+        # Initialize client with only the api_key parameter
+        client = openai.OpenAI(api_key=api_key)
+    except TypeError as e:
+        # Handle version compatibility issues
+        raise RuntimeError(f"OpenAI client initialization failed. Please ensure openai>=1.30.0 is installed. Error: {e}")
+    
     prompt = generate_quiz_prompt(spark_content, spark_data)
     
     try:
@@ -366,6 +372,8 @@ def generate_quiz_with_openai(spark_content: str, spark_data: Dict[str, Any], ap
         
         questions = json.loads(content)
         return questions
+    except json.JSONDecodeError as err:
+        raise RuntimeError(f"OpenAI returned invalid JSON: {err}")
     except Exception as err:
         raise RuntimeError(f"OpenAI API error: {err}")
 
@@ -375,7 +383,13 @@ def generate_quiz_with_anthropic(spark_content: str, spark_data: Dict[str, Any],
     if not ANTHROPIC_AVAILABLE:
         raise RuntimeError("Anthropic SDK not installed")
     
-    client = anthropic.Anthropic(api_key=api_key)
+    try:
+        # Initialize client with only the api_key parameter
+        client = anthropic.Anthropic(api_key=api_key)
+    except TypeError as e:
+        # Handle version compatibility issues
+        raise RuntimeError(f"Anthropic client initialization failed. Please ensure anthropic>=0.25.0 is installed. Error: {e}")
+    
     prompt = generate_quiz_prompt(spark_content, spark_data)
     
     try:
@@ -401,6 +415,8 @@ def generate_quiz_with_anthropic(spark_content: str, spark_data: Dict[str, Any],
         
         questions = json.loads(content)
         return questions
+    except json.JSONDecodeError as err:
+        raise RuntimeError(f"Anthropic returned invalid JSON: {err}")
     except Exception as err:
         raise RuntimeError(f"Anthropic API error: {err}")
 
