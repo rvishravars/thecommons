@@ -1,16 +1,53 @@
-import { useState } from 'react';
-import { X, Brain, CheckCircle, XCircle, Award, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Brain, CheckCircle, XCircle, Award, AlertCircle, Key, Trash2 } from 'lucide-react';
 import { generateSparkMarkdown } from '../utils/sparkParser';
 
 const AI_PROVIDERS = [
-  { id: 'openai', name: 'OpenAI (GPT-4)', icon: '🤖' },
-  { id: 'anthropic', name: 'Anthropic (Claude)', icon: '🧠' },
-  { id: 'local', name: 'Local Template', icon: '📋' },
+  { id: 'openai', name: 'OpenAI (GPT-4)', icon: '🤖', keyLabel: 'OpenAI API Key' },
+  { id: 'anthropic', name: 'Anthropic (Claude)', icon: '🧠', keyLabel: 'Anthropic API Key' },
+  { id: 'local', name: 'Local Template', icon: '📋', keyLabel: null },
 ];
+
+// Storage keys for API keys
+const STORAGE_KEYS = {
+  openai: 'spark_lab_openai_key',
+  anthropic: 'spark_lab_anthropic_key',
+};
+
+// Helper functions for secure storage
+const getStoredApiKey = (provider) => {
+  try {
+    return localStorage.getItem(STORAGE_KEYS[provider]) || '';
+  } catch (e) {
+    console.error('Failed to load API key:', e);
+    return '';
+  }
+};
+
+const saveApiKey = (provider, key) => {
+  try {
+    if (key) {
+      localStorage.setItem(STORAGE_KEYS[provider], key);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS[provider]);
+    }
+  } catch (e) {
+    console.error('Failed to save API key:', e);
+  }
+};
+
+const clearApiKey = (provider) => {
+  try {
+    localStorage.removeItem(STORAGE_KEYS[provider]);
+  } catch (e) {
+    console.error('Failed to clear API key:', e);
+  }
+};
 
 export default function QuizModal({ sparkData, onClose }) {
   const [selectedAI, setSelectedAI] = useState(null);
   const [apiKey, setApiKey] = useState('');
+  const [saveKeyToStorage, setSaveKeyToStorage] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -18,6 +55,20 @@ export default function QuizModal({ sparkData, onClose }) {
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Load stored API key when provider changes
+  useEffect(() => {
+    if (selectedAI && selectedAI !== 'local' && STORAGE_KEYS[selectedAI]) {
+      const storedKey = getStoredApiKey(selectedAI);
+      if (storedKey) {
+        setApiKey(storedKey);
+        setSaveKeyToStorage(true);
+      } else {
+        setApiKey('');
+        setSaveKeyToStorage(false);
+      }
+    }
+  }, [selectedAI]);
 
   const generateLocalQuiz = () => {
     // Generate quiz questions from spark content
@@ -143,6 +194,16 @@ export default function QuizModal({ sparkData, onClose }) {
         setQuestions(quiz);
         setQuizStarted(true);
       } else if (selectedAI === 'openai' || selectedAI === 'anthropic') {
+        // Validate API key
+        if (!apiKey || apiKey.trim() === '') {
+          throw new Error('Please enter your API key to use this AI provider');
+        }
+        
+        // Save API key to storage if requested
+        if (saveKeyToStorage) {
+          saveApiKey(selectedAI, apiKey);
+        }
+        
         // Use AI provider
         const quiz = await generateAIQuiz(selectedAI);
         if (!quiz || quiz.length === 0) {
@@ -163,6 +224,14 @@ export default function QuizModal({ sparkData, onClose }) {
       ...selectedAnswers,
       [questionIndex]: answerIndex,
     });
+  };
+
+  const handleClearApiKey = () => {
+    if (selectedAI && STORAGE_KEYS[selectedAI]) {
+      clearApiKey(selectedAI);
+      setApiKey('');
+      setSaveKeyToStorage(false);
+    }
   };
 
   const handleNext = () => {
@@ -369,18 +438,44 @@ export default function QuizModal({ sparkData, onClose }) {
 
           {selectedAI && selectedAI !== 'local' && (
             <div className="mb-6">
-              <label className="block text-sm font-semibold mb-2">API Key (Optional)</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-semibold">
+                  <Key className="inline h-4 w-4 mr-1" />
+                  {AI_PROVIDERS.find(p => p.id === selectedAI)?.keyLabel || 'API Key'}
+                </label>
+                {apiKey && (
+                  <button
+                    onClick={handleClearApiKey}
+                    className="text-xs text-red-400 hover:text-red-300 flex items-center space-x-1"
+                    title="Clear saved API key"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    <span>Clear</span>
+                  </button>
+                )}
+              </div>
               <input
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your API key..."
+                placeholder={`Enter your ${selectedAI === 'openai' ? 'OpenAI' : 'Anthropic'} API key...`}
                 className="w-full theme-input rounded border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-design-500"
               />
-              <p className="text-xs theme-subtle mt-1">
+              <div className="flex items-center justify-between mt-2">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={saveKeyToStorage}
+                    onChange={(e) => setSaveKeyToStorage(e.target.checked)}
+                    className="rounded border-gray-600 bg-gray-800 text-design-600 focus:ring-design-500"
+                  />
+                  <span className="text-xs theme-subtle">Save to browser (localStorage)</span>
+                </label>
+              </div>
+              <p className="text-xs theme-subtle mt-2">
                 {selectedAI === 'openai' 
-                  ? 'Enter your OpenAI API key or set OPENAI_API_KEY environment variable'
-                  : 'Enter your Anthropic API key or set ANTHROPIC_API_KEY environment variable'}
+                  ? '🔒 Your OpenAI API key will be stored securely in your browser and never sent to our servers.'
+                  : '🔒 Your Anthropic API key will be stored securely in your browser and never sent to our servers.'}
               </p>
             </div>
           )}

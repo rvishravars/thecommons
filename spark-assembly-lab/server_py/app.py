@@ -420,15 +420,18 @@ def generate_quiz():
     if provider not in ["openai", "anthropic"]:
         return jsonify({"error": "provider must be 'openai' or 'anthropic'"}), 400
     
+    # Try to get API key from request or environment (fallback)
     if not api_key:
-        # Try to get from environment
         if provider == "openai":
             api_key = os.environ.get("OPENAI_API_KEY")
         elif provider == "anthropic":
             api_key = os.environ.get("ANTHROPIC_API_KEY")
         
         if not api_key:
-            return jsonify({"error": f"API key required for {provider}"}), 400
+            provider_name = "OpenAI" if provider == "openai" else "Anthropic"
+            return jsonify({
+                "error": f"{provider_name} API key required. Please enter your API key in the quiz interface."
+            }), 400
     
     try:
         if provider == "openai":

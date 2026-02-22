@@ -214,10 +214,10 @@ The app includes an AI-powered quiz system to test understanding of spark conten
    - **OpenAI (GPT-4)**: AI-generated contextual questions
    - **Anthropic (Claude)**: AI-generated contextual questions
 4. **For AI Providers**:
-   - Enter your API key in the input field, OR
-   - Set environment variables in `.env` file (see `.env.example`):
-     - `OPENAI_API_KEY` for OpenAI
-     - `ANTHROPIC_API_KEY` for Anthropic
+   - Enter your API key in the secure input field
+   - Check "Save to browser" to store the key in localStorage for future use
+   - Your API key is only stored in your browser and sent directly to the AI provider
+   - Click "Clear" to remove a saved API key
 5. **Start the Quiz**: Answer 5 multiple-choice questions about the spark
 6. **View Results**: See your score and correct/incorrect answers
 
@@ -227,20 +227,19 @@ The AI providers generate questions that test understanding of:
 - Technical implementation details (Logic phase)
 - TheCommons framework concepts
 
+**Where are API keys stored?**
+- API keys are stored in your browser's `localStorage` (if you check "Save to browser")
+- Keys are **never** sent to our servers - they go directly from your browser to OpenAI/Anthropic
+- You can clear saved keys at any time using the "Clear" button
+- Optionally, server admins can set API keys as environment variables (see `.env.example`)
+
 **Testing with Docker:**
 ```bash
-# Copy the example environment file
-cp .env.example .env
-
-# Edit .env and add your API keys (optional)
-# OPENAI_API_KEY=sk-...
-# ANTHROPIC_API_KEY=sk-ant-...
-
-# Rebuild and start the container
-docker compose down
+# No configuration needed! Just start the container
 docker compose up --build
 
 # Visit http://localhost:3000 and try the Quiz Me feature
+# Enter your API key when prompted (or use Local Template mode)
 ```
 
 ### Server Configuration (Optional)
@@ -254,7 +253,9 @@ GITHUB_TOKEN=your_token_here      # For private repos or higher rate limits
 # Cache settings
 SPARK_CACHE_TTL_SECONDS=60        # Cache duration (default: 60 seconds)
 
-# AI Integration (optional)
+# AI Integration (optional fallback)
+# Users can enter API keys in the browser UI (recommended)
+# These are only used as fallback if no API key is provided by the user
 OPENAI_API_KEY=sk-...             # For GPT-4 quiz generation
 ANTHROPIC_API_KEY=sk-ant-...      # For Claude quiz generation
 ```
