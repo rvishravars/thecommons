@@ -203,6 +203,46 @@ The app uses a simple Personal Access Token (PAT) authentication system:
 3. The stability indicator shows completion level
 4. Click **"Refresh"** icon to reload sparks from the current source
 
+### Quiz Me Feature
+
+The app includes an AI-powered quiz system to test understanding of spark content:
+
+1. **Open a Spark**: Load any existing spark from the sidebar
+2. **Click "Quiz Me"**: Located in the toolbar at the top of the assembly canvas
+3. **Choose Quiz Provider**:
+   - **Local Template**: Uses built-in quiz generation (no API key needed)
+   - **OpenAI (GPT-4)**: AI-generated contextual questions
+   - **Anthropic (Claude)**: AI-generated contextual questions
+4. **For AI Providers**:
+   - Enter your API key in the input field, OR
+   - Set environment variables in `.env` file (see `.env.example`):
+     - `OPENAI_API_KEY` for OpenAI
+     - `ANTHROPIC_API_KEY` for Anthropic
+5. **Start the Quiz**: Answer 5 multiple-choice questions about the spark
+6. **View Results**: See your score and correct/incorrect answers
+
+The AI providers generate questions that test understanding of:
+- The problem/gap identified (Spark phase)
+- The Novel Core and design approach (Design phase)
+- Technical implementation details (Logic phase)
+- TheCommons framework concepts
+
+**Testing with Docker:**
+```bash
+# Copy the example environment file
+cp .env.example .env
+
+# Edit .env and add your API keys (optional)
+# OPENAI_API_KEY=sk-...
+# ANTHROPIC_API_KEY=sk-ant-...
+
+# Rebuild and start the container
+docker compose down
+docker compose up --build
+
+# Visit http://localhost:3000 and try the Quiz Me feature
+```
+
 ### Server Configuration (Optional)
 
 The server supports environment variables for configuration:
@@ -213,7 +253,13 @@ GITHUB_TOKEN=your_token_here      # For private repos or higher rate limits
 
 # Cache settings
 SPARK_CACHE_TTL_SECONDS=60        # Cache duration (default: 60 seconds)
+
+# AI Integration (optional)
+OPENAI_API_KEY=sk-...             # For GPT-4 quiz generation
+ANTHROPIC_API_KEY=sk-ant-...      # For Claude quiz generation
 ```
+
+Create a `.env` file in the `spark-assembly-lab/` directory based on `.env.example` to configure these settings.
 
 The application does not have a default repository - users must specify a repository URL to load sparks.
 
