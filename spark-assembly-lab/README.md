@@ -30,7 +30,7 @@ A React-based LEGO-style interface for building and visualizing **Sparks** in Th
 - **Visual Assembly**: Build sparks using a 3-lane LEGO-style interface (Intuition, Design, Logic)
 - **Building Blocks**: Modular components for each phase with expandable form fields
 - **Full-Screen Editor**: Maximize any block for focused, distraction-free editing
-- **Quiz Me**: Interactive AI-powered quiz system to test understanding of spark content
+- **Quiz Me**: Interactive AI-powered quiz system to test understanding of spark content (requires login)
 - **External Repo Loading**: Load sparks from any GitHub repository dynamically
 - **Mobile Responsive**: Fully optimized for mobile devices with drawer navigation
 - **Live Preview**: Real-time markdown preview of your spark
@@ -207,19 +207,22 @@ The app uses a simple Personal Access Token (PAT) authentication system:
 
 The app includes an AI-powered quiz system to test understanding of spark content:
 
-1. **Open a Spark**: Load any existing spark from the sidebar
-2. **Click "Quiz Me"**: Located in the toolbar at the top of the assembly canvas
-3. **Choose Quiz Provider**:
+**Prerequisites**: You must be logged in with GitHub to use the Quiz feature.
+
+1. **Login**: Click the "Login" button in the header and enter your GitHub token
+2. **Open a Spark**: Load any existing spark from the sidebar
+3. **Click "Quiz Me"**: Located in the toolbar at the top of the assembly canvas
+4. **Choose Quiz Provider**:
    - **Local Template**: Uses built-in quiz generation (no API key needed)
-   - **OpenAI (GPT-4)**: AI-generated contextual questions
+   - **OpenAI (GPT-4o)**: AI-generated contextual questions
    - **Anthropic (Claude)**: AI-generated contextual questions
-4. **For AI Providers**:
+5. **For AI Providers**:
    - Enter your API key in the secure input field
    - Check "Save to browser" to store the key in localStorage for future use
    - Your API key is only stored in your browser and sent directly to the AI provider
    - Click "Clear" to remove a saved API key
-5. **Start the Quiz**: Answer 5 multiple-choice questions about the spark
-6. **View Results**: See your score and correct/incorrect answers
+6. **Start the Quiz**: Answer 5 multiple-choice questions about the spark
+7. **View Results**: See your score and correct/incorrect answers
 
 The AI providers generate questions that test understanding of:
 - The problem/gap identified (Spark phase)
