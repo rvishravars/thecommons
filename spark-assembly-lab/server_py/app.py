@@ -350,7 +350,7 @@ def generate_quiz_with_openai(spark_content: str, spark_data: Dict[str, Any], ap
     
     try:
         response = client.chat.completions.create(
-            model="gpt-4-turbo-preview",
+            model="gpt-4o",  # Using GPT-4o (latest model)
             messages=[
                 {"role": "system", "content": "You are a quiz generator that returns only valid JSON arrays."},
                 {"role": "user", "content": prompt}
