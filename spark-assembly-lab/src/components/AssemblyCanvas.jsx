@@ -124,8 +124,12 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
   const openPhaseEditor = (phaseKey) => {
     const phase = sparkData.phases[phaseKey];
-    const fallback = buildPhaseNotes(phaseKey, phase);
-    setPhaseDraft(phase.notes || fallback);
+    if (canPush) {
+      const fallback = buildPhaseNotes(phaseKey, phase);
+      setPhaseDraft(phase.notes || fallback);
+    } else {
+      setPhaseDraft('');
+    }
     setEditingPhase(phaseKey);
   };
 
@@ -363,7 +367,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-shrink-0"
             >
               <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>{showPreview ? (canPush ? 'Edit' : 'Add') : 'Preview'}</span>
+              <span>{showPreview ? 'Edit' : 'Preview'}</span>
             </button>
 
             {/* Primary Action: Submit */}
@@ -524,7 +528,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                       disabled={isReadOnly}
                       className={`mt-2 text-xs text-${phase.color}-400 hover:text-${phase.color}-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      {!isReadOnly && <span>Edit</span>}
+                      {!isReadOnly && <span>{canPush ? 'Edit' : 'Add'}</span>}
                     </button>
                   </div>
                 </div>
