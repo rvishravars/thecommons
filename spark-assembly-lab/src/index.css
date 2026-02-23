@@ -203,27 +203,4 @@
     --tw-prose-td-borders: #e8eaed;
   }
 
-  /* KaTeX color overrides for both themes */
-  .katex {
-    color: inherit;
-  }
-
-  /* KaTeX in light theme */
-  [data-theme="light-theme"] .katex {
-    color: #1f1f1f;
-  }
-  
-  [data-theme="light-theme"] .katex-mathml {
-    display: none;
-  }
-
-  /* KaTeX in dark theme */
-  [data-theme="studio"] .katex,
-  [data-theme="studio"] .katex-html {
-    color: #eaeaea;
-  }
-
-  .prose .katex-display {
-    margin: 1em 0;
-  }
 }

@@ -217,21 +217,42 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
     // Parse repository URL
     const { owner, repo } = parseRepoUrl(repoInput);
     
-    let sparkItems = [];
-    
-    // Try searching first (faster, works across the whole repo)
+    let searchItems = [];
+    let dirItems = [];
+    let searchError = null;
+    let dirError = null;
+
+    // Search first (fast, but can be stale)
     try {
-      sparkItems = await searchSparkFiles(owner, repo);
+      searchItems = await searchSparkFiles(owner, repo);
     } catch (searchErr) {
-      console.warn('Search failed, falling back to directory listing:', searchErr);
+      searchError = searchErr;
+      console.warn('Search failed:', searchErr);
     }
-    
-    // If search didn't work or returned nothing, try directory listing
-    if (sparkItems.length === 0) {
-      sparkItems = await listDirectory(owner, repo, searchPath, branch);
+
+    // Directory listing for authoritative results
+    try {
+      dirItems = await listDirectory(owner, repo, searchPath, branch);
+    } catch (listErr) {
+      dirError = listErr;
+      console.warn('Directory listing failed:', listErr);
     }
-    
-    if (sparkItems.length === 0) {
+
+    const combinedItems = [];
+    const seenPaths = new Set();
+    const addItem = (item) => {
+      const path = item.path || item.name;
+      if (!path || seenPaths.has(path)) return;
+      seenPaths.add(path);
+      combinedItems.push(item);
+    };
+
+    searchItems.forEach(addItem);
+    dirItems.forEach(addItem);
+
+    if (combinedItems.length === 0) {
+      if (dirError) throw dirError;
+      if (searchError) throw searchError;
       return {
         success: true,
         owner,
@@ -244,7 +265,7 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
     
     // Fetch content for each spark file
     const files = [];
-    for (const item of sparkItems) {
+    for (const item of combinedItems) {
       try {
         const path = item.path || item.name;
         const content = await fetchFileContent(owner, repo, path, branch);

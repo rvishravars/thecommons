@@ -17,7 +17,10 @@
 
 ### The Novel Core (The 10% Delta)
 * **The Blueprint:** Introduce a "Decay Rate" for CS earned via Scout tasks. Unlike Logic/Builder points, which are more permanent, Scout points lose 10% value every month unless the user contributes a higher-tier Spark (Designer or Builder level).
-* **The Interface:** This snaps into the **Logarithmic Voting Power** formula: $Weight = \log_{10}(CS_{active})$.
+* **The Interface:** This snaps into the **Logarithmic Voting Power** formula: 
+
+$$Weight = \log_{10}(CS_{active})$$
+
 * **Prior Art:** Traditional DAOs use "Staking" (locking money). Our "Delta" is **Staking Time/Consistency** instead of capital.
 
 ---
