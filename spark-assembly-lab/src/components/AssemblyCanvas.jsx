@@ -3,6 +3,8 @@ import { Download, Copy, Eye, Brain, GitPullRequest, RotateCcw, Trash2 } from 'l
 import MarkdownPreview from './MarkdownPreview';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 import QuizModal from './QuizModal';
 import PRTracker from './PRTracker';
 import { PhaseTypes } from '../types/spark';
@@ -330,7 +332,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                 className={`inline-flex items-center rounded-full px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-semibold ${stability === 0
                   ? 'bg-red-600'
                   : stability === 1
-                      ? 'bg-spark-600'
+                    ? 'bg-spark-600'
                     : stability === 2
                       ? 'bg-design-600'
                       : 'bg-logic-600'
@@ -443,8 +445,8 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
         <MarkdownPreview markdown={generateSparkMarkdown(sparkData)} />
       ) : showPRTracker ? (
         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <PRTracker 
-            repoUrl={repoUrl} 
+          <PRTracker
+            repoUrl={repoUrl}
             sparkFile={originalSparkData?.sourcePath || sparkData.sourcePath}
             user={user}
           />
@@ -472,31 +474,34 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                 color: 'logic',
               },
             ]
-            .filter(phase => activePhasesForNewSpark.includes(phase.key))
-            .map((phase) => (
-              <div key={phase.key} className={`flex-1 min-w-[280px] lg:min-w-[320px] flex flex-col rounded-xl border-2 border-${phase.color}-600 theme-panel-soft`}>
-                <div className={`bg-${phase.color}-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl`}>
-                  <h2 className="text-lg sm:text-xl font-bold">{phase.title}</h2>
-                  <p className="text-xs sm:text-sm mt-1 opacity-90">{phase.description}</p>
-                </div>
-                <div className="flex-1 p-3 sm:p-4 flex flex-col overflow-y-hidden">
-                  <div className="w-full flex-1 theme-input rounded border p-3 sm:p-4 text-sm sm:text-base overflow-y-auto bg-black/10 min-h-[240px]">
-                    <div className="prose prose-invert prose-sm max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {sparkData.phases[phase.key].notes || buildPhaseNotes(phase.key, sparkData.phases[phase.key])}
-                      </ReactMarkdown>
-                    </div>
+              .filter(phase => activePhasesForNewSpark.includes(phase.key))
+              .map((phase) => (
+                <div key={phase.key} className={`flex-1 min-w-[280px] lg:min-w-[320px] flex flex-col rounded-xl border-2 border-${phase.color}-600 theme-panel-soft`}>
+                  <div className={`bg-${phase.color}-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl`}>
+                    <h2 className="text-lg sm:text-xl font-bold">{phase.title}</h2>
+                    <p className="text-xs sm:text-sm mt-1 opacity-90">{phase.description}</p>
                   </div>
-                  <button
-                    onClick={() => openPhaseEditor(phase.key)}
-                    disabled={isReadOnly}
-                    className={`mt-2 text-xs text-${phase.color}-400 hover:text-${phase.color}-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    {!isReadOnly && <span>Edit</span>}
-                  </button>
+                  <div className="flex-1 p-3 sm:p-4 flex flex-col overflow-y-hidden">
+                    <div className="w-full flex-1 theme-input rounded border p-3 sm:p-4 text-sm sm:text-base overflow-y-auto bg-black/10 min-h-[240px]">
+                      <div className="prose prose-invert prose-sm max-w-none">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm, remarkMath]}
+                          rehypePlugins={[rehypeKatex]}
+                        >
+                          {sparkData.phases[phase.key].notes || buildPhaseNotes(phase.key, sparkData.phases[phase.key])}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => openPhaseEditor(phase.key)}
+                      disabled={isReadOnly}
+                      className={`mt-2 text-xs text-${phase.color}-400 hover:text-${phase.color}-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {!isReadOnly && <span>Edit</span>}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
 
             {/* Add Phase Buttons */}
             <div className="flex flex-col gap-3 mt-6">
