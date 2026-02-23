@@ -4,6 +4,7 @@ import MarkdownPreview from './MarkdownPreview';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import QuizModal from './QuizModal';
+import PRTracker from './PRTracker';
 import { PhaseTypes } from '../types/spark';
 import { generateSparkMarkdown, validateSparkData } from '../utils/sparkParser';
 import { useToast } from '../utils/ToastContext';
@@ -12,6 +13,7 @@ import { getStoredToken, getStoredUserInfo } from '../utils/github';
 export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly, onPRCreated }) {
   const [showPreview, setShowPreview] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [showPRTracker, setShowPRTracker] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -349,6 +351,16 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
           <div className="flex items-center gap-2 flex-wrap">
             <button
+              onClick={() => setShowPRTracker(!showPRTracker)}
+              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors"
+              title="View pull requests for this spark"
+            >
+              <GitPullRequest className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Evolution</span>
+              <span className="sm:hidden">PRs</span>
+            </button>
+
+            <button
               onClick={() => setShowQuiz(true)}
               disabled={!user}
               className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-design-500 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-design-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-design-500"
@@ -430,6 +442,14 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
       {showPreview ? (
         <MarkdownPreview markdown={generateSparkMarkdown(sparkData)} />
+      ) : showPRTracker ? (
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <PRTracker 
+            repoUrl={repoUrl} 
+            sparkFile={originalSparkData?.sourcePath || sparkData.sourcePath}
+            user={user}
+          />
+        </div>
       ) : (
         <div className="flex-1 overflow-x-auto overflow-y-auto">
           <div className="h-full flex flex-col lg:flex-row p-4 sm:p-6 gap-4 sm:gap-6 min-w-full">

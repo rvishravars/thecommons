@@ -66,7 +66,7 @@ Build and test
 
 ## 🚀 Quick Start (Docker Only)
 
-### Local Deployment (Docker Compose)
+### Local Development (Docker Compose)
 
 ```bash
 # From the spark-assembly-lab directory
@@ -86,22 +86,71 @@ The Docker setup automatically:
 - Enables hot module replacement (HMR)
 - Runs the Flask API on port 8080
 
+### Building for Production (Docker)
+
+All builds should be run through Docker. Use the build script from the repo root:
+
+```bash
+# From the repo root
+./build.sh
+
+# Or manually using docker-compose
+cd spark-assembly-lab
+docker compose -f docker-compose.prod.yml build
+
+# Or use docker build directly
+docker build -f spark-assembly-lab/Dockerfile.prod -t spark-assembly-lab:latest .
+```
+
+The production build:
+- ✅ Builds React app with Vite (inside Docker)
+- ✅ Compiles TypeScript/JSX
+- ✅ Optimizes assets and bundles
+- ✅ Creates production-ready Flask container
+- ✅ Produces final `spark-assembly-lab:latest` image
+
+### Running Production Build
+
+```bash
+# Run the built image locally on port 8080
+docker run -p 8080:8080 spark-assembly-lab:latest
+
+# Or use docker-compose for production
+cd spark-assembly-lab
+docker compose -f docker-compose.prod.yml up
+
+# Visit http://localhost:8080
+```
+
 ### Cloud Deployment (Cloud Run)
 
 ```bash
 # From the repo root
-docker build -f spark-assembly-lab/Dockerfile.prod -t spark-assembly-lab:prod .
+./build.sh
 
-# Run locally on port 8080
-docker run -p 8080:8080 spark-assembly-lab:prod
+# Tag for Cloud Run
+docker tag spark-assembly-lab:latest gcr.io/YOUR_PROJECT/spark-assembly-lab:latest
 
-# Deploy to Cloud Run (example)
+# Push to Container Registry
+docker push gcr.io/YOUR_PROJECT/spark-assembly-lab:latest
+
+# Deploy to Cloud Run
 gcloud run deploy spark-assembly-lab \
-   --source . \
-   --dockerfile spark-assembly-lab/Dockerfile.prod \
+   --image gcr.io/YOUR_PROJECT/spark-assembly-lab:latest \
    --region us-central1 \
-   --allow-unauthenticated
+   --allow-unauthenticated \
+   --port 8080
 ```
+
+## ⚠️ Important: Docker-Only Build Process
+
+**Do NOT run `npm run build` locally.** All builds must be run through Docker to ensure:
+- ✅ Consistent environments
+- ✅ No local dependency issues
+- ✅ Reproducible production builds
+- ✅ Proper layer caching for performance
+
+Use the provided `./build.sh` script or Docker commands instead.
 
 ## 📁 Project Structure
 
