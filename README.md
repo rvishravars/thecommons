@@ -42,6 +42,14 @@ Try the **[Live Demo](https://spark-assembly-lab-bgbmwuia5q-uc.a.run.app/)** to 
 
 👉 **[Launch Spark Assembly Lab](https://spark-assembly-lab-bgbmwuia5q-uc.a.run.app/)** *(Work in Progress)*
 
+**Key Features:**
+- Visual LEGO-style assembly interface with 3 phases
+- GitHub authentication and repository browser
+- **Global Spark Search** - Find `.spark.md` files across all of GitHub with advanced filters
+- AI-powered Improve Spark feature for feedback and refinement
+- Full-screen editor and live markdown preview
+- Mobile responsive design
+
 
 ---
 
@@ -77,9 +85,9 @@ graph TB
 ```
 
 TheCommons is built on a modular architecture where:
-- **Frontend** (React/Vite) provides the LEGO-style assembly interface
+- **Frontend** (React/Vite) provides the LEGO-style assembly interface with global search
 - **Backend** (Flask/Python) orchestrates operations and provides API proxies
-- **GitHub** serves as the single source of truth for auth, storage, and version control
+- **GitHub** serves as the single source of truth for auth, storage, version control, and discovery (Code Search API)
 - **AI Providers** (Gemini, OpenAI) power the reflection-based Improve Spark feature
 - **Scribe Agent** (Python) validates Sparks and evaluates submissions
 

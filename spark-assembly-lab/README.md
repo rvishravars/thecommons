@@ -31,7 +31,8 @@ A React-based LEGO-style interface for building and visualizing **Sparks** in Th
 - **Building Blocks**: Modular components for each phase with expandable form fields
 - **Full-Screen Editor**: Maximize any block for focused, distraction-free editing
 - **Improve Spark**: AI-powered reflection system that provides feedback to strengthen and refine your spark content (requires login)
-- **External Repo Loading**: Load sparks from any GitHub repository dynamically
+- **Global Spark Search**: Search for `.spark.md` files across all of GitHub with advanced filters for organization and user
+- **Repository Browser**: Load sparks from any GitHub repository dynamically with local search
 - **Mobile Responsive**: Fully optimized for mobile devices with drawer navigation
 - **Live Preview**: Real-time markdown preview of your spark
 - **Stability Tracking**: Visual indicators showing completion status (0/3 to 3/3 Stable)
@@ -161,13 +162,14 @@ spark-assembly-lab/
 │   │   ├── AssemblyCanvas.jsx      # Main workspace with 3 lanes
 │   │   ├── PhaseLane.jsx           # Individual phase column
 │   │   ├── BuildingBlock.jsx       # Expandable form component
-│   │   ├── SparkSelector.jsx       # Sidebar for existing sparks
+│   │   ├── SparkSelector.jsx       # Sidebar with repo/global search tabs
+│   │   ├── GlobalSparkSearch.jsx   # Global GitHub search interface
 │   │   ├── MarkdownPreview.jsx     # Live markdown preview
 │   │   ├── GitHubAuth.jsx          # GitHub authentication component
 │   │   ├── Header.jsx              # App header with auth
 │   │   └── Toast.jsx               # Toast notification
 │   ├── utils/
-│   │   ├── github.js               # GitHub API utilities
+│   │   ├── github.js               # GitHub API utilities (auth, search, repos)
 │   │   ├── sparkParser.js          # Markdown parsing & generation
 │   │   └── ToastContext.jsx        # Toast notification provider
 │   ├── types/
@@ -205,7 +207,7 @@ spark-assembly-lab/
 - **Drag & Drop**: react-dnd (prepared for future enhancements)
 - **Icons**: lucide-react
 - **Authentication**: GitHub Personal Access Token (PAT)
-- **API**: GitHub REST API v3
+- **API**: GitHub REST API v3 (including Code Search API)
 - **Containerization**: Docker
 
 ## 📖 Usage Guide
@@ -239,6 +241,10 @@ The app uses a simple Personal Access Token (PAT) authentication system:
 
 ### Loading Existing Sparks
 
+There are two ways to find and load sparks:
+
+#### Option 1: Repository Browser (Repository Tab)
+
 1. **Enter Repository URL**: 
    - Enter a GitHub repository URL in the "Git Repository" input at the top of the sidebar
    - Supported formats:
@@ -248,9 +254,35 @@ The app uses a simple Personal Access Token (PAT) authentication system:
    - Click the search icon or press Enter to load sparks from that repository
    - The app will search for all `.spark.md` files in the repository
    - Your choice is saved in localStorage and persists across sessions
-2. Click on any spark in the sidebar to load it
-3. The stability indicator shows completion level
-4. Click **"Refresh"** icon to reload sparks from the current source
+2. **Local Search**: Use the search bar to filter loaded sparks by name, filename, or content
+3. Click on any spark in the sidebar to load it
+4. The stability indicator shows completion level
+5. Click **"Refresh"** icon to reload sparks from the current source
+
+#### Option 2: Global Spark Search (Global Search Tab)
+
+Search for spark files across all of GitHub:
+
+1. **Switch to Global Search Tab**: Click the "Global Search" tab in the sidebar
+2. **Enter Search Query**: Type keywords like "reputation", "governance", "voting", etc.
+3. **Apply Filters (Optional)**:
+   - Click "Show Filters" to reveal organization and user filters
+   - **Organization**: Filter by org name (e.g., `facebook`, `ethereum`, `google`)
+   - **User**: Filter by GitHub username (e.g., `torvalds`, `gvanrossum`)
+   - You can search with just filters (no keywords) to browse all sparks from an org/user
+4. **Click "Search GitHub"**: Execute the search across all public repositories
+5. **Browse Results**: View spark files with repository information, descriptions, and star counts
+6. **Load a Spark**: Click "Load Spark" on any result to open it in the editor
+7. **Browse Repository**: Click "Browse Repo" to switch your active repository to explore more sparks
+8. **Pagination**: Use "Previous" and "Next" buttons to navigate through results (20 per page)
+
+**Search Examples:**
+- Just keywords: `reputation` (finds all sparks mentioning reputation)
+- Keyword + org: `governance` + org:`ethereum` (governance sparks in Ethereum org)
+- Just filters: org:`facebook` (browse all sparks from Facebook's repos)
+- User sparks: user:`vitalik` (all sparks by a specific user)
+
+**Note:** Global search requires GitHub API access. Using a GitHub token (via Login) provides higher rate limits.
 
 ### Improve Spark Feature
 

@@ -349,10 +349,10 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-design-500/50 scrollbar-track-transparent">
             <button
               onClick={() => setShowPRTracker(!showPRTracker)}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors"
+              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-shrink-0"
               title="View pull requests for this spark"
             >
               <GitPullRequest className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -363,17 +363,16 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
             <button
               onClick={() => setShowQuiz(true)}
               disabled={!user}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-design-500 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-design-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-design-500"
+              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-design-500 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-design-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-design-500 whitespace-nowrap flex-shrink-0"
               title={!user ? 'Please login with GitHub to use Improve Spark feature' : 'Get AI feedback to improve this spark'}
             >
               <Brain className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Improve Spark</span>
-              <span className="sm:hidden">Improve</span>
+              <span>Improve</span>
             </button>
 
             <button
               onClick={() => setShowPreview(!showPreview)}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors"
+              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-shrink-0"
             >
               <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>{showPreview ? 'Edit' : 'Preview'}</span>
@@ -381,7 +380,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
             <button
               onClick={handleCopyToClipboard}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors"
+              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-shrink-0"
             >
               <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>Copy</span>
@@ -390,7 +389,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
             <button
               onClick={handleReset}
               disabled={!isDirty || isReadOnly}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors disabled:opacity-50"
+              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors disabled:opacity-50 whitespace-nowrap flex-shrink-0"
             >
               <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Reset</span>
@@ -399,7 +398,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
             <button
               onClick={handleDownload}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-design-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-design-700 transition-colors"
+              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-design-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-design-700 transition-colors whitespace-nowrap flex-shrink-0"
             >
               <Download className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Download</span>
@@ -409,7 +408,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
             <button
               onClick={handleSubmit}
               disabled={isSubmitting || isReadOnly}
-              className={`flex items-center space-x-1 sm:space-x-2 rounded-lg bg-logic-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-logic-700 transition-colors disabled:opacity-60 ${isReadOnly ? 'cursor-not-allowed grayscale' : ''}`}
+              className={`flex items-center space-x-1 sm:space-x-2 rounded-lg bg-logic-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-logic-700 transition-colors disabled:opacity-60 whitespace-nowrap flex-shrink-0 ${isReadOnly ? 'cursor-not-allowed grayscale' : ''}`}
             >
               <GitPullRequest className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>Submit</span>
@@ -419,7 +418,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               onClick={handleDeleteRequest}
               disabled={isSubmitting || isReadOnly || !originalSparkData}
               title={sparkData.contributors.scout !== user?.login ? 'Only the spark owner can delete' : 'Request deletion of this spark'}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-red-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-60"
+              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-red-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-60 whitespace-nowrap flex-shrink-0"
             >
               <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>Delete</span>
