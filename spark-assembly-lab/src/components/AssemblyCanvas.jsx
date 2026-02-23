@@ -352,11 +352,11 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               onClick={() => setShowQuiz(true)}
               disabled={!user}
               className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-design-500 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-design-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-design-500"
-              title={!user ? 'Please login with GitHub to use Quiz feature' : 'Test your understanding of this spark'}
+              title={!user ? 'Please login with GitHub to use Improve Spark feature' : 'Get AI feedback to improve this spark'}
             >
               <Brain className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Quiz Me</span>
-              <span className="sm:hidden">Quiz</span>
+              <span className="hidden sm:inline">Improve Spark</span>
+              <span className="sm:hidden">Improve</span>
             </button>
 
             <button

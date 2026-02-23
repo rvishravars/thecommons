@@ -76,7 +76,7 @@ TheCommons is built on a modular architecture where:
 - **Frontend** (React/Vite) provides the LEGO-style assembly interface
 - **Backend** (Flask/Python) orchestrates operations and provides API proxies
 - **GitHub** serves as the single source of truth for auth, storage, and version control
-- **AI Providers** (Gemini, OpenAI) power the reflection-based Quiz feature
+- **AI Providers** (Gemini, OpenAI) power the reflection-based Improve Spark feature
 - **Scribe Agent** (Python) validates Sparks and evaluates submissions
 
 ---

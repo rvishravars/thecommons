@@ -603,8 +603,8 @@ IMPORTANT: Return ONLY a valid JSON array. Do not include any prose, markdown, o
           <div className="flex items-center space-x-3">
             <Brain className="h-8 w-8" />
             <div>
-              <h2 className="text-2xl font-bold">Quiz Me!</h2>
-              <p className="text-sm opacity-90">Test your understanding of this spark</p>
+              <h2 className="text-2xl font-bold">Improve Spark</h2>
+              <p className="text-sm opacity-90">Get AI feedback to strengthen your spark</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/10 transition-colors">

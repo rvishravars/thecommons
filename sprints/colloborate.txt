@@ -25,7 +25,7 @@ Evaluate the quality and completeness of the Spark:
 ### MISSION 3: GOVERNANCE ADVISORY
 Act as the Advisor to the Baseplate Architect (Repo Owner). Provide:
 - A clear 'Final Lock' recommendation (Merge: Yes/No).
-- A one-sentence 'Scribe Report' summarizing the audit for the Quiz Me modal.
+- A one-sentence 'Scribe Report' summarizing the audit for the Improve Spark modal.
 - A 'Merit Distribution' plan that calculates the CS rewards to be finalized upon merge.
 
 ### MISSION 4: SUBMISSION (UI)

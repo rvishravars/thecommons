@@ -8,7 +8,7 @@ Please capture the following screenshots for the main README:
 **What to capture:**
 - Full interface showing all three phase lanes (Intuition, Design, Logic)
 - At least one spark loaded with some content
-- Show the toolbar with "Quiz Me", "Preview", "Copy MD", and "Download" buttons
+- Show the toolbar with "Improve Spark", "Preview", "Copy MD", and "Download" buttons
 - Make sure the spark name is visible at the top
 
 **How to capture:**
@@ -46,13 +46,13 @@ Please capture the following screenshots for the main README:
 
 ### 4. Quiz Mode (`quiz-mode.png`)
 **What to capture:**
-- The Quiz Me modal showing either:
+- The Improve Spark modal showing either:
   - AI provider selection screen (OpenAI, Anthropic, Local Template)
   - OR a question with multiple choice options
   - OR the results screen with score
 
 **How to capture:**
-1. Click "Quiz Me" button in the toolbar
+1. Click "Improve Spark" button in the toolbar
 2. Choose one of the screens to capture (provider selection or quiz question)
 3. Save as `quiz-mode.png`
 

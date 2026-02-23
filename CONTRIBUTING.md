@@ -28,7 +28,7 @@ Have an idea for a new feature, improvement, or expansion? We'd love to hear it!
 
 Examples of great contributions:
 - New spark phases or mission types
-- Improved quiz/reflection mechanisms
+- Enhanced reflection and feedback mechanisms
 - Better collaboration workflows
 - Performance optimizations
 - Documentation improvements
