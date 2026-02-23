@@ -215,10 +215,14 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
         throw new Error(data.error || 'Failed to submit PR');
       }
 
-      toast.success(`PR created: ${data.pr_url}`);
+      if (data.is_proposal) {
+        toast.success(`Proposal submitted as an Issue: ${data.issue_url}`);
+      } else {
+        toast.success(`PR created: ${data.pr_url}`);
+      }
       setShowConfirmation(false);
-      if (data.pr_url) {
-        window.open(data.pr_url, '_blank');
+      if (data.issue_url || data.pr_url) {
+        window.open(data.issue_url || data.pr_url, '_blank');
       }
       // Refresh PR counts
       if (onPRCreated) {
