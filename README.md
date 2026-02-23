@@ -59,27 +59,25 @@ The Commons is assisted by an AI Scribe that ensures every new brick follows the
 ```mermaid
 graph TB
     A["Frontend<br/>React/Vite"]
-    B["Backend<br/>Node.js"]
-    C["Scribe Agent<br/>Python AI"]
-    D["ML Models<br/>Qwen2.5"]
-    E["Local Cache<br/>Status/JSON"]
-    F["GitHub<br/>Auth + Storage<br/>+ Versioning"]
+    B["Backend<br/>Flask/Python"]
+    C["AI Providers<br/>Gemini + OpenAI"]
+    D["GitHub API<br/>Auth + Storage<br/>+ Versioning"]
+    E["Scribe Agent<br/>Python Logic"]
     
-    A -->|Auth| F
+    A -->|Auth| D
+    A -->|Direct API| C
     A --> B
-    B -->|Read/Write/Version| F
-    B --> C
-    C --> D
-    C --> E
+    B -->|API calls| C
+    B -->|Read/Write| D
     B --> E
 ```
 
 TheCommons is built on a modular architecture where:
 - **Frontend** (React/Vite) provides the LEGO-style assembly interface
-- **Backend** (Node.js) orchestrates all operations
+- **Backend** (Flask/Python) orchestrates operations and provides API proxies
 - **GitHub** serves as the single source of truth for auth, storage, and version control
-- **Scribe Agent** (Python AI) evaluates submissions using ML models
-- **Local Cache** stores temporary evaluation results
+- **AI Providers** (Gemini, OpenAI) power the reflection-based Quiz feature
+- **Scribe Agent** (Python) validates Sparks and evaluates submissions
 
 ---
 
