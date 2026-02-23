@@ -93,8 +93,8 @@ export function parseSparkFile(content) {
       builder: logic.contributor || '',
     },
     stability,
+    proposals: parseProposals(content),
   };
-
   console.log('✅ Parsed result:', result);
   return result;
 }
@@ -110,6 +110,28 @@ function extractPhaseNotes(rawPhase) {
     .replace(/\n?---\s*$/m, '')
     .trim();
   return notes;
+}
+
+function parseProposals(content) {
+  const proposals = { spark: '', design: '', logic: '' };
+  const sectionMatch = content.match(/## 📝 Community Proposals\s*\n([\s\S]*?)(?=\n---\n> \*Instructions:|$)/);
+  if (!sectionMatch) return proposals;
+
+  const section = sectionMatch[1];
+  const phases = {
+    spark: /### Proposed Addition to Spark Phase\s*\n([\s\S]*?)(?=\n###|$)/,
+    design: /### Proposed Addition to Design Phase\s*\n([\s\S]*?)(?=\n###|$)/,
+    logic: /### Proposed Addition to Logic Phase\s*\n([\s\S]*?)(?=\n###|$)/,
+  };
+
+  Object.entries(phases).forEach(([key, regex]) => {
+    const match = section.match(regex);
+    if (match) {
+      proposals[key] = match[1].trim();
+    }
+  });
+
+  return proposals;
 }
 
 export function buildMissionSummary(parsedSpark) {
@@ -336,7 +358,7 @@ export function generateSparkMarkdown(sparkData) {
   };
 
   let markdown = `# ${name}\n\n`;
-  
+
   // Add YAML frontmatter with deletion flag
   if (markedForDeletion) {
     markdown += `---\nstatus: deletion_pending\nmarked_for_deletion: true\n---\n\n`;
@@ -402,7 +424,23 @@ export function generateSparkMarkdown(sparkData) {
   markdown += `| **Design** | @${contributors.designer || 'user2'} | Designed Shape | +15 CS (+5 Echo) |\n`;
   markdown += `| **Logic** | @${contributors.builder || 'user3'} | Merged Build | +25 CS (+10 Prototype) |\n\n`;
 
-  markdown += `---\n`;
+  markdown += `---\n\n`;
+
+  // Community Proposals
+  const hasProposals = Object.keys(phases).some(k => phases[k].proposal || (sparkData.proposals && sparkData.proposals[k]));
+  if (hasProposals) {
+    markdown += `## 📝 Community Proposals\n\n`;
+    Object.keys(phases).forEach(key => {
+      const proposal = phases[key].proposal || (sparkData.proposals && sparkData.proposals[key]);
+      if (proposal) {
+        markdown += `### Proposed Addition to ${key.charAt(0).toUpperCase() + key.slice(1)} Phase\n`;
+        markdown += `${proposal.trim()}\n\n`;
+      }
+    });
+    markdown += `---\n\n`;
+  }
+
+  // Instructions
   markdown += `> *Instructions: Start by filling out Phase 1. As the community interacts, update the file via Pull Requests to complete Phase 2 and 3.*\n`;
 
   return markdown;

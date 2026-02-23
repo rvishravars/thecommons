@@ -20,6 +20,11 @@ function AppMain() {
   const [user, setUser] = useState(() => getStoredUserInfo());
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [prRefreshCallback, setPrRefreshCallback] = useState(null);
+  const [canPush, setCanPush] = useState(true);
+
+  const handlePermissionChange = (allowed) => {
+    setCanPush(allowed);
+  };
 
   const handleSparkSelect = (spark) => {
     setSelectedSpark(spark);
@@ -30,6 +35,7 @@ function AppMain() {
         markedForDeletion: spark.markedForDeletion || false,
         phases: spark.phases,
         contributors: spark.contributors,
+        proposals: spark.proposals || { spark: '', design: '', logic: '' },
         sourcePath: spark.sourcePath || spark.sourceFile || null,
       };
       loaded.phases = {
@@ -53,6 +59,7 @@ function AppMain() {
         name: updatedData.name,
         phases: updatedData.phases,
         contributors: updatedData.contributors,
+        proposals: updatedData.proposals,
         rawContent: generateSparkMarkdown(updatedData)
       });
     }
@@ -142,6 +149,7 @@ function AppMain() {
               onRepoChange={handleRepoChange}
               currentSparkData={sparkData}
               onPRRefresh={setPrRefreshCallback}
+              onPermissionChange={handlePermissionChange}
             />
           </aside>
 
@@ -156,6 +164,7 @@ function AppMain() {
                 onResetSpark={handleResetSpark}
                 isReadOnly={!user}
                 onPRCreated={() => prRefreshCallback?.()}
+                canPush={canPush}
               />
             ) : (
               <div className="flex h-full items-center justify-center p-4">

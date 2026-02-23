@@ -121,12 +121,36 @@ def fetch_json_with_token(url: str, token: str, method: str = "GET", payload: Op
     req.add_header("User-Agent", "spark-assembly-lab")
     if payload is not None:
         req.add_header("Content-Type", "application/json")
-    with urllib.request.urlopen(req) as response:
-        return json.loads(response.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8")
+        print(f"HTTP Error {e.code}: {e.reason}")
+        print(f"Response Body: {error_body}")
+        raise e
 
 
-def get_open_pr_count(owner: str, repo: str, spark_path: str, token: Optional[str]) -> Dict[str, Any]:
+def create_github_issue(owner: str, repo: str, token: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Create a new GitHub Issue in the specified repository."""
+    url = f"https://api.github.com/repos/{owner}/{repo}/issues"
+    return fetch_json_with_token(url, token, method="POST", payload=payload)
+
+
+def get_open_activity_count(owner: str, repo: str, spark_path: str, token: Optional[str]) -> Dict[str, Any]:
     headers = build_github_headers_with_token(token)
+    
+    can_push = False
+    if token:
+        try:
+            # Check for write permission by attempting to get the repo's push permission info
+            repo_info = fetch_json(f"https://api.github.com/repos/{owner}/{repo}", headers)
+            permissions = repo_info.get("permissions", {})
+            can_push = permissions.get("push", False)
+        except Exception:
+            can_push = False
+
+    # 1. Fetch Pull Requests
     pulls_url = f"https://api.github.com/repos/{owner}/{repo}/pulls?state=open&per_page=100"
     pulls = fetch_json(pulls_url, headers)
 
@@ -145,7 +169,24 @@ def get_open_pr_count(owner: str, repo: str, spark_path: str, token: Optional[st
                 urls.append(pr.get("html_url"))
                 break
 
-    return {"count": count, "urls": urls}
+    # 2. Fetch Issues (Proposals)
+    issues_url = f"https://api.github.com/repos/{owner}/{repo}/issues?state=open&per_page=100"
+    all_issues = fetch_json(issues_url, headers)
+    
+    # Filter for proposals that aren't PRs and mention the spark_path
+    spark_name = spark_path.split("/")[-1].replace(".spark.md", "")
+    for issue in all_issues:
+        if issue.get("pull_request"):
+            continue
+        
+        title = issue.get("title", "").lower()
+        body = issue.get("body", "").lower() if issue.get("body") else ""
+        
+        if spark_name.lower() in title or spark_name.lower() in body:
+            count += 1
+            urls.append(issue.get("html_url"))
+
+    return {"count": count, "urls": urls, "can_push": can_push}
 
 
 def search_for_spark_files(owner: str, repo: str) -> List[Dict[str, Any]]:
@@ -548,8 +589,13 @@ def get_prs_for_spark():
         token = auth_header.replace("Bearer ", "").strip()
 
     try:
-        result = get_open_pr_count(owner, repo, spark_path, token)
-        response = {"count": result["count"], "urls": result["urls"], "cached": False}
+        result = get_open_activity_count(owner, repo, spark_path, token)
+        response = {
+            "count": result["count"], 
+            "urls": result["urls"], 
+            "can_push": result["can_push"],
+            "cached": False
+        }
         pr_cache["data"][cache_key] = response
         pr_cache["timestamp"] = now
         return jsonify(response)
@@ -577,30 +623,76 @@ def submit_spark():
 
     owner = parsed["owner"]
     repo = parsed["repo"]
+    
+    # Extract spark name from title for the proposal
+    spark_name = title.replace("Spark: ", "") if title.startswith("Spark: ") else "New Spark"
 
     try:
+        # 1. Get Repo Info
         repo_info = fetch_json_with_token(f"https://api.github.com/repos/{owner}/{repo}", token)
         base_branch = repo_info.get("default_branch", "main")
-        ref = fetch_json_with_token(f"https://api.github.com/repos/{owner}/{repo}/git/ref/heads/{base_branch}", token)
-        base_sha = ref.get("object", {}).get("sha")
+        
+        # 2. Try to test write access by creating a branch
+        try:
+            ref = fetch_json_with_token(f"https://api.github.com/repos/{owner}/{repo}/git/ref/heads/{base_branch}", token)
+            base_sha = ref.get("object", {}).get("sha")
+            
+            # Create branch to confirm write access
+            branch_name = f"spark/{int(time.time())}"
+            fetch_json_with_token(
+                f"https://api.github.com/repos/{owner}/{repo}/git/refs",
+                token,
+                method="POST",
+                payload={"ref": f"refs/heads/{branch_name}", "sha": base_sha}
+            )
+        except urllib.error.HTTPError as err:
+            if err.code == 403 or err.code == 404:
+                # No write access -> Create a PROPOSAL (Issue) instead
+                print(f"Write access denied to {owner}/{repo}. Creating Proposal (Issue)...")
+                
+                proposal_body = f"""### Spark Proposal: {spark_name}
+
+A new spark contribution has been submitted from the Spark Assembly Lab.
+
+**Target File:** `{path}`
+**Submitted By:** User linked to this issue
+
+#### Proposed Content:
+```markdown
+{content}
+```
+
+---
+*This proposal was automatically generated by the Spark Assembly Lab. You can merge this by copy-pasting the content into the spark file or by using the owner's write access.*"""
+                
+                try:
+                    issue = create_github_issue(owner, repo, token, {
+                        "title": f"[PROPOSAL] {spark_name}",
+                        "body": proposal_body
+                    })
+                    
+                    return jsonify({
+                        "issue_url": issue.get("html_url"),
+                        "is_proposal": True
+                    })
+                except urllib.error.HTTPError as issue_err:
+                    if issue_err.code == 403:
+                        return jsonify({
+                            "error": "Submission failed. Your GitHub token lacks permissions to create issues. Please ensure it has 'Issues: Read & Write' scope (for Fine-grained tokens) or 'public_repo' scope (for Classic tokens)."
+                        }), 403
+                    raise issue_err
+            else:
+                raise err
+
         if not base_sha:
             return jsonify({"error": "Failed to resolve base branch"}), 502
 
-        branch_name = f"spark/{int(time.time())}"
-        fetch_json_with_token(
-            f"https://api.github.com/repos/{owner}/{repo}/git/refs",
-            token,
-            method="POST",
-            payload={"ref": f"refs/heads/{branch_name}", "sha": base_sha}
-        )
-
+        # 3. Commit/Update file (We already created the branch in Step 2)
         encoded = base64.b64encode(content.encode("utf-8")).decode("utf-8")
-
-        # Check for existing file
         file_sha = None
         try:
             existing = fetch_json_with_token(
-                f"https://api.github.com/repos/{owner}/{repo}/contents/{urllib.parse.quote(path)}?ref={base_branch}",
+                f"https://api.github.com/repos/{owner}/{repo}/contents/{urllib.parse.quote(path)}?ref={branch_name}",
                 token
             )
             file_sha = existing.get("sha")
@@ -622,20 +714,34 @@ def submit_spark():
             payload=commit_payload
         )
 
+        # 4. Create PR
         pr = fetch_json_with_token(
             f"https://api.github.com/repos/{owner}/{repo}/pulls",
             token,
             method="POST",
-            payload={"title": title, "body": body, "head": branch_name, "base": base_branch}
+            payload={
+                "title": title, 
+                "body": body, 
+                "head": branch_name, 
+                "base": base_branch
+            }
         )
 
-        # Invalidate PR cache for this spark
+        # Invalidate PR cache
         cache_key = f"{owner}/{repo}:{path}"
         if cache_key in pr_cache["data"]:
             del pr_cache["data"][cache_key]
 
-        return jsonify({"pr_url": pr.get("html_url"), "branch": branch_name})
+        return jsonify({
+            "pr_url": pr.get("html_url"), 
+            "branch": branch_name,
+            "is_proposal": False
+        })
     except Exception as err:
+        print(f"Submission error: {err}")
+        return jsonify({"error": str(err)}), 502
+    except Exception as err:
+        print(f"Submission error: {err}")
         return jsonify({"error": str(err)}), 502
 
 

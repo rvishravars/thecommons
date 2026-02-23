@@ -12,7 +12,7 @@ import { generateSparkMarkdown, validateSparkData } from '../utils/sparkParser';
 import { useToast } from '../utils/ToastContext';
 import { getStoredToken, getStoredUserInfo } from '../utils/github';
 
-export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly, onPRCreated }) {
+export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly, onPRCreated, canPush = true }) {
   const [showPreview, setShowPreview] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showPRTracker, setShowPRTracker] = useState(false);
@@ -124,8 +124,12 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
   const openPhaseEditor = (phaseKey) => {
     const phase = sparkData.phases[phaseKey];
-    const fallback = buildPhaseNotes(phaseKey, phase);
-    setPhaseDraft(phase.notes || fallback);
+    if (canPush) {
+      const fallback = buildPhaseNotes(phaseKey, phase);
+      setPhaseDraft(phase.notes || fallback);
+    } else {
+      setPhaseDraft('');
+    }
     setEditingPhase(phaseKey);
   };
 
@@ -137,9 +141,16 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
         ...sparkData.phases,
         [editingPhase]: {
           ...sparkData.phases[editingPhase],
-          notes: phaseDraft,
+          // If owner, update notes directly. If non-owner, update the hidden proposal field.
+          notes: canPush ? phaseDraft : sparkData.phases[editingPhase].notes,
+          proposal: canPush ? sparkData.phases[editingPhase].proposal : phaseDraft
         },
       },
+      // Also sync to the top-level proposals structure for the parser/generator
+      proposals: {
+        ...sparkData.proposals,
+        [editingPhase]: canPush ? (sparkData.proposals?.[editingPhase] || '') : phaseDraft
+      }
     };
     onSparkUpdate(updated);
     handleEditDone();
@@ -215,10 +226,14 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
         throw new Error(data.error || 'Failed to submit PR');
       }
 
-      toast.success(`PR created: ${data.pr_url}`);
+      if (data.is_proposal) {
+        toast.success(`Proposal submitted as an Issue: ${data.issue_url}`);
+      } else {
+        toast.success(`PR created: ${data.pr_url}`);
+      }
       setShowConfirmation(false);
-      if (data.pr_url) {
-        window.open(data.pr_url, '_blank');
+      if (data.issue_url || data.pr_url) {
+        window.open(data.issue_url || data.pr_url, '_blank');
       }
       // Refresh PR counts
       if (onPRCreated) {
@@ -369,7 +384,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               className={`flex items-center space-x-1 sm:space-x-2 rounded-lg bg-logic-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-logic-700 transition-colors disabled:opacity-60 whitespace-nowrap flex-shrink-0 ${isReadOnly ? 'cursor-not-allowed grayscale' : ''}`}
             >
               <GitPullRequest className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>Submit</span>
+              <span>{canPush ? 'Submit' : 'Propose'}</span>
             </button>
 
             {/* Secondary Actions Dropdown */}
@@ -520,7 +535,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                       disabled={isReadOnly}
                       className={`mt-2 text-xs text-${phase.color}-400 hover:text-${phase.color}-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      {!isReadOnly && <span>Edit</span>}
+                      {!isReadOnly && <span>{canPush ? 'Edit' : 'Add'}</span>}
                     </button>
                   </div>
                 </div>

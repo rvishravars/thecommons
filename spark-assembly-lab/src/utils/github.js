@@ -63,7 +63,7 @@ export const loginWithToken = async (token) => {
 
   try {
     const userInfo = await fetchUserInfo(token);
-    
+
     if (!userInfo) {
       return {
         success: false,
@@ -115,16 +115,16 @@ export const parseRepoUrl = (input) => {
   const cleanInput = input.trim()
     .replace(/https?:\/\//, '')
     .replace(/github\.com\//, '');
-  
+
   const parts = cleanInput.split('/').filter(part => part);
-  
+
   if (parts.length >= 2) {
     return {
       owner: parts[0],
       repo: parts[1].replace('.git', ''),
     };
   }
-  
+
   throw new Error('Invalid repository format. Use: owner/repo or https://github.com/owner/repo');
 };
 
@@ -136,12 +136,12 @@ const buildGitHubHeaders = () => {
     'Accept': 'application/vnd.github+json',
     'User-Agent': 'spark-assembly-lab',
   };
-  
+
   const token = getStoredToken();
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  
+
   return headers;
 };
 
@@ -151,18 +151,18 @@ const buildGitHubHeaders = () => {
 const searchSparkFiles = async (owner, repo) => {
   const query = `filename:.spark.md repo:${owner}/${repo}`;
   const url = `https://api.github.com/search/code?q=${encodeURIComponent(query)}`;
-  
+
   const response = await fetch(url, {
     headers: buildGitHubHeaders(),
   });
-  
+
   if (!response.ok) {
     if (response.status === 403) {
       throw new Error('GitHub API rate limit exceeded. Please add a GitHub token or try again later.');
     }
     throw new Error(`GitHub search failed: ${response.status}`);
   }
-  
+
   const data = await response.json();
   return data.items || [];
 };
@@ -172,11 +172,11 @@ const searchSparkFiles = async (owner, repo) => {
  */
 const listDirectory = async (owner, repo, path = 'sparks', branch = 'main') => {
   const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
-  
+
   const response = await fetch(url, {
     headers: buildGitHubHeaders(),
   });
-  
+
   if (!response.ok) {
     if (response.status === 404) {
       throw new Error(`Repository '${owner}/${repo}' not found or the '${path}' directory doesn't exist`);
@@ -186,9 +186,9 @@ const listDirectory = async (owner, repo, path = 'sparks', branch = 'main') => {
     }
     throw new Error(`GitHub API error: ${response.status}`);
   }
-  
+
   const items = await response.json();
-  return items.filter(item => 
+  return items.filter(item =>
     item.type === 'file' && item.name.endsWith('.spark.md')
   );
 };
@@ -199,13 +199,13 @@ const listDirectory = async (owner, repo, path = 'sparks', branch = 'main') => {
 const fetchFileContent = async (owner, repo, path, branch = 'main') => {
   // Use raw.githubusercontent.com for direct content access (no rate limiting)
   const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
-  
+
   const response = await fetch(url);
-  
+
   if (!response.ok) {
     throw new Error(`Failed to fetch ${path}: ${response.status}`);
   }
-  
+
   return await response.text();
 };
 
@@ -216,7 +216,7 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
   try {
     // Parse repository URL
     const { owner, repo } = parseRepoUrl(repoInput);
-    
+
     let searchItems = [];
     let dirItems = [];
     let searchError = null;
@@ -262,7 +262,7 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
         message: 'No .spark.md files found in this repository',
       };
     }
-    
+
     // Fetch content for each spark file
     const files = [];
     for (const item of combinedItems) {
@@ -279,7 +279,7 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
         // Continue with other files
       }
     }
-    
+
     return {
       success: true,
       owner,
@@ -301,7 +301,7 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
 export const fetchOpenPullRequests = async (owner, repo) => {
   try {
     const url = `https://api.github.com/repos/${owner}/${repo}/pulls?state=open&per_page=100`;
-    
+
     const response = await fetch(url, {
       headers: buildGitHubHeaders(),
     });
@@ -318,12 +318,36 @@ export const fetchOpenPullRequests = async (owner, repo) => {
 };
 
 /**
+ * Fetch all open issues in a repository
+ */
+export const fetchOpenIssues = async (owner, repo) => {
+  try {
+    const url = `https://api.github.com/repos/${owner}/${repo}/issues?state=open&per_page=100`;
+
+    const response = await fetch(url, {
+      headers: buildGitHubHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch issues: ${response.status}`);
+    }
+
+    const issues = await response.json();
+    // GitHub API includes PRs in the issues list, filter them out
+    return issues.filter(issue => !issue.pull_request);
+  } catch (error) {
+    console.error('Failed to fetch issues:', error);
+    return [];
+  }
+};
+
+/**
  * Fetch files changed in a specific pull request
  */
 export const fetchPRFiles = async (owner, repo, prNumber) => {
   try {
     const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/files?per_page=100`;
-    
+
     const response = await fetch(url, {
       headers: buildGitHubHeaders(),
     });
@@ -345,7 +369,7 @@ export const fetchPRFiles = async (owner, repo, prNumber) => {
 export const fetchPRDiff = async (owner, repo, prNumber, filename) => {
   try {
     const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/files`;
-    
+
     const response = await fetch(url, {
       headers: buildGitHubHeaders(),
     });
@@ -381,7 +405,7 @@ export const filterPRsByFile = (prs, filename) => {
 export const fetchFileCommitHistory = async (owner, repo, filepath, branch = 'main') => {
   try {
     const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${filepath}&sha=${branch}&per_page=50`;
-    
+
     const response = await fetch(url, {
       headers: buildGitHubHeaders(),
     });
@@ -403,7 +427,7 @@ export const fetchFileCommitHistory = async (owner, repo, filepath, branch = 'ma
 export const fetchCommitDetails = async (owner, repo, sha) => {
   try {
     const url = `https://api.github.com/repos/${owner}/${repo}/commits/${sha}`;
-    
+
     const response = await fetch(url, {
       headers: buildGitHubHeaders(),
     });
@@ -432,29 +456,29 @@ export const fetchCommitDetails = async (owner, repo, sha) => {
 export const globalSearchSparkFiles = async (searchQuery = '', options = {}) => {
   try {
     const { org, user, perPage = 30, page = 1 } = options;
-    
+
     // Build query parts
     const queryParts = ['filename:.spark.md'];
-    
+
     // Add search keywords if provided
     if (searchQuery && searchQuery.trim()) {
       queryParts.push(searchQuery.trim());
     }
-    
+
     // Add org/user filters
     if (org) {
       queryParts.push(`org:${org}`);
     } else if (user) {
       queryParts.push(`user:${user}`);
     }
-    
+
     const query = queryParts.join(' ');
     const url = `https://api.github.com/search/code?q=${encodeURIComponent(query)}&per_page=${perPage}&page=${page}`;
-    
+
     const response = await fetch(url, {
       headers: buildGitHubHeaders(),
     });
-    
+
     if (!response.ok) {
       if (response.status === 403) {
         const resetTime = response.headers.get('X-RateLimit-Reset');
@@ -465,14 +489,14 @@ export const globalSearchSparkFiles = async (searchQuery = '', options = {}) => 
       }
       throw new Error(`GitHub search failed: ${response.status}`);
     }
-    
+
     const data = await response.json();
-    
+
     // Parse results into a more usable format
     const results = (data.items || []).map(item => {
       const repoFullName = item.repository.full_name;
       const [owner, repo] = repoFullName.split('/');
-      
+
       return {
         path: item.path,
         name: item.name,
@@ -489,7 +513,7 @@ export const globalSearchSparkFiles = async (searchQuery = '', options = {}) => 
         sha: item.sha,
       };
     });
-    
+
     return {
       success: true,
       totalCount: data.total_count,
