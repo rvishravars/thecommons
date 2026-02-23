@@ -212,17 +212,12 @@ The app includes an AI-powered quiz system to test understanding of spark conten
 1. **Login**: Click the "Login" button in the header and enter your GitHub token
 2. **Open a Spark**: Load any existing spark from the sidebar
 3. **Click "Quiz Me"**: Located in the toolbar at the top of the assembly canvas
-4. **Choose Quiz Provider**:
-   - **Local Template**: Uses built-in quiz generation (no API key needed)
-   - **OpenAI (GPT-4o)**: AI-generated contextual questions
-   - **Anthropic (Claude)**: AI-generated contextual questions
-5. **For AI Providers**:
-   - Enter your API key in the secure input field
-   - Check "Save to browser" to store the key in localStorage for future use
-   - Your API key is only stored in your browser and sent directly to the AI provider
-   - Click "Clear" to remove a saved API key
-6. **Start the Quiz**: Answer 5 multiple-choice questions about the spark
-7. **View Results**: See your score and correct/incorrect answers
+4. **Pick a Focus**: Strengthen Spark, Improve Design, or Tighten Logic
+5. **Choose a Provider**: Gemini or OpenAI
+6. **Enter API Key**: Use a Gemini API key from Google AI Studio or an OpenAI API key
+7. **Optional: Save to browser**: Store the key in localStorage for future use
+8. **Start the Quiz**: Answer 5 reflection questions about the spark
+9. **View Summary**: Receive a detailed feedback report (no right or wrong answers)
 
 The AI providers generate questions that test understanding of:
 - The problem/gap identified (Spark phase)
@@ -232,9 +227,9 @@ The AI providers generate questions that test understanding of:
 
 **Where are API keys stored?**
 - API keys are stored in your browser's `localStorage` (if you check "Save to browser")
-- Keys are **never** sent to our servers - they go directly from your browser to OpenAI/Anthropic
+- Gemini keys are sent directly from your browser to Gemini
+- OpenAI keys are sent to the backend proxy for quiz generation
 - You can clear saved keys at any time using the "Clear" button
-- Optionally, server admins can set API keys as environment variables (see `.env.example`)
 
 **Testing with Docker:**
 ```bash
@@ -242,7 +237,7 @@ The AI providers generate questions that test understanding of:
 docker compose up --build
 
 # Visit http://localhost:3000 and try the Quiz Me feature
-# Enter your API key when prompted (or use Local Template mode)
+# Enter your Gemini API key when prompted
 ```
 
 ### Server Configuration (Optional)

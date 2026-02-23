@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react';
-import { X, Brain, CheckCircle, XCircle, Award, AlertCircle, Key, Trash2 } from 'lucide-react';
+import { X, Brain, Award, AlertCircle, Key, Trash2 } from 'lucide-react';
 import { generateSparkMarkdown } from '../utils/sparkParser';
 
-const AI_PROVIDERS = [
-  { id: 'openai', name: 'OpenAI (GPT-4)', icon: '🤖', keyLabel: 'OpenAI API Key' },
-  { id: 'anthropic', name: 'Anthropic (Claude)', icon: '🧠', keyLabel: 'Anthropic API Key' },
-  { id: 'local', name: 'Local Template', icon: '📋', keyLabel: null },
+const PROVIDERS = [
+  { id: 'gemini', label: 'Gemini', description: 'Direct from your browser' },
+  { id: 'openai', label: 'OpenAI', description: 'Uses the backend proxy' },
 ];
 
-// Storage keys for API keys
 const STORAGE_KEYS = {
+  gemini: 'spark_lab_gemini_key',
   openai: 'spark_lab_openai_key',
-  anthropic: 'spark_lab_anthropic_key',
 };
+
+const DEFAULT_GEMINI_MODEL = 'models/gemini-1.5-flash';
+const OPENAI_MODELS = [
+  { id: 'gpt-4o-mini', label: 'gpt-4o-mini' },
+  { id: 'gpt-4o', label: 'gpt-4o' },
+];
 
 // Helper functions for secure storage
 const getStoredApiKey = (provider) => {
@@ -45,141 +49,332 @@ const clearApiKey = (provider) => {
 };
 
 export default function QuizModal({ sparkData, onClose }) {
-  const [selectedAI, setSelectedAI] = useState(null);
+  const [selectedProvider, setSelectedProvider] = useState('gemini');
   const [apiKey, setApiKey] = useState('');
   const [saveKeyToStorage, setSaveKeyToStorage] = useState(false);
+  const [availableModels, setAvailableModels] = useState([]);
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_GEMINI_MODEL);
+  const [openaiModel, setOpenaiModel] = useState(OPENAI_MODELS[0].id);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsError, setModelsError] = useState(null);
+  const [quizMode, setQuizMode] = useState('spark');
   const [quizStarted, setQuizStarted] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
+  const [summary, setSummary] = useState('');
+  const [summaryLoading, setSummaryLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Load stored API key when provider changes
   useEffect(() => {
-    if (selectedAI && selectedAI !== 'local' && STORAGE_KEYS[selectedAI]) {
-      const storedKey = getStoredApiKey(selectedAI);
-      if (storedKey) {
-        setApiKey(storedKey);
-        setSaveKeyToStorage(true);
-      } else {
-        setApiKey('');
-        setSaveKeyToStorage(false);
+    const storedKey = getStoredApiKey(selectedProvider);
+    if (storedKey) {
+      setApiKey(storedKey);
+      setSaveKeyToStorage(true);
+    } else {
+      setApiKey('');
+      setSaveKeyToStorage(false);
+    }
+  }, [selectedProvider]);
+
+  const fetchGeminiModels = async () => {
+    if (!apiKey || selectedProvider !== 'gemini') {
+      setAvailableModels([]);
+      setModelsError(null);
+      return;
+    }
+
+    setModelsLoading(true);
+    setModelsError(null);
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`
+      );
+      const data = await response.json();
+
+      if (!response.ok) {
+        const message = data?.error?.message || 'Failed to load Gemini models.';
+        throw new Error(message);
       }
+
+      const models = (data.models || [])
+        .filter((model) => (model.supportedGenerationMethods || []).includes('generateContent'))
+        .map((model) => model.name);
+
+      setAvailableModels(models);
+      if (models.length > 0) {
+        setSelectedModel(models.includes(DEFAULT_GEMINI_MODEL) ? DEFAULT_GEMINI_MODEL : models[0]);
+      }
+    } catch (err) {
+      setModelsError(err.message || 'Failed to load Gemini models.');
+    } finally {
+      setModelsLoading(false);
     }
-  }, [selectedAI]);
-
-  const generateLocalQuiz = () => {
-    // Generate quiz questions from spark content
-    const quizQuestions = [];
-    
-    // Question 1: About Spark phase
-    if (sparkData.phases.spark.gap) {
-      quizQuestions.push({
-        question: `What is the main gap identified in the "${sparkData.name}" spark?`,
-        options: [
-          sparkData.phases.spark.gap || 'N/A',
-          'There is no gap mentioned',
-          'The system works perfectly',
-          'Users are completely satisfied',
-        ],
-        correctAnswer: 0,
-        phase: 'spark',
-      });
-    }
-
-    // Question 2: About Design phase
-    if (sparkData.phases.design.novel_core || sparkData.phases.design.blueprint) {
-      quizQuestions.push({
-        question: `What is the Novel Core (10% Delta) of this spark?`,
-        options: [
-          'It uses existing technology',
-          sparkData.phases.design.blueprint || sparkData.phases.design.novel_core || 'N/A',
-          'It copies other solutions',
-          'It makes no changes',
-        ],
-        correctAnswer: 1,
-        phase: 'design',
-      });
-    }
-
-    // Question 3: About Logic phase
-    if (sparkData.phases.logic.technical_impl) {
-      quizQuestions.push({
-        question: `Which phase focuses on technical implementation and testing?`,
-        options: [
-          'Spark - Scout submits the gap/hunch',
-          'Design - Designer creates blueprint',
-          'Logic - Builder implements and tests',
-          'None of the above',
-        ],
-        correctAnswer: 2,
-        phase: 'logic',
-      });
-    }
-
-    // Question 4: About Contributors
-    quizQuestions.push({
-      question: `In TheCommons framework, what is the reward for the Logic/Builder phase?`,
-      options: [
-        '+5 CS',
-        '+15 CS (+5 Echo Bonus)',
-        '+25 CS (+10 Prototype Bonus)',
-        '+50 CS',
-      ],
-      correctAnswer: 2,
-      phase: 'general',
-    });
-
-    // Question 5: About the Framework
-    quizQuestions.push({
-      question: `Which role identifies "Loose Studs" or gaps in the ecosystem?`,
-      options: [
-        'Builder',
-        'Designer',
-        'Scout',
-        'Architect',
-      ],
-      correctAnswer: 2,
-      phase: 'general',
-    });
-
-    return quizQuestions;
   };
 
-  const generateAIQuiz = async (provider) => {
-    try {
-      setError(null);
-      const sparkContent = generateSparkMarkdown(sparkData);
-      
-      const response = await fetch('/api/quiz/generate', {
+  useEffect(() => {
+    if (selectedProvider === 'gemini') {
+      fetchGeminiModels();
+    }
+  }, [apiKey, selectedProvider]);
+
+  const buildGeminiPrompt = () => {
+    const sparkContent = generateSparkMarkdown(sparkData);
+    return `You are an expert quiz generator for TheCommons Spark Assembly Lab.
+
+This quiz is a reflection exercise to strengthen the spark. There are no right answers.
+Focus the questions on: ${quizMode.toUpperCase()}.
+
+Generate 5 multiple-choice quiz questions based on the following Spark document. Questions should test understanding of:
+1. The problem/gap identified in the SPARK phase
+2. The Novel Core (10% Delta) in the DESIGN phase
+3. The technical implementation in the LOGIC phase
+4. TheCommons framework concepts (roles, rewards, assembly line)
+5. The overall spark's value proposition
+
+Spark Name: ${sparkData.name}
+
+Spark Content:
+${sparkContent.slice(0, 3000)}
+
+Return ONLY a valid JSON array with this exact structure (no markdown, no explanation):
+[
+  {
+    "question": "Question text here?",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "phase": "spark"
+  }
+]
+
+Phase values must be one of: "spark", "design", "logic", or "general".
+Do NOT include correct answers.
+Make questions engaging and educational.`;
+  };
+
+  const buildSummaryPrompt = () => {
+    const sparkContent = generateSparkMarkdown(sparkData);
+    const answerLines = questions.map((q, idx) => {
+      const selectedIndex = selectedAnswers[idx];
+      const selectedText = Number.isInteger(selectedIndex) ? q.options[selectedIndex] : 'No answer';
+      return `${idx + 1}. ${q.question}\nSelected: ${selectedText}`;
+    }).join('\n\n');
+
+    return `You are a Spark mentor. Provide a detailed feedback report based on the user's answers.
+
+Focus area: ${quizMode.toUpperCase()}.
+There are no right or wrong answers. The goal is to strengthen the spark.
+
+Spark Name: ${sparkData.name}
+
+Spark Content:
+${sparkContent.slice(0, 3000)}
+
+User Answers:
+${answerLines}
+
+Return a concise, structured feedback report with:
+- Strengths you observe
+- Risks or gaps to consider
+- Suggested next steps
+- One clarifying question to ask the team
+
+Write in plain text (no JSON).`;
+  };
+
+  const generateGeminiQuiz = async () => {
+    const modelPath = selectedModel.startsWith('models/') ? selectedModel : `models/${selectedModel}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/${modelPath}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+    const fetchGemini = async (promptText) => {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          provider,
-          apiKey: apiKey || undefined,
-          sparkContent,
-          sparkData: {
-            name: sparkData.name,
-            phases: sparkData.phases,
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: promptText }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 2000,
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  question: { type: 'string' },
+                  options: {
+                    type: 'array',
+                    items: { type: 'string' },
+                  },
+                  phase: { type: 'string' },
+                },
+                required: ['question', 'options', 'phase'],
+              },
+            },
           },
         }),
       });
 
+      const responseBody = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate quiz');
+        const message = responseBody?.error?.message || 'Gemini API request failed';
+        throw new Error(message);
       }
 
-      const data = await response.json();
-      return data.questions;
+      const candidates = responseBody?.candidates || [];
+      if (candidates.length === 0) {
+        const blockReason = responseBody?.promptFeedback?.blockReason;
+        const safetyMessage = blockReason
+          ? `Gemini blocked the response (${blockReason}). Try rephrasing or shortening the spark content.`
+          : 'Gemini returned an empty response.';
+        throw new Error(safetyMessage);
+      }
+
+      const text = candidates?.[0]?.content?.parts
+        ?.map((part) => part.text || '')
+        .join('')
+        .trim();
+
+      if (!text) {
+        throw new Error('Gemini returned an empty response.');
+      }
+
+      let normalized = text;
+      if (normalized.startsWith('```json')) {
+        normalized = normalized.slice(7);
+      }
+      if (normalized.startsWith('```')) {
+        normalized = normalized.slice(3);
+      }
+      if (normalized.endsWith('```')) {
+        normalized = normalized.slice(0, -3);
+      }
+      normalized = normalized.trim();
+
+      const arrayMatch = normalized.match(/\[[\s\S]*\]/);
+      const jsonPayload = arrayMatch ? arrayMatch[0] : normalized;
+      return JSON.parse(jsonPayload);
+    };
+
+    try {
+      return await fetchGemini(buildGeminiPrompt());
     } catch (err) {
-      console.error('AI quiz generation error:', err);
-      throw err;
+      const strictPrompt = `${buildGeminiPrompt()}
+
+IMPORTANT: Return ONLY a valid JSON array. Do not include any prose, markdown, or trailing commas. Ensure all strings use double quotes and are properly escaped.`;
+      try {
+        return await fetchGemini(strictPrompt);
+      } catch (retryErr) {
+        const message = retryErr.message || err.message || 'Gemini returned invalid JSON.';
+        throw new Error(`Gemini returned invalid JSON. Please try again. Details: ${message}`);
+      }
     }
+  };
+
+  const generateGeminiSummary = async () => {
+    const modelPath = selectedModel.startsWith('models/') ? selectedModel : `models/${selectedModel}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/${modelPath}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: buildSummaryPrompt() }],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.4,
+          maxOutputTokens: 1200,
+          responseMimeType: 'text/plain',
+        },
+      }),
+    });
+
+    const responseBody = await response.json();
+    if (!response.ok) {
+      const message = responseBody?.error?.message || 'Gemini API request failed';
+      throw new Error(message);
+    }
+
+    const candidates = responseBody?.candidates || [];
+    if (candidates.length === 0) {
+      const blockReason = responseBody?.promptFeedback?.blockReason;
+      const safetyMessage = blockReason
+        ? `Gemini blocked the response (${blockReason}). Try rephrasing or shortening the spark content.`
+        : 'Gemini returned an empty response.';
+      throw new Error(safetyMessage);
+    }
+
+    const text = candidates?.[0]?.content?.parts
+      ?.map((part) => part.text || '')
+      .join('')
+      .trim();
+
+    if (!text) {
+      throw new Error('Gemini returned an empty response.');
+    }
+
+    return text;
+  };
+
+  const generateOpenAIQuiz = async () => {
+    const response = await fetch('/api/quiz/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        provider: 'openai',
+        apiKey,
+        model: openaiModel,
+        prompt: buildGeminiPrompt(),
+        focus: quizMode,
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.error || 'OpenAI request failed');
+    }
+
+    return data.questions || [];
+  };
+
+  const generateOpenAISummary = async () => {
+    const response = await fetch('/api/quiz/summary', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        provider: 'openai',
+        apiKey,
+        model: openaiModel,
+        prompt: buildSummaryPrompt(),
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.error || 'OpenAI summary request failed');
+    }
+
+    return data.summary || '';
   };
 
   const handleStartQuiz = async () => {
@@ -187,33 +382,36 @@ export default function QuizModal({ sparkData, onClose }) {
     setError(null);
 
     try {
-      if (selectedAI === 'local') {
-        // Use local template
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const quiz = generateLocalQuiz();
-        setQuestions(quiz);
-        setQuizStarted(true);
-      } else if (selectedAI === 'openai' || selectedAI === 'anthropic') {
-        // Validate API key
-        if (!apiKey || apiKey.trim() === '') {
-          throw new Error('Please enter your API key to use this AI provider');
-        }
-        
-        // Save API key to storage if requested
-        if (saveKeyToStorage) {
-          saveApiKey(selectedAI, apiKey);
-        }
-        
-        // Use AI provider
-        const quiz = await generateAIQuiz(selectedAI);
-        if (!quiz || quiz.length === 0) {
-          throw new Error('No questions generated');
-        }
-        setQuestions(quiz);
-        setQuizStarted(true);
+      if (!apiKey || apiKey.trim() === '') {
+        throw new Error(`Please enter your ${selectedProvider === 'openai' ? 'OpenAI' : 'Gemini'} API key to generate the quiz.`);
       }
+
+      if (saveKeyToStorage) {
+        saveApiKey(selectedProvider, apiKey);
+      }
+
+      const quiz = selectedProvider === 'openai'
+        ? await generateOpenAIQuiz()
+        : await generateGeminiQuiz();
+      if (!quiz || quiz.length === 0) {
+        throw new Error('No questions generated');
+      }
+      setQuestions(quiz);
+      setQuizStarted(true);
     } catch (err) {
-      setError(err.message || 'Failed to generate quiz. Please try again.');
+      const rawMessage = err.message || '';
+      const normalized = rawMessage.toLowerCase();
+      if (normalized.includes('model') && normalized.includes('not found')) {
+        setError(selectedProvider === 'openai'
+          ? 'That OpenAI model is not available for your key. Try a different model.'
+          : 'That Gemini model is not available for your key. Use the model dropdown to pick an available one, then try again.');
+      } else if (normalized.includes('insufficient_quota') || normalized.includes('quota')) {
+        setError(selectedProvider === 'openai'
+          ? 'Your OpenAI quota is exceeded. Please add billing at https://platform.openai.com/account/billing/overview, or use a different key.'
+          : 'Your Gemini quota is exceeded. Please add billing at https://aistudio.google.com/app/billing, or use a different key.');
+      } else {
+        setError(rawMessage || 'Failed to generate quiz. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -227,33 +425,31 @@ export default function QuizModal({ sparkData, onClose }) {
   };
 
   const handleClearApiKey = () => {
-    if (selectedAI && STORAGE_KEYS[selectedAI]) {
-      clearApiKey(selectedAI);
-      setApiKey('');
-      setSaveKeyToStorage(false);
-    }
+    clearApiKey(selectedProvider);
+    setApiKey('');
+    setSaveKeyToStorage(false);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
-    } else {
-      setShowResults(true);
+      return;
     }
-  };
 
-  const calculateScore = () => {
-    let correct = 0;
-    questions.forEach((q, idx) => {
-      if (selectedAnswers[idx] === q.correctAnswer) {
-        correct++;
-      }
-    });
-    return {
-      correct,
-      total: questions.length,
-      percentage: Math.round((correct / questions.length) * 100),
-    };
+    setShowResults(true);
+    setSummaryLoading(true);
+    setSummary('');
+
+    try {
+      const report = selectedProvider === 'openai'
+        ? await generateOpenAISummary()
+        : await generateGeminiSummary();
+      setSummary(report);
+    } catch (err) {
+      setSummary(err.message || 'Failed to generate summary.');
+    } finally {
+      setSummaryLoading(false);
+    }
   };
 
   const getPhaseColor = (phase) => {
@@ -264,55 +460,42 @@ export default function QuizModal({ sparkData, onClose }) {
   };
 
   if (showResults) {
-    const score = calculateScore();
     return (
       <div className="fixed inset-0 z-50 theme-overlay backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
         <div className="theme-panel rounded-xl border-2 border-design-600 w-full max-w-2xl shadow-2xl max-h-[95vh] overflow-y-auto">
           <div className="bg-design-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl flex items-center justify-between sticky top-0">
             <div className="flex items-center space-x-2 sm:space-x-3">
               <Award className="h-6 w-6 sm:h-8 sm:w-8" />
-              <h2 className="text-lg sm:text-2xl font-bold">Quiz Results</h2>
+              <h2 className="text-lg sm:text-2xl font-bold">Reflection Summary</h2>
             </div>
             <button onClick={onClose} className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 transition-colors">
               <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
           </div>
 
-          <div className="p-4 sm:p-8 text-center">
-            <div className="text-4xl sm:text-6xl font-bold mb-4">
-              {score.percentage}%
-            </div>
-            <div className="text-lg sm:text-2xl mb-6 sm:mb-8">
-              {score.correct} out of {score.total} correct
-            </div>
+          <div className="p-4 sm:p-8">
+            <p className="text-sm theme-subtle mb-4">
+              Focus area: <span className="font-semibold text-white">{quizMode.toUpperCase()}</span>
+            </p>
 
-            <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
-              {questions.map((q, idx) => {
-                const isCorrect = selectedAnswers[idx] === q.correctAnswer;
-                return (
-                  <div
-                    key={idx}
-                    className={`flex items-center justify-between p-2 sm:p-3 rounded-lg ${
-                      isCorrect ? 'bg-logic-900/20 border border-logic-600' : 'bg-red-900/20 border border-red-600'
-                    }`}
-                  >
-                    <span className="text-sm">Question {idx + 1}</span>
-                    {isCorrect ? (
-                      <CheckCircle className="h-5 w-5 text-logic-400" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-red-400" />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            {summaryLoading ? (
+              <div className="text-center py-8 theme-subtle">
+                <div className="text-sm">Generating your feedback report...</div>
+              </div>
+            ) : (
+              <div className="whitespace-pre-wrap text-sm leading-relaxed bg-design-900/10 border border-design-700/40 rounded-lg p-4">
+                {summary || 'No summary available.'}
+              </div>
+            )}
 
-            <button
-              onClick={onClose}
-              className="px-6 py-3 bg-design-600 hover:bg-design-700 rounded-lg font-semibold transition-colors"
-            >
-              Close
-            </button>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={onClose}
+                className="px-6 py-3 bg-design-600 hover:bg-design-700 rounded-lg font-semibold transition-colors"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -341,7 +524,7 @@ export default function QuizModal({ sparkData, onClose }) {
           <div className="p-4 sm:p-8">
             <div className="mb-4 sm:mb-6">
               <span className={`text-xs font-semibold uppercase ${getPhaseColor(q.phase)}`}>
-                {q.phase === 'general' ? 'Framework Knowledge' : `${q.phase} Phase`}
+                {q.phase === 'general' ? 'Reflection' : `${q.phase} Focus`}
               </span>
               <h3 className="text-lg sm:text-xl font-semibold mt-2">{q.question}</h3>
             </div>
@@ -413,69 +596,146 @@ export default function QuizModal({ sparkData, onClose }) {
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-2">Spark: {sparkData.name}</h3>
             <p className="text-sm theme-muted">
-              Choose your AI provider to generate quiz questions based on this spark&apos;s content
+              Choose a focus area and provider to guide the reflection quiz. There are no right answers.
             </p>
           </div>
 
-          <div className="space-y-3 mb-6">
-            {AI_PROVIDERS.map((provider) => (
-              <button
-                key={provider.id}
-                onClick={() => setSelectedAI(provider.id)}
-                className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                  selectedAI === provider.id
-                    ? 'border-design-500 bg-design-900/20'
-                    : 'theme-border theme-border-hover theme-card'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{provider.icon}</span>
-                  <span className="font-semibold">{provider.name}</span>
-                </div>
-              </button>
-            ))}
+          <div className="mb-6">
+            <label className="block text-sm font-semibold mb-2">Provider</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {PROVIDERS.map((provider) => (
+                <button
+                  key={provider.id}
+                  onClick={() => setSelectedProvider(provider.id)}
+                  className={`text-left p-3 rounded-lg border-2 transition-all ${
+                    selectedProvider === provider.id
+                      ? 'border-design-500 bg-design-900/20'
+                      : 'theme-border theme-border-hover theme-card'
+                  }`}
+                >
+                  <div className="text-sm font-semibold">{provider.label}</div>
+                  <div className="text-xs theme-subtle mt-1">{provider.description}</div>
+                </button>
+              ))}
+            </div>
           </div>
 
-          {selectedAI && selectedAI !== 'local' && (
+          <div className="mb-6">
+            <label className="block text-sm font-semibold mb-2">Quiz Focus</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {[
+                { id: 'spark', label: 'Strengthen Spark', description: 'Clarify the gap and why it matters' },
+                { id: 'design', label: 'Improve Design', description: 'Refine the novel core and blueprint' },
+                { id: 'logic', label: 'Tighten Logic', description: 'Stress-test implementation details' },
+              ].map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => setQuizMode(option.id)}
+                  className={`text-left p-3 rounded-lg border-2 transition-all ${
+                    quizMode === option.id
+                      ? 'border-design-500 bg-design-900/20'
+                      : 'theme-border theme-border-hover theme-card'
+                  }`}
+                >
+                  <div className="text-sm font-semibold">{option.label}</div>
+                  <div className="text-xs theme-subtle mt-1">{option.description}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-semibold">
+                <Key className="inline h-4 w-4 mr-1" />
+                {selectedProvider === 'openai' ? 'OpenAI API Key' : 'Gemini API Key'}
+              </label>
+              {apiKey && (
+                <button
+                  onClick={handleClearApiKey}
+                  className="text-xs text-red-400 hover:text-red-300 flex items-center space-x-1"
+                  title="Clear saved API key"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  <span>Clear</span>
+                </button>
+              )}
+            </div>
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder={`Enter your ${selectedProvider === 'openai' ? 'OpenAI' : 'Gemini'} API key...`}
+              className="w-full theme-input rounded border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-design-500"
+            />
+            <div className="flex items-center justify-between mt-2">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={saveKeyToStorage}
+                  onChange={(e) => setSaveKeyToStorage(e.target.checked)}
+                  className="rounded border-gray-600 bg-gray-800 text-design-600 focus:ring-design-500"
+                />
+                <span className="text-xs theme-subtle">Save to browser (localStorage)</span>
+              </label>
+            </div>
+            <p className="text-xs theme-subtle mt-2">
+              🔒 Your {selectedProvider === 'openai' ? 'OpenAI' : 'Gemini'} API key will be stored securely in your browser and never sent to our servers.
+            </p>
+          </div>
+
+          {selectedProvider === 'gemini' && (
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-semibold">
-                  <Key className="inline h-4 w-4 mr-1" />
-                  {AI_PROVIDERS.find(p => p.id === selectedAI)?.keyLabel || 'API Key'}
-                </label>
-                {apiKey && (
-                  <button
-                    onClick={handleClearApiKey}
-                    className="text-xs text-red-400 hover:text-red-300 flex items-center space-x-1"
-                    title="Clear saved API key"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                    <span>Clear</span>
-                  </button>
+                <label className="block text-sm font-semibold">Gemini Model</label>
+                <button
+                  onClick={fetchGeminiModels}
+                  disabled={!apiKey || modelsLoading}
+                  className="text-xs theme-muted-hover disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Refresh model list"
+                >
+                  {modelsLoading ? 'Loading...' : 'Refresh'}
+                </button>
+              </div>
+              <select
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                disabled={!apiKey || availableModels.length === 0}
+                className="w-full theme-input rounded border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-design-500 disabled:opacity-50"
+              >
+                {availableModels.length === 0 ? (
+                  <option value={selectedModel}>Enter API key to load models</option>
+                ) : (
+                  availableModels.map((model) => (
+                    <option key={model} value={model}>{model}</option>
+                  ))
                 )}
-              </div>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder={`Enter your ${selectedAI === 'openai' ? 'OpenAI' : 'Anthropic'} API key...`}
+              </select>
+              {modelsError && (
+                <p className="text-xs text-red-300 mt-2">{modelsError}</p>
+              )}
+              {!modelsError && availableModels.length > 0 && (
+                <p className="text-xs theme-subtle mt-2">
+                  Select a model that supports generateContent for your account.
+                </p>
+              )}
+            </div>
+          )}
+
+          {selectedProvider === 'openai' && (
+            <div className="mb-6">
+              <label className="block text-sm font-semibold mb-2">OpenAI Model</label>
+              <select
+                value={openaiModel}
+                onChange={(e) => setOpenaiModel(e.target.value)}
                 className="w-full theme-input rounded border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-design-500"
-              />
-              <div className="flex items-center justify-between mt-2">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={saveKeyToStorage}
-                    onChange={(e) => setSaveKeyToStorage(e.target.checked)}
-                    className="rounded border-gray-600 bg-gray-800 text-design-600 focus:ring-design-500"
-                  />
-                  <span className="text-xs theme-subtle">Save to browser (localStorage)</span>
-                </label>
-              </div>
+              >
+                {OPENAI_MODELS.map((model) => (
+                  <option key={model.id} value={model.id}>{model.label}</option>
+                ))}
+              </select>
               <p className="text-xs theme-subtle mt-2">
-                {selectedAI === 'openai' 
-                  ? '🔒 Your OpenAI API key will be stored securely in your browser and never sent to our servers.'
-                  : '🔒 Your Anthropic API key will be stored securely in your browser and never sent to our servers.'}
+                Select the OpenAI model available on your account.
               </p>
             </div>
           )}
@@ -491,7 +751,7 @@ export default function QuizModal({ sparkData, onClose }) {
 
           <button
             onClick={handleStartQuiz}
-            disabled={!selectedAI || loading}
+            disabled={!apiKey || loading}
             className="w-full px-6 py-3 bg-design-600 hover:bg-design-700 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Generating Quiz...' : 'Start Quiz'}
