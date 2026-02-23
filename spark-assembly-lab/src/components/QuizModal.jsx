@@ -65,6 +65,7 @@ export default function QuizModal({ sparkData, onClose }) {
   const [showResults, setShowResults] = useState(false);
   const [summary, setSummary] = useState('');
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [copyStatus, setCopyStatus] = useState('idle');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -430,6 +431,18 @@ IMPORTANT: Return ONLY a valid JSON array. Do not include any prose, markdown, o
     setSaveKeyToStorage(false);
   };
 
+  const handleCopySummary = async () => {
+    if (!summary || summaryLoading) return;
+    try {
+      await navigator.clipboard.writeText(summary);
+      setCopyStatus('copied');
+      setTimeout(() => setCopyStatus('idle'), 2000);
+    } catch (err) {
+      setCopyStatus('failed');
+      setTimeout(() => setCopyStatus('idle'), 2000);
+    }
+  };
+
   const handleNext = async () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -488,7 +501,14 @@ IMPORTANT: Return ONLY a valid JSON array. Do not include any prose, markdown, o
               </div>
             )}
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                onClick={handleCopySummary}
+                disabled={!summary || summaryLoading}
+                className="px-4 py-3 bg-design-900/30 hover:bg-design-900/40 border border-design-700/60 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {copyStatus === 'copied' ? 'Copied' : copyStatus === 'failed' ? 'Copy Failed' : 'Copy Summary'}
+              </button>
               <button
                 onClick={onClose}
                 className="px-6 py-3 bg-design-600 hover:bg-design-700 rounded-lg font-semibold transition-colors"
