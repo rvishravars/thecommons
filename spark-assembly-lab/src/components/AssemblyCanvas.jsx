@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download, Copy, Eye, Brain, GitPullRequest, RotateCcw, Trash2 } from 'lucide-react';
+import { Download, Copy, Eye, Brain, GitPullRequest, RotateCcw, Trash2, MoreVertical } from 'lucide-react';
 import MarkdownPreview from './MarkdownPreview';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -23,6 +23,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
   const [editStatus, setEditStatus] = useState(null);
   const [editingPhase, setEditingPhase] = useState(null);
   const [phaseDraft, setPhaseDraft] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
   const [activePhasesForNewSpark, setActivePhasesForNewSpark] = useState(() => {
     // For new template sparks, start with only Spark
     const isNewTemplate = ['New Spark', 'School Level', 'University Level'].includes(sparkData?.name);
@@ -351,27 +352,8 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
             </div>
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-design-500/50 scrollbar-track-transparent">
-            <button
-              onClick={() => setShowPRTracker(!showPRTracker)}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-shrink-0"
-              title="View pull requests for this spark"
-            >
-              <GitPullRequest className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Evolution</span>
-              <span className="sm:hidden">PRs</span>
-            </button>
-
-            <button
-              onClick={() => setShowQuiz(true)}
-              disabled={!user}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-design-500 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-design-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-design-500 whitespace-nowrap flex-shrink-0"
-              title={!user ? 'Please login with GitHub to use Improve Spark feature' : 'Get AI feedback to improve this spark'}
-            >
-              <Brain className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>Improve</span>
-            </button>
-
+          <div className="flex items-center gap-2">
+            {/* Primary Toggle: Preview/Edit */}
             <button
               onClick={() => setShowPreview(!showPreview)}
               className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-shrink-0"
@@ -380,33 +362,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               <span>{showPreview ? 'Edit' : 'Preview'}</span>
             </button>
 
-            <button
-              onClick={handleCopyToClipboard}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-shrink-0"
-            >
-              <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>Copy</span>
-            </button>
-
-            <button
-              onClick={handleReset}
-              disabled={!isDirty || isReadOnly}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors disabled:opacity-50 whitespace-nowrap flex-shrink-0"
-            >
-              <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Reset</span>
-              <span className="sm:hidden">Reset</span>
-            </button>
-
-            <button
-              onClick={handleDownload}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-design-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-design-700 transition-colors whitespace-nowrap flex-shrink-0"
-            >
-              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Download</span>
-              <span className="sm:hidden">Save</span>
-            </button>
-
+            {/* Primary Action: Submit */}
             <button
               onClick={handleSubmit}
               disabled={isSubmitting || isReadOnly}
@@ -416,15 +372,82 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               <span>Submit</span>
             </button>
 
-            <button
-              onClick={handleDeleteRequest}
-              disabled={isSubmitting || isReadOnly || !originalSparkData}
-              title={sparkData.contributors.scout !== user?.login ? 'Only the spark owner can delete' : 'Request deletion of this spark'}
-              className="flex items-center space-x-1 sm:space-x-2 rounded-lg bg-red-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-60 whitespace-nowrap flex-shrink-0"
-            >
-              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>Delete</span>
-            </button>
+            {/* Secondary Actions Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="p-2 rounded-lg theme-button hover:bg-white/10 transition-colors flex-shrink-0"
+                title="More actions"
+              >
+                <MoreVertical className="h-5 w-5" />
+              </button>
+
+              {showDropdown && (
+                <>
+                  {/* Backdrop to close dropdown */}
+                  <div
+                    className="fixed inset-0 z-[55]"
+                    onClick={() => setShowDropdown(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-48 rounded-xl theme-panel border theme-border shadow-2xl z-[60] py-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                    <button
+                      onClick={() => { setShowQuiz(true); setShowDropdown(false); }}
+                      disabled={!user}
+                      className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm hover:bg-design-500/10 transition-colors disabled:opacity-50"
+                    >
+                      <Brain className="h-4 w-4 text-design-400" />
+                      <span>Improve</span>
+                    </button>
+
+                    <button
+                      onClick={() => { setShowPRTracker(!showPRTracker); setShowDropdown(false); }}
+                      className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors"
+                    >
+                      <GitPullRequest className="h-4 w-4 theme-muted" />
+                      <span>Evolution</span>
+                    </button>
+
+                    <div className="h-px theme-border my-1 mx-2" />
+
+                    <button
+                      onClick={() => { handleCopyToClipboard(); setShowDropdown(false); }}
+                      className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors"
+                    >
+                      <Copy className="h-4 w-4 theme-muted" />
+                      <span>Copy MD</span>
+                    </button>
+
+                    <button
+                      onClick={() => { handleDownload(); setShowDropdown(false); }}
+                      className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors"
+                    >
+                      <Download className="h-4 w-4 theme-muted" />
+                      <span>Download</span>
+                    </button>
+
+                    <div className="h-px theme-border my-1 mx-2" />
+
+                    <button
+                      onClick={() => { handleReset(); setShowDropdown(false); }}
+                      disabled={!isDirty || isReadOnly}
+                      className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm hover:bg-white/5 transition-colors disabled:opacity-50"
+                    >
+                      <RotateCcw className="h-4 w-4 text-yellow-500/80" />
+                      <span>Reset</span>
+                    </button>
+
+                    <button
+                      onClick={() => { handleDeleteRequest(); setShowDropdown(false); }}
+                      disabled={isSubmitting || isReadOnly || !originalSparkData}
+                      className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm hover:bg-red-500/10 text-red-400 transition-colors disabled:opacity-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
