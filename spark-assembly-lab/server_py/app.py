@@ -131,8 +131,10 @@ def create_github_issue(owner: str, repo: str, token: str, payload: Dict[str, An
     return fetch_json_with_token(url, token, method="POST", payload=payload)
 
 
-def get_open_pr_count(owner: str, repo: str, spark_path: str, token: Optional[str]) -> Dict[str, Any]:
+def get_open_activity_count(owner: str, repo: str, spark_path: str, token: Optional[str]) -> Dict[str, Any]:
     headers = build_github_headers_with_token(token)
+    
+    # 1. Fetch Pull Requests
     pulls_url = f"https://api.github.com/repos/{owner}/{repo}/pulls?state=open&per_page=100"
     pulls = fetch_json(pulls_url, headers)
 
@@ -150,6 +152,23 @@ def get_open_pr_count(owner: str, repo: str, spark_path: str, token: Optional[st
                 count += 1
                 urls.append(pr.get("html_url"))
                 break
+
+    # 2. Fetch Issues (Proposals)
+    issues_url = f"https://api.github.com/repos/{owner}/{repo}/issues?state=open&per_page=100"
+    all_issues = fetch_json(issues_url, headers)
+    
+    # Filter for proposals that aren't PRs and mention the spark_path
+    spark_name = spark_path.split("/")[-1].replace(".spark.md", "")
+    for issue in all_issues:
+        if issue.get("pull_request"):
+            continue
+        
+        title = issue.get("title", "").lower()
+        body = issue.get("body", "").lower() if issue.get("body") else ""
+        
+        if spark_name.lower() in title or spark_name.lower() in body:
+            count += 1
+            urls.append(issue.get("html_url"))
 
     return {"count": count, "urls": urls}
 
@@ -554,7 +573,7 @@ def get_prs_for_spark():
         token = auth_header.replace("Bearer ", "").strip()
 
     try:
-        result = get_open_pr_count(owner, repo, spark_path, token)
+        result = get_open_activity_count(owner, repo, spark_path, token)
         response = {"count": result["count"], "urls": result["urls"], "cached": False}
         pr_cache["data"][cache_key] = response
         pr_cache["timestamp"] = now

@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { GitPullRequest, ChevronDown, ChevronUp, Code2, Plus, Minus, AlertCircle, GitCommit } from 'lucide-react';
-import { fetchOpenPullRequests, fetchPRFiles, fetchPRDiff, parseRepoUrl, fetchFileCommitHistory, fetchCommitDetails } from '../utils/github';
+import { fetchOpenPullRequests, fetchOpenIssues, fetchPRFiles, fetchPRDiff, parseRepoUrl, fetchFileCommitHistory, fetchCommitDetails } from '../utils/github';
 
 export default function PRTracker({ repoUrl, sparkFile, user }) {
   const [prs, setPrs] = useState([]);
+  const [proposals, setProposals] = useState([]);
   const [commits, setCommits] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedPR, setSelectedPR] = useState(null);
+  const [selectedProposal, setSelectedProposal] = useState(null);
   const [selectedCommit, setSelectedCommit] = useState(null);
   const [commitDiffs, setCommitDiffs] = useState({});
   const [prFiles, setPrFiles] = useState({});
@@ -24,27 +26,39 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
     setLoading(true);
     setError(null);
     setViewMode('prs');
-    
+
     try {
       const { owner, repo } = parseRepoUrl(repoUrl);
-      const allPRs = await fetchOpenPullRequests(owner, repo);
-      
-      // Filter PRs that might affect this spark
       const sparkName = sparkFile.replace('.spark.md', '');
-      const relevantPRs = allPRs.filter(pr => 
+
+      // Load PRs and Proposals in parallel
+      const [allPRs, allIssues] = await Promise.all([
+        fetchOpenPullRequests(owner, repo),
+        fetchOpenIssues(owner, repo)
+      ]);
+
+      // Filter PRs
+      const relevantPRs = allPRs.filter(pr =>
         pr.title.toLowerCase().includes(sparkName.toLowerCase()) ||
         (pr.body && pr.body.toLowerCase().includes(sparkName.toLowerCase()))
       );
-      
+
+      // Filter Proposals (Issues tagged with [PROPOSAL] or mentioning spark)
+      const relevantProposals = allIssues.filter(issue =>
+        issue.title.toLowerCase().includes(sparkName.toLowerCase()) ||
+        (issue.body && issue.body.toLowerCase().includes(sparkName.toLowerCase()))
+      );
+
       setPrs(relevantPRs);
-      
-      // If no PRs found, load commit history instead
-      if (relevantPRs.length === 0) {
+      setProposals(relevantProposals);
+
+      // If no PRs or proposals found, load commit history instead
+      if (relevantPRs.length === 0 && relevantProposals.length === 0) {
         await loadHistory(owner, repo);
       }
     } catch (err) {
-      setError(err.message || 'Failed to load pull requests');
-      console.error('Error loading PRs:', err);
+      setError(err.message || 'Failed to load activity');
+      console.error('Error loading PRs/Proposals:', err);
     } finally {
       setLoading(false);
     }
@@ -55,7 +69,7 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
       setViewMode('history');
       const history = await fetchFileCommitHistory(owner, repo, sparkFile);
       setCommits(history);
-      
+
       if (history.length === 0) {
         setError('No history found for this spark');
       }
@@ -73,12 +87,12 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
     try {
       const { owner, repo } = parseRepoUrl(repoUrl);
       const details = await fetchCommitDetails(owner, repo, commit.sha);
-      
+
       setCommitDiffs(prev => ({
         ...prev,
         [commit.sha]: details,
       }));
-      
+
       setSelectedCommit(selectedCommit?.sha === commit.sha ? null : commit);
     } catch (err) {
       console.error(`Error loading diff for commit ${commit.sha}:`, err);
@@ -94,15 +108,15 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
     try {
       const { owner, repo } = parseRepoUrl(repoUrl);
       const files = await fetchPRFiles(owner, repo, pr.number);
-      
+
       // Filter for spark files
       const sparkFiles = files.filter(f => f.filename.endsWith('.spark.md'));
-      
+
       setPrFiles(prev => ({
         ...prev,
         [pr.number]: sparkFiles,
       }));
-      
+
       setSelectedPR(selectedPR?.number === pr.number ? null : pr);
     } catch (err) {
       console.error(`Error loading PR #${pr.number} details:`, err);
@@ -111,7 +125,7 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
 
   const toggleDiffExpand = async (prNumber, fileIndex) => {
     const key = `${prNumber}-${fileIndex}`;
-    
+
     if (expandedDiffs[key]) {
       setExpandedDiffs(prev => {
         const newState = { ...prev };
@@ -167,9 +181,14 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
           <>
             <GitPullRequest className="h-5 w-5" />
             <h3 className="font-semibold">Spark Evolution</h3>
-            <span className="ml-auto inline-block bg-white/20 px-2 py-0.5 rounded text-xs font-semibold">
-              {prs.length} Open
-            </span>
+            <div className="ml-auto flex gap-2">
+              <span className="inline-block bg-white/20 px-2 py-0.5 rounded text-xs font-semibold">
+                {prs.length} PRs
+              </span>
+              <span className="inline-block bg-white/20 px-2 py-0.5 rounded text-xs font-semibold">
+                {proposals.length} Proposals
+              </span>
+            </div>
           </>
         ) : (
           <>
@@ -196,10 +215,10 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
           </div>
         )}
 
-        {/* Pull Requests View */}
-        {viewMode === 'prs' && prs.length === 0 && !error && (
+        {/* Pull Requests & Proposals View */}
+        {viewMode === 'prs' && prs.length === 0 && proposals.length === 0 && !error && (
           <div className="p-4 text-center opacity-60">
-            <p className="text-sm">No pull requests in progress</p>
+            <p className="text-sm">No activity in progress</p>
           </div>
         )}
 
@@ -211,7 +230,7 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
               className="w-full p-4 text-left hover:bg-white/5 transition-colors flex items-start gap-3 group"
             >
               <GitPullRequest className="h-5 w-5 text-spark-600 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
-              
+
               <div className="flex-1 min-w-0">
                 <h4 className="font-semibold text-sm truncate group-hover:text-spark-400 transition-colors">
                   <span className="text-xs opacity-60 mr-2">#{pr.number}</span>
@@ -262,7 +281,7 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
                         >
                           <Code2 className="h-4 w-4 opacity-60" />
                           <span className="flex-1 font-mono truncate">{file.filename}</span>
-                          
+
                           <div className="flex items-center gap-2">
                             <span className="flex items-center gap-1">
                               <Plus className="h-3 w-3 text-logic-600" />
@@ -331,6 +350,63 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
           </div>
         ))}
 
+        {/* Proposals (Issues) List */}
+        {viewMode === 'prs' && proposals.map((issue) => (
+          <div key={issue.number} className="hover:bg-white/5 transition-colors border-t border-white/5">
+            <button
+              onClick={() => setSelectedProposal(selectedProposal?.number === issue.number ? null : issue)}
+              className="w-full p-4 text-left hover:bg-white/5 transition-colors flex items-start gap-3 group"
+            >
+              <AlertCircle className="h-5 w-5 text-design-400 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-sm truncate group-hover:text-design-300 transition-colors">
+                  <span className="text-xs opacity-60 mr-2">#{issue.number}</span>
+                  {issue.title}
+                </h4>
+                <div className="flex flex-wrap gap-2 mt-2 text-xs opacity-70">
+                  <span className="bg-design-600/30 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold text-design-300">Proposal</span>
+                  <span>{issue.user.login}</span>
+                  <span>•</span>
+                  <span>{formatDate(issue.created_at)}</span>
+                  <span>•</span>
+                  <span>{issue.comments} comments</span>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0">
+                {selectedProposal?.number === issue.number ? (
+                  <ChevronUp className="h-5 w-5 opacity-60" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 opacity-60 group-hover:opacity-100" />
+                )}
+              </div>
+            </button>
+
+            {selectedProposal?.number === issue.number && (
+              <div className="bg-white/5 border-t border-white/10 p-4 space-y-3">
+                <div className="text-xs space-y-2">
+                  <p className="font-semibold opacity-80">Proposal Content</p>
+                  <div className="opacity-60 whitespace-pre-wrap line-clamp-[10] bg-black/40 p-3 rounded font-mono text-[10px]">
+                    {issue.body}
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-white/10">
+                  <a
+                    href={issue.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-design-400 hover:text-design-300 transition-colors"
+                  >
+                    Review Proposal on GitHub →
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+
         {/* Commit History View */}
         {viewMode === 'history' && commits.length === 0 && !error && (
           <div className="p-4 text-center opacity-60">
@@ -346,7 +422,7 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
               className="w-full p-4 text-left hover:bg-white/5 transition-colors flex items-start gap-3 group"
             >
               <GitCommit className="h-5 w-5 text-design-600 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
-              
+
               <div className="flex-1 min-w-0">
                 <h4 className="font-semibold text-sm truncate group-hover:text-design-400 transition-colors">
                   {commit.commit.author.name}
