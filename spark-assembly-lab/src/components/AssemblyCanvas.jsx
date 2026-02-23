@@ -29,6 +29,10 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
     const isNewTemplate = ['New Spark', 'School Level', 'University Level'].includes(sparkData?.name);
     return isNewTemplate ? [PhaseTypes.SPARK] : [PhaseTypes.SPARK, PhaseTypes.DESIGN, PhaseTypes.LOGIC];
   });
+  const [expandedPhases, setExpandedPhases] = useState({
+    [PhaseTypes.DESIGN]: false,
+    [PhaseTypes.LOGIC]: false,
+  });
   const toast = useToast();
   const user = getStoredUserInfo();
 
@@ -40,6 +44,10 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
     } else {
       setActivePhasesForNewSpark([PhaseTypes.SPARK, PhaseTypes.DESIGN, PhaseTypes.LOGIC]);
     }
+    setExpandedPhases({
+      [PhaseTypes.DESIGN]: false,
+      [PhaseTypes.LOGIC]: false,
+    });
   }, [sparkData?.name]);
 
   const handleBlockUpdate = (phase, blockType, value) => {
@@ -467,6 +475,12 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
         </div>
       </div>
 
+      {isReadOnly && (
+        <div className="mx-4 sm:mx-6 mt-4 rounded-lg border border-design-500/40 bg-design-500/10 px-3 py-2 text-xs sm:text-sm text-design-100">
+          Login to edit or propose changes to this spark.
+        </div>
+      )}
+
       {/* Assembly Area */}
       {editStatus && (
         <div
@@ -513,14 +527,22 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               },
             ]
               .filter(phase => activePhasesForNewSpark.includes(phase.key))
-              .map((phase) => (
+              .map((phase) => {
+                const isCollapsible = [PhaseTypes.SPARK, PhaseTypes.DESIGN, PhaseTypes.LOGIC].includes(phase.key);
+                const isExpanded = !isCollapsible || expandedPhases[phase.key];
+                return (
                 <div key={phase.key} className={`flex-1 min-w-[280px] lg:min-w-[320px] flex flex-col rounded-xl border-2 border-${phase.color}-600 theme-panel-soft`}>
                   <div className={`bg-${phase.color}-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl`}>
                     <h2 className="text-lg sm:text-xl font-bold">{phase.title}</h2>
                     <p className="text-xs sm:text-sm mt-1 opacity-90">{phase.description}</p>
                   </div>
                   <div className="flex-1 p-3 sm:p-4 flex flex-col overflow-y-hidden">
-                    <div className="w-full flex-1 theme-input rounded border p-3 sm:p-4 text-sm sm:text-base overflow-y-auto bg-black/10 min-h-[240px]">
+                    <div
+                      className={`w-full flex-1 theme-input rounded border p-3 sm:p-4 text-sm sm:text-base bg-black/10 relative ${isCollapsible
+                        ? `${isExpanded ? 'overflow-y-auto' : 'overflow-hidden'} max-h-[68vh] sm:max-h-[58vh]`
+                        : 'overflow-y-auto min-h-[240px]'
+                        }`}
+                    >
                       <div className="prose prose-invert prose-sm max-w-none">
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm, remarkMath]}
@@ -529,17 +551,36 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                           {sparkData.phases[phase.key].notes || buildPhaseNotes(phase.key, sparkData.phases[phase.key])}
                         </ReactMarkdown>
                       </div>
+                      {isCollapsible && !isExpanded && (
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/60 to-transparent" />
+                      )}
                     </div>
-                    <button
-                      onClick={() => openPhaseEditor(phase.key)}
-                      disabled={isReadOnly}
-                      className={`mt-2 text-xs text-${phase.color}-400 hover:text-${phase.color}-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                      {!isReadOnly && <span>{canPush ? 'Edit' : 'Add'}</span>}
-                    </button>
+                    <div className="mt-2 flex items-center gap-3">
+                      {isCollapsible && (
+                        <button
+                          onClick={() =>
+                            setExpandedPhases((prev) => ({
+                              ...prev,
+                              [phase.key]: !prev[phase.key],
+                            }))
+                          }
+                          className={`text-xs text-${phase.color}-200 hover:text-${phase.color}-100 transition-colors`}
+                        >
+                          {isExpanded ? 'Less' : 'More'}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => openPhaseEditor(phase.key)}
+                        disabled={isReadOnly}
+                        className={`text-xs text-${phase.color}-400 hover:text-${phase.color}-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed`}
+                      >
+                        {!isReadOnly && <span>{canPush ? 'Edit' : 'Add'}</span>}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              ))}
+              );
+            })}
 
             {/* Add Phase Buttons */}
             <div className="flex flex-col gap-3 mt-6">

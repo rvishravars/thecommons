@@ -19,8 +19,8 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
   const [prInfo, setPrInfo] = useState({ count: null, urls: [] });
   const [refreshToken, setRefreshToken] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isScribeSummaryCollapsed, setIsScribeSummaryCollapsed] = useState(false);
-  const [isSparksListCollapsed, setIsSparksListCollapsed] = useState(false);
+  const [isScribeSummaryCollapsed, setIsScribeSummaryCollapsed] = useState(true);
+  const [isSparksListCollapsed, setIsSparksListCollapsed] = useState(true);
   const hasRegisteredRefresh = useRef(false);
 
   // Expose refresh function to parent
