@@ -17,8 +17,11 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-markdown": "^9.0.1",
-    "gray-matter": "^4.0.3",
     "remark-gfm": "^4.0.0",
+    "remark-math": "^5.1.1",
+    "rehype-katex": "^6.0.3",
+    "katex": "^0.16.9",
+    "gray-matter": "^4.0.3",
     "lucide-react": "^0.344.0",
     "clsx": "^2.1.0"
   },
