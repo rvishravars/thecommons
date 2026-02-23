@@ -4,7 +4,13 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /app/spark-assembly-lab
 
-# Copy app source (includes package.json)
+# Copy package files first for better layer caching
+COPY spark-assembly-lab/package.json spark-assembly-lab/package-lock.json* ./
+
+# Install Node dependencies
+RUN npm install
+
+# Copy the rest of the application
 COPY spark-assembly-lab/ ./
 
 # Install Python for Flask backend
@@ -13,11 +19,6 @@ RUN apk add --no-cache python3 py3-pip
 # Create virtualenv to avoid PEP 668 restrictions
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-
-# Install dependencies
-RUN npm install
-
-# Scribe core is already included in the above COPY
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r server_py/requirements.txt

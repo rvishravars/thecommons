@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Plus, FileText, Zap, RefreshCw, Search, X, Globe, FolderGit2, ChevronDown, ChevronUp } from 'lucide-react';
 import { buildMissionSummary, parseSparkFile } from '../utils/sparkParser';
 import { getStoredToken, loadSparksFromGitHub } from '../utils/github';
@@ -21,10 +21,12 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
   const [searchQuery, setSearchQuery] = useState('');
   const [isScribeSummaryCollapsed, setIsScribeSummaryCollapsed] = useState(false);
   const [isSparksListCollapsed, setIsSparksListCollapsed] = useState(false);
+  const hasRegisteredRefresh = useRef(false);
 
   // Expose refresh function to parent
   useEffect(() => {
-    if (onPRRefresh) {
+    if (onPRRefresh && !hasRegisteredRefresh.current) {
+      hasRegisteredRefresh.current = true;
       onPRRefresh(() => {
         setRefreshToken((value) => value + 1);
       });
@@ -413,9 +415,9 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         )}
 
         <div className="rounded-lg border theme-border theme-card-soft mb-3">
-          <button
+          <div
             onClick={() => setIsSparksListCollapsed(!isSparksListCollapsed)}
-            className="w-full flex items-center justify-between p-3 hover:bg-gray-700/30 transition-colors"
+            className="w-full flex items-center justify-between p-3 hover:bg-gray-700/30 transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <h3 className="text-xs font-semibold uppercase tracking-wider theme-muted">
@@ -442,7 +444,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
                 <ChevronUp className="h-4 w-4 theme-muted" />
               )}
             </div>
-          </button>
+          </div>
 
           {!isSparksListCollapsed && (
             <div className="px-3 pb-3">
