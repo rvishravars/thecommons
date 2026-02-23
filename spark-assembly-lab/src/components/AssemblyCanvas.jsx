@@ -12,7 +12,7 @@ import { generateSparkMarkdown, validateSparkData } from '../utils/sparkParser';
 import { useToast } from '../utils/ToastContext';
 import { getStoredToken, getStoredUserInfo } from '../utils/github';
 
-export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly, onPRCreated }) {
+export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly, onPRCreated, canPush = true }) {
   const [showPreview, setShowPreview] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showPRTracker, setShowPRTracker] = useState(false);
@@ -373,7 +373,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               className={`flex items-center space-x-1 sm:space-x-2 rounded-lg bg-logic-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-logic-700 transition-colors disabled:opacity-60 whitespace-nowrap flex-shrink-0 ${isReadOnly ? 'cursor-not-allowed grayscale' : ''}`}
             >
               <GitPullRequest className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>Submit</span>
+              <span>{canPush ? 'Submit' : 'Propose'}</span>
             </button>
 
             {/* Secondary Actions Dropdown */}

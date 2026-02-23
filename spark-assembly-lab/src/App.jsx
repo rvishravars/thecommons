@@ -20,6 +20,11 @@ function AppMain() {
   const [user, setUser] = useState(() => getStoredUserInfo());
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [prRefreshCallback, setPrRefreshCallback] = useState(null);
+  const [canPush, setCanPush] = useState(true);
+
+  const handlePermissionChange = (allowed) => {
+    setCanPush(allowed);
+  };
 
   const handleSparkSelect = (spark) => {
     setSelectedSpark(spark);
@@ -142,6 +147,7 @@ function AppMain() {
               onRepoChange={handleRepoChange}
               currentSparkData={sparkData}
               onPRRefresh={setPrRefreshCallback}
+              onPermissionChange={handlePermissionChange}
             />
           </aside>
 
@@ -156,6 +162,7 @@ function AppMain() {
                 onResetSpark={handleResetSpark}
                 isReadOnly={!user}
                 onPRCreated={() => prRefreshCallback?.()}
+                canPush={canPush}
               />
             ) : (
               <div className="flex h-full items-center justify-center p-4">
