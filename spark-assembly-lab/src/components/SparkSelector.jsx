@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, FileText, Zap, RefreshCw } from 'lucide-react';
 import { buildMissionSummary, parseSparkFile } from '../utils/sparkParser';
-import { getStoredToken } from '../utils/github';
+import { getStoredToken, loadSparksFromGitHub } from '../utils/github';
 import RepoInput from './RepoInput';
 
 export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, onRepoChange, currentSparkData, onPRRefresh }) {
@@ -76,70 +76,61 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     setRefreshToken((value) => value + 1);
 
     try {
-      console.log('🔍 Loading sparks...');
+      console.log('🔍 Loading sparks from GitHub...');
 
-      try {
-        // Build API URL with repo parameter if provided
-        const apiUrl = repoUrl
-          ? `/api/sparks?repo=${encodeURIComponent(repoUrl)}`
-          : '/api/sparks';
+      if (!repoUrl) {
+        setErrorType('no-repo');
+        setError('Please enter a repository URL to load sparks');
+        setSparks([]);
+        setLoading(false);
+        return;
+      }
 
-        const apiResponse = await fetch(apiUrl);
+      // Load sparks directly from GitHub
+      const result = await loadSparksFromGitHub(repoUrl, 'main', 'sparks');
 
-        if (apiResponse.ok) {
-          const apiData = await apiResponse.json();
-
-          // Store repo info for display
-          if (apiData.owner && apiData.repo) {
-            setRepoInfo(`${apiData.owner}/${apiData.repo}`);
-          }
-
-          if (Array.isArray(apiData.files) && apiData.files.length > 0) {
-            const apiContentFiles = apiData.files.filter((file) => file?.content);
-            if (apiContentFiles.length > 0) {
-              const parsedSparks = apiContentFiles.map((file) =>
-                buildSparkEntry(file.name || file.path || 'spark', file.content, file.path)
-              );
-              // Sort by name in reverse order (latest first)
-              parsedSparks.sort((a, b) => b.name.localeCompare(a.name));
-              setSparks(parsedSparks);
-              setLoading(false);
-              return;
-            }
-          } else {
-            // No spark files found in the repository
-            setErrorType('no-sparks');
-            setError('No .spark.md files found in this repository');
-            setSparks([]);
-            setLoading(false);
-            return;
-          }
+      if (!result.success) {
+        // Handle errors
+        const errorMsg = result.error || 'Failed to load sparks';
+        
+        if (errorMsg.includes('not found') || errorMsg.includes("doesn't exist")) {
+          setErrorType('repo-not-found');
+          setError('Repository not found. Please check the URL and try again.');
+        } else if (errorMsg.includes('rate limit')) {
+          setErrorType('rate-limit');
+          setError('GitHub API rate limit exceeded. Please add a GitHub token in the login menu.');
+        } else if (errorMsg.includes('Invalid repository format')) {
+          setErrorType('invalid-format');
+          setError('Invalid repository format. Use: owner/repo or https://github.com/owner/repo');
         } else {
-          const errorData = await apiResponse.json().catch(() => ({ error: 'Unknown error' }));
-          const errorMessage = errorData.error || `Failed to fetch sparks: ${apiResponse.status}`;
-
-          // Determine error type based on status code and message
-          if (apiResponse.status === 404 || errorMessage.includes('GitHub index fetch failed: 404')) {
-            setErrorType('repo-not-found');
-            setError('Repository not found. Please check the URL and try again.');
-          } else if (apiResponse.status === 403) {
-            setErrorType('rate-limit');
-            setError('GitHub API rate limit exceeded. Please try again later or add a GITHUB_TOKEN.');
-          } else if (errorMessage.includes('Invalid repository format')) {
-            setErrorType('invalid-format');
-            setError('Invalid repository format. Use: owner/repo or https://github.com/owner/repo');
-          } else {
-            setErrorType('network-error');
-            setError(errorMessage);
-          }
-          setSparks([]);
-          setLoading(false);
-          return;
+          setErrorType('network-error');
+          setError(errorMsg);
         }
-      } catch (err) {
-        console.warn('⚠️ Could not fetch sparks from backend', err);
-        setErrorType('network-error');
-        setError(err.message || 'Failed to connect to the server');
+        setSparks([]);
+        setLoading(false);
+        return;
+      }
+
+      // Store repo info for display
+      if (result.owner && result.repo) {
+        setRepoInfo(`${result.owner}/${result.repo}`);
+      }
+
+      // Check if we have files
+      if (result.files && result.files.length > 0) {
+        const parsedSparks = result.files.map((file) =>
+          buildSparkEntry(file.name || file.path || 'spark', file.content, file.path)
+        );
+        
+        // Sort by name in reverse order (latest first)
+        parsedSparks.sort((a, b) => b.name.localeCompare(a.name));
+        setSparks(parsedSparks);
+        setLoading(false);
+        return;
+      } else {
+        // No spark files found in the repository
+        setErrorType('no-sparks');
+        setError(result.message || 'No .spark.md files found in this repository');
         setSparks([]);
         setLoading(false);
         return;
@@ -147,7 +138,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     } catch (err) {
       console.error('❌ Error in loadSparks:', err);
       setErrorType('network-error');
-      setError(err.message);
+      setError(err.message || 'Failed to load sparks from GitHub');
       setSparks([]);
     } finally {
       setLoading(false);
@@ -356,7 +347,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               )}
-              {errorType === 'no-sparks' && (
+              {(errorType === 'no-sparks' || errorType === 'no-repo') && (
                 <svg className="h-5 w-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -370,6 +361,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
                 <p className="text-sm font-semibold text-red-400 mb-1">
                   {errorType === 'repo-not-found' && 'Repository Not Found'}
                   {errorType === 'no-sparks' && 'No Spark Files'}
+                  {errorType === 'no-repo' && 'No Repository'}
                   {errorType === 'rate-limit' && 'Rate Limit Exceeded'}
                   {errorType === 'invalid-format' && 'Invalid Format'}
                   {errorType === 'network-error' && 'Connection Error'}

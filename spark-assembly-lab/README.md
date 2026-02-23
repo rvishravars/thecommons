@@ -30,7 +30,7 @@ A React-based LEGO-style interface for building and visualizing **Sparks** in Th
 - **Visual Assembly**: Build sparks using a 3-lane LEGO-style interface (Intuition, Design, Logic)
 - **Building Blocks**: Modular components for each phase with expandable form fields
 - **Full-Screen Editor**: Maximize any block for focused, distraction-free editing
-- **Quiz Me**: Interactive AI-powered quiz system to test understanding of spark content
+- **Quiz Me**: Interactive AI-powered quiz system to test understanding of spark content (requires login)
 - **External Repo Loading**: Load sparks from any GitHub repository dynamically
 - **Mobile Responsive**: Fully optimized for mobile devices with drawer navigation
 - **Live Preview**: Real-time markdown preview of your spark
@@ -203,6 +203,43 @@ The app uses a simple Personal Access Token (PAT) authentication system:
 3. The stability indicator shows completion level
 4. Click **"Refresh"** icon to reload sparks from the current source
 
+### Quiz Me Feature
+
+The app includes an AI-powered quiz system to test understanding of spark content:
+
+**Prerequisites**: You must be logged in with GitHub to use the Quiz feature.
+
+1. **Login**: Click the "Login" button in the header and enter your GitHub token
+2. **Open a Spark**: Load any existing spark from the sidebar
+3. **Click "Quiz Me"**: Located in the toolbar at the top of the assembly canvas
+4. **Pick a Focus**: Strengthen Spark, Improve Design, or Tighten Logic
+5. **Choose a Provider**: Gemini or OpenAI
+6. **Enter API Key**: Use a Gemini API key from Google AI Studio or an OpenAI API key
+7. **Optional: Save to browser**: Store the key in localStorage for future use
+8. **Start the Quiz**: Answer 5 reflection questions about the spark
+9. **View Summary**: Receive a detailed feedback report (no right or wrong answers)
+
+The AI providers generate questions that test understanding of:
+- The problem/gap identified (Spark phase)
+- The Novel Core and design approach (Design phase)
+- Technical implementation details (Logic phase)
+- TheCommons framework concepts
+
+**Where are API keys stored?**
+- API keys are stored in your browser's `localStorage` (if you check "Save to browser")
+- Gemini keys are sent directly from your browser to Gemini
+- OpenAI keys are sent to the backend proxy for quiz generation
+- You can clear saved keys at any time using the "Clear" button
+
+**Testing with Docker:**
+```bash
+# No configuration needed! Just start the container
+docker compose up --build
+
+# Visit http://localhost:3000 and try the Quiz Me feature
+# Enter your Gemini API key when prompted
+```
+
 ### Server Configuration (Optional)
 
 The server supports environment variables for configuration:
@@ -213,7 +250,15 @@ GITHUB_TOKEN=your_token_here      # For private repos or higher rate limits
 
 # Cache settings
 SPARK_CACHE_TTL_SECONDS=60        # Cache duration (default: 60 seconds)
+
+# AI Integration (optional fallback)
+# Users can enter API keys in the browser UI (recommended)
+# These are only used as fallback if no API key is provided by the user
+OPENAI_API_KEY=sk-...             # For GPT-4 quiz generation
+ANTHROPIC_API_KEY=sk-ant-...      # For Claude quiz generation
 ```
+
+Create a `.env` file in the `spark-assembly-lab/` directory based on `.env.example` to configure these settings.
 
 The application does not have a default repository - users must specify a repository URL to load sparks.
 
