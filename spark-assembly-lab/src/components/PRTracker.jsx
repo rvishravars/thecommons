@@ -13,6 +13,7 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
   const [prFiles, setPrFiles] = useState({});
   const [expandedDiffs, setExpandedDiffs] = useState({});
   const [viewMode, setViewMode] = useState('prs'); // 'prs' or 'history'
+  const [visibleCommits, setVisibleCommits] = useState(5);
 
   useEffect(() => {
     if (!repoUrl || !sparkFile) return;
@@ -337,7 +338,7 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
           </div>
         )}
 
-        {viewMode === 'history' && commits.map((commit) => (
+        {viewMode === 'history' && commits.slice(0, visibleCommits).map((commit) => (
           <div key={commit.sha} className="hover:bg-white/5 transition-colors">
             {/* Commit Summary */}
             <button
@@ -347,15 +348,15 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
               <GitCommit className="h-5 w-5 text-design-600 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
               
               <div className="flex-1 min-w-0">
-                <h4 className="font-mono text-xs truncate group-hover:text-design-400 transition-colors">
-                  {commit.sha.substring(0, 12)}
+                <h4 className="font-semibold text-sm truncate group-hover:text-design-400 transition-colors">
+                  {commit.commit.author.name}
                 </h4>
                 <p className="text-xs opacity-60 mt-1">
                   {new Date(commit.commit.author.date).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric',
-                  })} · {commit.commit.author.name}
+                  })}
                 </p>
               </div>
 
@@ -421,6 +422,18 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
             )}
           </div>
         ))}
+
+        {/* Load More Button */}
+        {viewMode === 'history' && visibleCommits < commits.length && (
+          <div className="p-4 text-center border-t border-white/10">
+            <button
+              onClick={() => setVisibleCommits(prev => Math.min(prev + 5, commits.length))}
+              className="text-xs px-4 py-2 bg-design-600 hover:bg-design-700 rounded transition-colors font-semibold"
+            >
+              Load More ({commits.length - visibleCommits} remaining)
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
