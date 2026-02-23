@@ -141,9 +141,16 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
         ...sparkData.phases,
         [editingPhase]: {
           ...sparkData.phases[editingPhase],
-          notes: phaseDraft,
+          // If owner, update notes directly. If non-owner, update the hidden proposal field.
+          notes: canPush ? phaseDraft : sparkData.phases[editingPhase].notes,
+          proposal: canPush ? sparkData.phases[editingPhase].proposal : phaseDraft
         },
       },
+      // Also sync to the top-level proposals structure for the parser/generator
+      proposals: {
+        ...sparkData.proposals,
+        [editingPhase]: canPush ? (sparkData.proposals?.[editingPhase] || '') : phaseDraft
+      }
     };
     onSparkUpdate(updated);
     handleEditDone();

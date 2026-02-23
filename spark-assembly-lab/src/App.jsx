@@ -35,6 +35,7 @@ function AppMain() {
         markedForDeletion: spark.markedForDeletion || false,
         phases: spark.phases,
         contributors: spark.contributors,
+        proposals: spark.proposals || { spark: '', design: '', logic: '' },
         sourcePath: spark.sourcePath || spark.sourceFile || null,
       };
       loaded.phases = {
@@ -58,6 +59,7 @@ function AppMain() {
         name: updatedData.name,
         phases: updatedData.phases,
         contributors: updatedData.contributors,
+        proposals: updatedData.proposals,
         rawContent: generateSparkMarkdown(updatedData)
       });
     }
