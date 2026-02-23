@@ -11,8 +11,12 @@ export default function MarkdownPreview({ markdown }) {
       <div className="max-w-4xl mx-auto p-8">
         <div className="prose prose-invert prose-lg max-w-none">
           <ReactMarkdown 
-            remarkPlugins={[remarkGfm, remarkMath]}
-            rehypePlugins={[[rehypeKatex, {}]]}
+            remarkPlugins={[[remarkMath, { singleDollarTextMath: true }], remarkGfm]}
+            rehypePlugins={[[rehypeKatex, { 
+              strict: false,
+              output: 'html',
+              trust: true
+            }]]}
           >
             {markdown}
           </ReactMarkdown>
