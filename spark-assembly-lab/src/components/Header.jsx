@@ -3,8 +3,7 @@ import GitHubAuth from './GitHubAuth';
 
 const THEME_OPTIONS = [
   { value: 'studio', label: 'Studio Noir' },
-  { value: 'wonderworks', label: 'WonderWorks' },
-  { value: 'ledger', label: 'Ledger Light' },
+  { value: 'light-theme', label: 'Light Theme' },
 ];
 
 export default function Header({ theme, onThemeChange, onMenuToggle, user, onUserChange }) {

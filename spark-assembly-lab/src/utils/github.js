@@ -398,5 +398,109 @@ export const fetchCommitDetails = async (owner, repo, sha) => {
   }
 };
 
+/**
+ * Global search for .spark.md files across all GitHub repositories
+ * @param {string} searchQuery - Search query (can include keywords, org:name, user:name, etc.)
+ * @param {Object} options - Search options
+ * @param {string} options.org - Filter by organization name
+ * @param {string} options.user - Filter by user name
+ * @param {number} options.perPage - Results per page (default: 30, max: 100)
+ * @param {number} options.page - Page number (default: 1)
+ * @returns {Promise<Object>} Search results with spark files
+ */
+export const globalSearchSparkFiles = async (searchQuery = '', options = {}) => {
+  try {
+    const { org, user, perPage = 30, page = 1 } = options;
+    
+    // Build query parts
+    const queryParts = ['filename:.spark.md'];
+    
+    // Add search keywords if provided
+    if (searchQuery && searchQuery.trim()) {
+      queryParts.push(searchQuery.trim());
+    }
+    
+    // Add org/user filters
+    if (org) {
+      queryParts.push(`org:${org}`);
+    } else if (user) {
+      queryParts.push(`user:${user}`);
+    }
+    
+    const query = queryParts.join(' ');
+    const url = `https://api.github.com/search/code?q=${encodeURIComponent(query)}&per_page=${perPage}&page=${page}`;
+    
+    const response = await fetch(url, {
+      headers: buildGitHubHeaders(),
+    });
+    
+    if (!response.ok) {
+      if (response.status === 403) {
+        const resetTime = response.headers.get('X-RateLimit-Reset');
+        throw new Error('GitHub API rate limit exceeded. Please add a GitHub token or try again later.');
+      }
+      if (response.status === 422) {
+        throw new Error('Invalid search query. Please refine your search.');
+      }
+      throw new Error(`GitHub search failed: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    // Parse results into a more usable format
+    const results = (data.items || []).map(item => {
+      const repoFullName = item.repository.full_name;
+      const [owner, repo] = repoFullName.split('/');
+      
+      return {
+        path: item.path,
+        name: item.name,
+        repository: {
+          fullName: repoFullName,
+          owner,
+          repo,
+          url: item.repository.html_url,
+          description: item.repository.description,
+          starCount: item.repository.stargazers_count,
+          language: item.repository.language,
+        },
+        url: item.html_url,
+        sha: item.sha,
+      };
+    });
+    
+    return {
+      success: true,
+      totalCount: data.total_count,
+      incompleteResults: data.incomplete_results,
+      results,
+      page,
+      perPage,
+      hasNextPage: results.length === perPage && data.total_count > page * perPage,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message || 'Failed to search for spark files',
+      results: [],
+      totalCount: 0,
+    };
+  }
+};
 
-
+/**
+ * Fetch content preview for a spark file from search results
+ * @param {string} owner - Repository owner
+ * @param {string} repo - Repository name
+ * @param {string} path - File path
+ * @param {string} branch - Branch name (default: 'main')
+ * @returns {Promise<string>} File content
+ */
+export const fetchSparkFilePreview = async (owner, repo, path, branch = 'main') => {
+  try {
+    return await fetchFileContent(owner, repo, path, branch);
+  } catch (error) {
+    console.error(`Failed to fetch preview for ${path}:`, error);
+    return null;
+  }
+};
