@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { Edit3, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 export default function BuildingBlock({ title, description, icon, color, value, onUpdate, onDone, isReadOnly }) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -57,7 +59,10 @@ export default function BuildingBlock({ title, description, icon, color, value, 
         {hasContent && (
           <div className="mt-3 px-1 py-1 overflow-hidden">
             <div className="prose prose-invert prose-xs max-w-none theme-text line-clamp-4">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm, remarkMath]}
+                rehypePlugins={[rehypeKatex]}
+              >
                 {value}
               </ReactMarkdown>
             </div>
