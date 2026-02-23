@@ -274,5 +274,85 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
   }
 };
 
+/**
+ * Fetch all open pull requests in a repository
+ */
+export const fetchOpenPullRequests = async (owner, repo) => {
+  try {
+    const url = `https://api.github.com/repos/${owner}/${repo}/pulls?state=open&per_page=100`;
+    
+    const response = await fetch(url, {
+      headers: buildGitHubHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch PRs: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch pull requests:', error);
+    return [];
+  }
+};
+
+/**
+ * Fetch files changed in a specific pull request
+ */
+export const fetchPRFiles = async (owner, repo, prNumber) => {
+  try {
+    const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/files?per_page=100`;
+    
+    const response = await fetch(url, {
+      headers: buildGitHubHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch PR files: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`Failed to fetch files for PR #${prNumber}:`, error);
+    return [];
+  }
+};
+
+/**
+ * Get file diff content from a PR
+ */
+export const fetchPRDiff = async (owner, repo, prNumber, filename) => {
+  try {
+    const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/files`;
+    
+    const response = await fetch(url, {
+      headers: buildGitHubHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch PR diff: ${response.status}`);
+    }
+
+    const files = await response.json();
+    return files.find(f => f.filename === filename);
+  } catch (error) {
+    console.error(`Failed to fetch diff for ${filename}:`, error);
+    return null;
+  }
+};
+
+/**
+ * Filter PRs that affect a specific file
+ */
+export const filterPRsByFile = (prs, filename) => {
+  return prs.filter(pr => {
+    // Check if the filename or similar spark file is in the PR's title or body
+    return (
+      pr.title.includes(filename.replace('.spark.md', '')) ||
+      (pr.body && pr.body.includes(filename))
+    );
+  });
+};
+
 
 
