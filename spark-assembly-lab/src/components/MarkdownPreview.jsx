@@ -12,7 +12,7 @@ export default function MarkdownPreview({ markdown }) {
         <div className="prose prose-invert prose-lg max-w-none">
           <ReactMarkdown 
             remarkPlugins={[remarkGfm, remarkMath]}
-            rehypePlugins={[rehypeKatex]}
+            rehypePlugins={[[rehypeKatex, {}]]}
           >
             {markdown}
           </ReactMarkdown>
