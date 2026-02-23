@@ -363,7 +363,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               className="flex items-center space-x-1 sm:space-x-2 rounded-lg theme-button px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors whitespace-nowrap flex-shrink-0"
             >
               <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span>{showPreview ? 'Edit' : 'Preview'}</span>
+              <span>{showPreview ? (canPush ? 'Edit' : 'Add') : 'Preview'}</span>
             </button>
 
             {/* Primary Action: Submit */}
