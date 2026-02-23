@@ -254,8 +254,7 @@ SPARK_CACHE_TTL_SECONDS=60        # Cache duration (default: 60 seconds)
 # AI Integration (optional fallback)
 # Users can enter API keys in the browser UI (recommended)
 # These are only used as fallback if no API key is provided by the user
-OPENAI_API_KEY=sk-...             # For GPT-4 quiz generation
-ANTHROPIC_API_KEY=sk-ant-...      # For Claude quiz generation
+OPENAI_API_KEY=sk-...             # For OpenAI quiz generation (gpt-4o-mini, gpt-4o)
 ```
 
 Create a `.env` file in the `spark-assembly-lab/` directory based on `.env.example` to configure these settings.
