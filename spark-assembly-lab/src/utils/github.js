@@ -354,5 +354,27 @@ export const filterPRsByFile = (prs, filename) => {
   });
 };
 
+/**
+ * Fetch commit history for a specific file
+ */
+export const fetchFileCommitHistory = async (owner, repo, filepath, branch = 'main') => {
+  try {
+    const url = `https://api.github.com/repos/${owner}/${repo}/commits?path=${filepath}&sha=${branch}&per_page=50`;
+    
+    const response = await fetch(url, {
+      headers: buildGitHubHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch commit history: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch commit history:', error);
+    return [];
+  }
+};
+
 
 

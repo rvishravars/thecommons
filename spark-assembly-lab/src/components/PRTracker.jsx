@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
-import { GitPullRequest, ChevronDown, ChevronUp, Code2, Plus, Minus, AlertCircle } from 'lucide-react';
-import { fetchOpenPullRequests, fetchPRFiles, fetchPRDiff, parseRepoUrl } from '../utils/github';
+import { GitPullRequest, ChevronDown, ChevronUp, Code2, Plus, Minus, AlertCircle, GitCommit } from 'lucide-react';
+import { fetchOpenPullRequests, fetchPRFiles, fetchPRDiff, parseRepoUrl, fetchFileCommitHistory } from '../utils/github';
 
 export default function PRTracker({ repoUrl, sparkFile, user }) {
   const [prs, setPrs] = useState([]);
+  const [commits, setCommits] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedPR, setSelectedPR] = useState(null);
+  const [selectedCommit, setSelectedCommit] = useState(null);
   const [prFiles, setPrFiles] = useState({});
   const [expandedDiffs, setExpandedDiffs] = useState({});
+  const [viewMode, setViewMode] = useState('prs'); // 'prs' or 'history'
 
   useEffect(() => {
     if (!repoUrl || !sparkFile) return;
@@ -18,6 +21,7 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
   const loadPRs = async () => {
     setLoading(true);
     setError(null);
+    setViewMode('prs');
     
     try {
       const { owner, repo } = parseRepoUrl(repoUrl);
@@ -32,14 +36,29 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
       
       setPrs(relevantPRs);
       
+      // If no PRs found, load commit history instead
       if (relevantPRs.length === 0) {
-        setError('No open pull requests found for this spark');
+        await loadHistory(owner, repo);
       }
     } catch (err) {
       setError(err.message || 'Failed to load pull requests');
       console.error('Error loading PRs:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadHistory = async (owner, repo) => {
+    try {
+      setViewMode('history');
+      const history = await fetchFileCommitHistory(owner, repo, sparkFile);
+      setCommits(history);
+      
+      if (history.length === 0) {
+        setError('No history found for this spark');
+      }
+    } catch (err) {
+      console.error('Error loading history:', err);
     }
   };
 
@@ -121,16 +140,28 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
     <div className="theme-panel rounded-lg border-2 border-spark-600 overflow-hidden">
       {/* Header */}
       <div className="bg-spark-600 px-4 py-3 flex items-center gap-2">
-        <GitPullRequest className="h-5 w-5" />
-        <h3 className="font-semibold">Spark Evolution</h3>
-        <span className="ml-auto inline-block bg-white/20 px-2 py-0.5 rounded text-xs font-semibold">
-          {prs.length} Open
-        </span>
+        {viewMode === 'prs' ? (
+          <>
+            <GitPullRequest className="h-5 w-5" />
+            <h3 className="font-semibold">Spark Evolution</h3>
+            <span className="ml-auto inline-block bg-white/20 px-2 py-0.5 rounded text-xs font-semibold">
+              {prs.length} Open
+            </span>
+          </>
+        ) : (
+          <>
+            <GitCommit className="h-5 w-5" />
+            <h3 className="font-semibold">Spark History</h3>
+            <span className="ml-auto inline-block bg-white/20 px-2 py-0.5 rounded text-xs font-semibold">
+              {commits.length} Commits
+            </span>
+          </>
+        )}
       </div>
 
       {/* Content */}
       <div className="divide-y divide-border-200/30">
-        {error && !prs.length && (
+        {error && !prs.length && !commits.length && (
           <div className="p-4 text-center">
             <p className="text-sm opacity-70">{error}</p>
             <button
@@ -142,13 +173,14 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
           </div>
         )}
 
-        {prs.length === 0 && !error && (
+        {/* Pull Requests View */}
+        {viewMode === 'prs' && prs.length === 0 && !error && (
           <div className="p-4 text-center opacity-60">
-            <p className="text-sm">No pull requests found</p>
+            <p className="text-sm">No pull requests in progress</p>
           </div>
         )}
 
-        {prs.map((pr) => (
+        {viewMode === 'prs' && prs.map((pr) => (
           <div key={pr.number} className="hover:bg-white/5 transition-colors">
             {/* PR Summary */}
             <button
@@ -267,6 +299,84 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-xs text-spark-400 hover:text-spark-300 transition-colors"
+                  >
+                    View on GitHub →
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Commit History View */}
+        {viewMode === 'history' && commits.length === 0 && !error && (
+          <div className="p-4 text-center opacity-60">
+            <p className="text-sm">No commit history available</p>
+          </div>
+        )}
+
+        {viewMode === 'history' && commits.map((commit) => (
+          <div key={commit.sha} className="hover:bg-white/5 transition-colors">
+            {/* Commit Summary */}
+            <button
+              onClick={() => setSelectedCommit(selectedCommit?.sha === commit.sha ? null : commit)}
+              className="w-full p-4 text-left hover:bg-white/5 transition-colors flex items-start gap-3 group"
+            >
+              <GitCommit className="h-5 w-5 text-design-600 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
+              
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-sm truncate group-hover:text-design-400 transition-colors">
+                  <span className="text-xs opacity-60 mr-2 font-mono">{commit.sha.substring(0, 7)}</span>
+                  {commit.commit.message.split('\n')[0]}
+                </h4>
+                <div className="flex flex-wrap gap-2 mt-2 text-xs opacity-70">
+                  <span>{commit.commit.author.name}</span>
+                  <span>•</span>
+                  <span>{formatDate(commit.commit.author.date)}</span>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0">
+                {selectedCommit?.sha === commit.sha ? (
+                  <ChevronUp className="h-5 w-5 opacity-60" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 opacity-60 group-hover:opacity-100" />
+                )}
+              </div>
+            </button>
+
+            {/* Commit Details */}
+            {selectedCommit?.sha === commit.sha && (
+              <div className="bg-white/5 border-t border-white/10 p-4 space-y-3">
+                {/* Commit Message */}
+                <div className="text-xs space-y-2">
+                  <p className="font-semibold opacity-80">Message</p>
+                  <p className="opacity-60 whitespace-pre-wrap">{commit.commit.message}</p>
+                </div>
+
+                {/* Commit Metadata */}
+                <div className="bg-white/5 rounded p-2 text-xs space-y-1">
+                  <div className="flex justify-between opacity-70">
+                    <span>Author:</span>
+                    <span>{commit.commit.author.name}</span>
+                  </div>
+                  <div className="flex justify-between opacity-70">
+                    <span>Date:</span>
+                    <span>{new Date(commit.commit.author.date).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between opacity-70">
+                    <span>SHA:</span>
+                    <span className="font-mono">{commit.sha.substring(0, 12)}</span>
+                  </div>
+                </div>
+
+                {/* View on GitHub Link */}
+                <div className="pt-2 border-t border-white/10">
+                  <a
+                    href={commit.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-design-400 hover:text-design-300 transition-colors"
                   >
                     View on GitHub →
                   </a>
