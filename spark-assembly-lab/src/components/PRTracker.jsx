@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { GitPullRequest, ChevronDown, ChevronUp, Code2, Plus, Minus, AlertCircle, GitCommit } from 'lucide-react';
-import { fetchOpenPullRequests, fetchPRFiles, fetchPRDiff, parseRepoUrl, fetchFileCommitHistory } from '../utils/github';
+import { fetchOpenPullRequests, fetchPRFiles, fetchPRDiff, parseRepoUrl, fetchFileCommitHistory, fetchCommitDetails } from '../utils/github';
 
 export default function PRTracker({ repoUrl, sparkFile, user }) {
   const [prs, setPrs] = useState([]);
@@ -9,6 +9,7 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
   const [error, setError] = useState(null);
   const [selectedPR, setSelectedPR] = useState(null);
   const [selectedCommit, setSelectedCommit] = useState(null);
+  const [commitDiffs, setCommitDiffs] = useState({});
   const [prFiles, setPrFiles] = useState({});
   const [expandedDiffs, setExpandedDiffs] = useState({});
   const [viewMode, setViewMode] = useState('prs'); // 'prs' or 'history'
@@ -59,6 +60,27 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
       }
     } catch (err) {
       console.error('Error loading history:', err);
+    }
+  };
+
+  const loadCommitDiff = async (commit) => {
+    if (commitDiffs[commit.sha]) {
+      setSelectedCommit(selectedCommit?.sha === commit.sha ? null : commit);
+      return;
+    }
+
+    try {
+      const { owner, repo } = parseRepoUrl(repoUrl);
+      const details = await fetchCommitDetails(owner, repo, commit.sha);
+      
+      setCommitDiffs(prev => ({
+        ...prev,
+        [commit.sha]: details,
+      }));
+      
+      setSelectedCommit(selectedCommit?.sha === commit.sha ? null : commit);
+    } catch (err) {
+      console.error(`Error loading diff for commit ${commit.sha}:`, err);
     }
   };
 
@@ -319,21 +341,22 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
           <div key={commit.sha} className="hover:bg-white/5 transition-colors">
             {/* Commit Summary */}
             <button
-              onClick={() => setSelectedCommit(selectedCommit?.sha === commit.sha ? null : commit)}
+              onClick={() => loadCommitDiff(commit)}
               className="w-full p-4 text-left hover:bg-white/5 transition-colors flex items-start gap-3 group"
             >
               <GitCommit className="h-5 w-5 text-design-600 mt-0.5 flex-shrink-0 group-hover:scale-110 transition-transform" />
               
               <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-sm truncate group-hover:text-design-400 transition-colors">
-                  <span className="text-xs opacity-60 mr-2 font-mono">{commit.sha.substring(0, 7)}</span>
-                  {commit.commit.message.split('\n')[0]}
+                <h4 className="font-mono text-xs truncate group-hover:text-design-400 transition-colors">
+                  {commit.sha.substring(0, 12)}
                 </h4>
-                <div className="flex flex-wrap gap-2 mt-2 text-xs opacity-70">
-                  <span>{commit.commit.author.name}</span>
-                  <span>•</span>
-                  <span>{formatDate(commit.commit.author.date)}</span>
-                </div>
+                <p className="text-xs opacity-60 mt-1">
+                  {new Date(commit.commit.author.date).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })} · {commit.commit.author.name}
+                </p>
               </div>
 
               <div className="flex-shrink-0">
@@ -345,42 +368,55 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
               </div>
             </button>
 
-            {/* Commit Details */}
-            {selectedCommit?.sha === commit.sha && (
-              <div className="bg-white/5 border-t border-white/10 p-4 space-y-3">
-                {/* Commit Message */}
-                <div className="text-xs space-y-2">
-                  <p className="font-semibold opacity-80">Message</p>
-                  <p className="opacity-60 whitespace-pre-wrap">{commit.commit.message}</p>
-                </div>
-
-                {/* Commit Metadata */}
-                <div className="bg-white/5 rounded p-2 text-xs space-y-1">
-                  <div className="flex justify-between opacity-70">
-                    <span>Author:</span>
-                    <span>{commit.commit.author.name}</span>
-                  </div>
-                  <div className="flex justify-between opacity-70">
-                    <span>Date:</span>
-                    <span>{new Date(commit.commit.author.date).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between opacity-70">
-                    <span>SHA:</span>
-                    <span className="font-mono">{commit.sha.substring(0, 12)}</span>
-                  </div>
-                </div>
-
-                {/* View on GitHub Link */}
-                <div className="pt-2 border-t border-white/10">
-                  <a
-                    href={commit.html_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-design-400 hover:text-design-300 transition-colors"
-                  >
-                    View on GitHub →
-                  </a>
-                </div>
+            {/* Commit Diff */}
+            {selectedCommit?.sha === commit.sha && commitDiffs[commit.sha] && (
+              <div className="bg-white/5 border-t border-white/10 p-4">
+                {commitDiffs[commit.sha].files && commitDiffs[commit.sha].files.length > 0 ? (
+                  <>
+                    {commitDiffs[commit.sha].files.map((file, idx) => (
+                      file.filename.endsWith('.spark.md') && (
+                        <div key={idx} className="space-y-2">
+                          {file.patch && (
+                            <div className="bg-black/20 rounded border border-white/10 p-3 font-mono text-xs max-h-96 overflow-y-auto">
+                              <pre className="whitespace-pre-wrap break-words text-xs">
+                                {file.patch
+                                  .split('\n')
+                                  .slice(0, 50) // Show first 50 lines
+                                  .map((line, i) => {
+                                    let color = '';
+                                    if (line.startsWith('+++') || line.startsWith('---')) color = 'text-spark-400';
+                                    if (line.startsWith('+') && !line.startsWith('+++')) color = 'text-logic-400';
+                                    if (line.startsWith('-') && !line.startsWith('---')) color = 'text-red-400';
+                                    if (line.startsWith('@@')) color = 'text-design-400';
+                                    return (
+                                      <div key={i} className={color}>
+                                        {line}
+                                      </div>
+                                    );
+                                  })}
+                                {file.patch.split('\n').length > 50 && (
+                                  <div className="text-opacity-50 text-xs">[... {file.patch.split('\n').length - 50} more lines ...]</div>
+                                )}
+                              </pre>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    ))}
+                    <div className="pt-3 border-t border-white/10 mt-3">
+                      <a
+                        href={`${repoUrl.replace('https://', '').replace('github.com/', 'https://github.com/')}/commit/${commit.sha}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-design-400 hover:text-design-300 transition-colors"
+                      >
+                        View on GitHub →
+                      </a>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-xs opacity-60 text-center py-4">No spark file changes in this commit</p>
+                )}
               </div>
             )}
           </div>

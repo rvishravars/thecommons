@@ -376,5 +376,27 @@ export const fetchFileCommitHistory = async (owner, repo, filepath, branch = 'ma
   }
 };
 
+/**
+ * Fetch full commit details including diff
+ */
+export const fetchCommitDetails = async (owner, repo, sha) => {
+  try {
+    const url = `https://api.github.com/repos/${owner}/${repo}/commits/${sha}`;
+    
+    const response = await fetch(url, {
+      headers: buildGitHubHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch commit details: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to fetch commit details:', error);
+    return null;
+  }
+};
+
 
 
