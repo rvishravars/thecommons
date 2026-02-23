@@ -5,7 +5,6 @@ import { parseSparkFile } from '../utils/sparkParser';
 
 export default function GlobalSparkSearch({ onSparkLoad, onRepoSelect }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [orgFilter, setOrgFilter] = useState('');
   const [userFilter, setUserFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [results, setResults] = useState([]);
@@ -17,8 +16,8 @@ export default function GlobalSparkSearch({ onSparkLoad, onRepoSelect }) {
   const [loadingPreview, setLoadingPreview] = useState(null);
 
   const handleSearch = async (page = 1) => {
-    if (!searchQuery.trim() && !orgFilter.trim() && !userFilter.trim()) {
-      setError('Please enter a search query or filter by organization/user');
+    if (!searchQuery.trim() && !userFilter.trim()) {
+      setError('Please enter a search query or filter by user');
       return;
     }
 
@@ -27,7 +26,6 @@ export default function GlobalSparkSearch({ onSparkLoad, onRepoSelect }) {
     setCurrentPage(page);
 
     const searchResults = await globalSearchSparkFiles(searchQuery, {
-      org: orgFilter || undefined,
       user: userFilter || undefined,
       page,
       perPage: 20,
@@ -84,11 +82,10 @@ export default function GlobalSparkSearch({ onSparkLoad, onRepoSelect }) {
   };
 
   const clearFilters = () => {
-    setOrgFilter('');
     setUserFilter('');
   };
 
-  const hasActiveFilters = orgFilter || userFilter;
+  const hasActiveFilters = userFilter;
 
   return (
     <div className="flex flex-col h-full theme-card border theme-border rounded-lg overflow-hidden">
@@ -143,14 +140,7 @@ export default function GlobalSparkSearch({ onSparkLoad, onRepoSelect }) {
 
         {/* Filter Inputs */}
         {showFilters && (
-          <div className="space-y-2 pt-2 border-t theme-border">
-            <input
-              type="text"
-              placeholder="Organization (e.g., 'facebook', 'google')..."
-              value={orgFilter}
-              onChange={(e) => setOrgFilter(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg theme-border theme-input text-sm focus:outline-none focus:ring-2 focus:ring-design-500"
-            />
+          <div className="pt-2 border-t theme-border">
             <input
               type="text"
               placeholder="User (e.g., 'torvalds', 'gvanrossum')..."

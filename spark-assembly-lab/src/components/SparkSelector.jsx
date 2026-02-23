@@ -423,11 +423,6 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
                   ({searchQuery ? `${filteredSparks.length}/${sparks.length}` : sparks.length})
                 </span>
               </h3>
-              {repoInfo && (
-                <p className="text-xs theme-subtle">
-                  from {repoInfo}
-                </p>
-              )}
             </div>
             <div className="flex items-center gap-2">
               <button
