@@ -49,7 +49,7 @@ class MeritEntry:
     """Merit distribution entry."""
     handle: str
     role: str
-    reward: str  # e.g., "+5 CS", "+15 CS", "+25 CS"
+    reward: str  # e.g., "+5 CS", "+15 CS", "+25 CS" (CS = Contribution Score)
 
 
 class Mission1DataParser:
@@ -369,7 +369,7 @@ class Mission3GovernanceAdvisory:
     @staticmethod
     def _calculate_merit(spark_data: Dict[str, Any], audit_status: AuditStatus) -> List[Dict[str, str]]:
         """
-        Calculate merit (CS) distribution based on contributions.
+        Calculate merit (CS = Contribution Score) distribution based on contributions.
         
         Args:
             spark_data: Parsed spark data
@@ -489,16 +489,20 @@ def evaluate_spark_mission(content: str) -> Dict[str, Any]:
     return output
 
 
-if __name__ == "__main__":
-    # Example usage
-    import sys
-    
-    if len(sys.argv) < 2:
-        print("Usage: python missions.py <spark_file.md>")
-        sys.exit(1)
-    
-    with open(sys.argv[1], 'r') as f:
-        content = f.read()
-    
-    result = evaluate_spark_mission(content)
-    print(json.dumps(result, indent=2))
+# CLI INTERFACE - RESERVED FOR LATER
+# The AI scribe is not invoked via commands currently.
+# This functionality is preserved for future use.
+
+# if __name__ == "__main__":
+#     # Example usage
+#     import sys
+#     
+#     if len(sys.argv) < 2:
+#         print("Usage: python missions.py <spark_file.md>")
+#         sys.exit(1)
+#     
+#     with open(sys.argv[1], 'r') as f:
+#         content = f.read()
+#     
+#     result = evaluate_spark_mission(content)
+#     print(json.dumps(result, indent=2))

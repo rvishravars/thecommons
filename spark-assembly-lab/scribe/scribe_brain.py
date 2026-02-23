@@ -482,74 +482,78 @@ class ScribeBrain:
         return mission_output
 
 
-def main():
-    """Main entry point for the Scribe Brain."""
-    import argparse
-    
-    parser = argparse.ArgumentParser(description="Scribe v2.0 Brain - Glass Box AI Agent")
-    parser.add_argument("--demo", action="store_true", help="Run in demo mode (no inference)")
-    parser.add_argument("--eval-file", type=str, help="Spark file to evaluate")
-    parser.add_argument("--phase", choices=["hunch", "shape"], default="hunch", help="Evaluation phase")
-    parser.add_argument("--missions", action="store_true", help="Run Scribe-Architect missions on a full Spark")
-    args = parser.parse_args()
+# CLI INTERFACE - RESERVED FOR LATER
+# The AI scribe is not invoked via commands currently.
+# This functionality is preserved for future use.
 
-    logger.info("🧠 Initializing Scribe v2.0 Brain...")
-
-    if args.demo:
-        logger.info("📊 Running in DEMO MODE (no inference required)")
-        demo_mode()
-        return
-
-    brain = ScribeBrain()
-    logger.info(f"Hardware selected: {brain.hardware.value}")
-
-    try:
-        if args.missions:
-            if not args.eval_file:
-                logger.error("--missions requires --eval-file")
-                sys.exit(1)
-
-            with open(args.eval_file, "r") as f:
-                spark_content = f.read()
-
-            logger.info("📥 Running Scribe-Architect missions...")
-            mission_result = brain.evaluate_spark_missions(spark_content)
-            logger.info("\n" + json.dumps(mission_result, indent=2))
-            return
-
-        if args.eval_file:
-            with open(args.eval_file, "r") as f:
-                spark_content = f.read()
-
-            logger.info(f"📥 Evaluating {args.phase.upper()} from file...")
-            result = brain.evaluate_spark(EvaluationPhase(args.phase), spark_content)
-        else:
-            # Example: Evaluate a sample hunch
-            sample_hunch = """
-            I notice that our Spark files don't have consistent date fields. 
-            It's hard to track when a blueprint was created vs. when it was approved.
-            This makes it difficult to analyze the velocity of the Commons.
-            """
-
-            logger.info("📥 Evaluating sample HUNCH...")
-            result = brain.evaluate_spark(EvaluationPhase.HUNCH, sample_hunch)
-
-        if result:
-            logger.info("\n" + brain.output_result(result))
-        else:
-            logger.error("Evaluation failed")
-            logger.info("\n💡 HELP:")
-            logger.info("   1. Download model: python spark-assembly-lab/scribe/models/downloader.py --download")
-            logger.info("   2. Or use demo mode: python spark-assembly-lab/scribe/scribe_brain.py --demo")
-            logger.info("   3. Or set Groq API: export GROQ_API_KEY='your-key'")
-            sys.exit(1)
-    except Exception as e:
-        logger.error(f"Fatal error during evaluation: {e}")
-        logger.info("\n💡 HELP:")
-        logger.info("   • Run demo mode: python spark-assembly-lab/scribe/scribe_brain.py --demo")
-        logger.info("   • Install model: python spark-assembly-lab/scribe/models/downloader.py --download")
-        logger.info("   • Check dependencies: pip install -r spark-assembly-lab/scribe/requirements.txt")
-        sys.exit(1)
+# def main():
+#     """Main entry point for the Scribe Brain."""
+#     import argparse
+#     
+#     parser = argparse.ArgumentParser(description="Scribe v2.0 Brain - Glass Box AI Agent")
+#     parser.add_argument("--demo", action="store_true", help="Run in demo mode (no inference)")
+#     parser.add_argument("--eval-file", type=str, help="Spark file to evaluate")
+#     parser.add_argument("--phase", choices=["hunch", "shape"], default="hunch", help="Evaluation phase")
+#     parser.add_argument("--missions", action="store_true", help="Run Scribe-Architect missions on a full Spark")
+# #     args = parser.parse_args()
+# 
+#     logger.info("🧠 Initializing Scribe v2.0 Brain...")
+# 
+#     if args.demo:
+#         logger.info("📊 Running in DEMO MODE (no inference required)")
+#         demo_mode()
+#         return
+# 
+#     brain = ScribeBrain()
+#     logger.info(f"Hardware selected: {brain.hardware.value}")
+# 
+#     try:
+#         if args.missions:
+#             if not args.eval_file:
+#                 logger.error("--missions requires --eval-file")
+#                 sys.exit(1)
+# 
+#             with open(args.eval_file, "r") as f:
+#                 spark_content = f.read()
+# 
+#             logger.info("📥 Running Scribe-Architect missions...")
+#             mission_result = brain.evaluate_spark_missions(spark_content)
+#             logger.info("\n" + json.dumps(mission_result, indent=2))
+#             return
+# 
+#         if args.eval_file:
+#             with open(args.eval_file, "r") as f:
+#                 spark_content = f.read()
+# 
+#             logger.info(f"📥 Evaluating {args.phase.upper()} from file...")
+#             result = brain.evaluate_spark(EvaluationPhase(args.phase), spark_content)
+#         else:
+#             # Example: Evaluate a sample hunch
+#             sample_hunch = """
+#             I notice that our Spark files don't have consistent date fields. 
+#             It's hard to track when a blueprint was created vs. when it was approved.
+#             This makes it difficult to analyze the velocity of the Commons.
+#             """
+# 
+#             logger.info("📥 Evaluating sample HUNCH...")
+#             result = brain.evaluate_spark(EvaluationPhase.HUNCH, sample_hunch)
+# 
+#         if result:
+#             logger.info("\n" + brain.output_result(result))
+#         else:
+#             logger.error("Evaluation failed")
+#             logger.info("\n💡 HELP:")
+#             logger.info("   1. Download model: python spark-assembly-lab/scribe/models/downloader.py --download")
+#             logger.info("   2. Or use demo mode: python spark-assembly-lab/scribe/scribe_brain.py --demo")
+#             logger.info("   3. Or set Groq API: export GROQ_API_KEY='your-key'")
+#             sys.exit(1)
+#     except Exception as e:
+#         logger.error(f"Fatal error during evaluation: {e}")
+#         logger.info("\n💡 HELP:")
+#         logger.info("   • Run demo mode: python spark-assembly-lab/scribe/scribe_brain.py --demo")
+#         logger.info("   • Install model: python spark-assembly-lab/scribe/models/downloader.py --download")
+#         logger.info("   • Check dependencies: pip install -r spark-assembly-lab/scribe/requirements.txt")
+#         sys.exit(1)
 
 
 def demo_mode():
@@ -632,5 +636,5 @@ def demo_mode():
     logger.info("")
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

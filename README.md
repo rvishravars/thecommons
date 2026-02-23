@@ -33,6 +33,8 @@ New to the Commons? Here is how you earn your seat at the table by adding mass t
 2.  **Phase 2: Designer (+15 CS):** Use your **Design**. Take a hunch and give it a shape. Define the **Novel Core** using the `!SHAPE` template.
 3.  **Phase 3: Builder (+25 CS):** Use your **Logic**. Write the code or technical specs to turn a design into a functional brick using `!BUILD`.
 
+> **🚧 Coming Soon:** Automated merit tracking and CS (Contribution Score) point system. [Track progress →](https://github.com/rvishravars/thecommons/issues/2)
+
 
 ### Visual Tour & Demo
 
@@ -51,6 +53,8 @@ The Commons is assisted by an AI Scribe that ensures every new brick follows the
 * **`!SHAPE`**: Validates a blueprint and checks for "Prior Art" (Novelty Audit).
 * **`!BUILD`**: Runs a stability check to ensure your logic doesn't break existing bricks.
 * **`!VOTE_VETO`**: A community safety-valve to halt structural changes.
+
+> **🚧 Coming Soon:** Pure CLI-based interface for AI Scribe commands. Currently, the Scribe operates programmatically through the web interface.
 
 ---
 

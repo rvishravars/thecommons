@@ -311,67 +311,71 @@ class StabilityAuditor:
         return "\n".join(lines)
 
 
-def main():
-    """CLI entry point for the stability auditor."""
-    import argparse
+# CLI INTERFACE - RESERVED FOR LATER
+# The AI scribe is not invoked via commands currently.
+# This functionality is preserved for future use.
 
-    parser = argparse.ArgumentParser(
-        description="Stability Audit for TheCommons Sparks"
-    )
-    parser.add_argument("--file", type=Path, help="Specific Spark file to audit")
-    parser.add_argument("--dir", type=Path, default=Path("sparks"), help="Directory containing Sparks")
-    parser.add_argument("--json", action="store_true", help="Output as JSON")
-    args = parser.parse_args()
+# def main():
+#     """CLI entry point for the stability auditor."""
+#     import argparse
+# 
+#     parser = argparse.ArgumentParser(
+#         description="Stability Audit for TheCommons Sparks"
+#     )
+#     parser.add_argument("--file", type=Path, help="Specific Spark file to audit")
+#     parser.add_argument("--dir", type=Path, default=Path("sparks"), help="Directory containing Sparks")
+#     parser.add_argument("--json", action="store_true", help="Output as JSON")
+# #     args = parser.parse_args()
+# 
+#     auditor = StabilityAuditor()
+# 
+#     # Collect files to audit
+#     files_to_audit = []
+#     if args.file:
+#         files_to_audit = [args.file]
+#     elif args.dir.exists():
+#         files_to_audit = sorted(args.dir.glob("*.spark.md"))
+# 
+#     if not files_to_audit:
+#         logger.warning(f"⚠️  No Spark files found in {args.dir}")
+#         return
+# 
+#     # Run audits
+#     all_valid = True
+#     reports = []
+# 
+#     for filepath in files_to_audit:
+#         report = auditor.audit_spark(filepath)
+#         if report:
+#             reports.append(report)
+#             if not report.is_valid:
+#                 all_valid = False
+# 
+#             if not args.json:
+#                 print(auditor.format_report(report))
+# 
+#     # JSON output
+#     if args.json:
+#         import json
+# 
+#         json_reports = []
+#         for report in reports:
+#             json_reports.append({
+#                 "filepath": report.filepath,
+#                 "is_valid": report.is_valid,
+#                 "completion_level": report.completion_level,
+#                 "novelty_score": report.novelty_score,
+#                 "critical_flaws": report.critical_flaws,
+#                 "warnings": report.warnings,
+#                 "recommendations": report.recommendations
+#             })
+# 
+#         print(json.dumps(json_reports, indent=2))
+# 
+#     # Exit code
+#     import sys
+#     sys.exit(0 if all_valid else 1)
 
-    auditor = StabilityAuditor()
 
-    # Collect files to audit
-    files_to_audit = []
-    if args.file:
-        files_to_audit = [args.file]
-    elif args.dir.exists():
-        files_to_audit = sorted(args.dir.glob("*.spark.md"))
-
-    if not files_to_audit:
-        logger.warning(f"⚠️  No Spark files found in {args.dir}")
-        return
-
-    # Run audits
-    all_valid = True
-    reports = []
-
-    for filepath in files_to_audit:
-        report = auditor.audit_spark(filepath)
-        if report:
-            reports.append(report)
-            if not report.is_valid:
-                all_valid = False
-
-            if not args.json:
-                print(auditor.format_report(report))
-
-    # JSON output
-    if args.json:
-        import json
-
-        json_reports = []
-        for report in reports:
-            json_reports.append({
-                "filepath": report.filepath,
-                "is_valid": report.is_valid,
-                "completion_level": report.completion_level,
-                "novelty_score": report.novelty_score,
-                "critical_flaws": report.critical_flaws,
-                "warnings": report.warnings,
-                "recommendations": report.recommendations
-            })
-
-        print(json.dumps(json_reports, indent=2))
-
-    # Exit code
-    import sys
-    sys.exit(0 if all_valid else 1)
-
-
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
