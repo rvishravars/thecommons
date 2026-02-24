@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, FileText, Zap, RefreshCw, Search, X, Globe, FolderGit2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, FileText, Zap, RefreshCw, Search, X, Globe, FolderGit2, ChevronDown, ChevronUp, GitPullRequest } from 'lucide-react';
 import { buildMissionSummary, parseSparkFile } from '../utils/sparkParser';
 import { getStoredToken, loadSparksFromGitHub } from '../utils/github';
 import RepoInput from './RepoInput';
 import GlobalSparkSearch from './GlobalSparkSearch';
 
-export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, onRepoChange, currentSparkData, onPRRefresh, onPermissionChange, user }) {
+export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, branch = 'main', onRepoChange, onBranchChange, currentSparkData, onPRRefresh, onPermissionChange, user }) {
   console.log('🚀 SparkSelector component mounted!');
   const [activeTab, setActiveTab] = useState('repo'); // 'repo' or 'global'
   const [sparks, setSparks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [errorType, setErrorType] = useState(null); // 'repo-not-found', 'no-sparks', 'network-error'
-  const [repoInfo, setRepoInfo] = useState(null);
+  // const [repoInfo, setRepoInfo] = useState(null);
   const [missionSummary, setMissionSummary] = useState(null);
   const [missionLoading, setMissionLoading] = useState(false);
   const [missionError, setMissionError] = useState(null);
@@ -74,6 +74,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         );
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSparkData?.name, selectedSpark?.sourceFile, selectedSpark?.sourcePath]);
 
   const loadSparks = useCallback(async () => {
@@ -94,7 +95,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
       }
 
       // Load sparks directly from GitHub
-      const result = await loadSparksFromGitHub(repoUrl, 'main', 'sparks');
+      const result = await loadSparksFromGitHub(repoUrl, branch || 'main', 'sparks');
 
       if (!result.success) {
         // Handle errors
@@ -119,9 +120,9 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
       }
 
       // Store repo info for display
-      if (result.owner && result.repo) {
-        setRepoInfo(`${result.owner}/${result.repo}`);
-      }
+      // if (result.owner && result.repo) {
+      //   setRepoInfo(`${result.owner}/${result.repo}`);
+      // }
 
       // Check if we have files
       if (result.files && result.files.length > 0) {
@@ -150,7 +151,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     } finally {
       setLoading(false);
     }
-  }, [buildSparkEntry, repoUrl]);
+  }, [buildSparkEntry, repoUrl, branch]);
 
   useEffect(() => {
     loadSparks();
@@ -257,6 +258,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
 
     loadPrs();
     return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSpark, repoUrl, refreshToken]);
 
   return (
@@ -293,7 +295,12 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         />
       ) : (
         <>
-          <RepoInput onRepoChange={onRepoChange} currentRepo={repoUrl} />
+          <RepoInput 
+            onRepoChange={onRepoChange} 
+            currentRepo={repoUrl}
+            currentBranch={branch}
+            onBranchChange={onBranchChange}
+          />
 
           <div className="p-4 border-b theme-border">
             <button

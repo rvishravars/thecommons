@@ -121,6 +121,7 @@ export default function QuizModal({ sparkData, onClose }) {
     if (selectedProvider === 'gemini') {
       fetchGeminiModels();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiKey, selectedProvider]);
 
   const buildGeminiPrompt = () => {

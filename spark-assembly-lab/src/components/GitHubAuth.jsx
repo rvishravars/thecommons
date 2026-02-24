@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { LogOut, LogIn, Loader, Copy, Check, X, HelpCircle } from 'lucide-react';
 import {
-  getStoredUserInfo,
   clearUserAuth,
   loginWithToken,
   openTokenCreationPage
