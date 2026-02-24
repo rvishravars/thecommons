@@ -1,0 +1,51 @@
+name: React Lint Check
+
+on:
+  pull_request:
+    paths:
+      - 'spark-assembly-lab/**/*.js'
+      - 'spark-assembly-lab/**/*.jsx'
+      - 'spark-assembly-lab/package.json'
+      - 'spark-assembly-lab/.eslintrc.*'
+  push:
+    branches:
+      - main
+    paths:
+      - 'spark-assembly-lab/**/*.js'
+      - 'spark-assembly-lab/**/*.jsx'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'spark-assembly-lab/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: spark-assembly-lab
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: spark-assembly-lab
+        run: npm run lint
+
+      - name: Lint Summary
+        if: success()
+        run: |
+          echo "✅ ESLint passed - No linting errors found"
+          echo "All React/JSX code follows the project's style guidelines"
+
+      - name: Lint Failed
+        if: failure()
+        run: |
+          echo "❌ ESLint found issues in the code"
+          echo "Please fix the linting errors before merging"
+          echo "Run 'npm run lint' locally to see detailed errors"
