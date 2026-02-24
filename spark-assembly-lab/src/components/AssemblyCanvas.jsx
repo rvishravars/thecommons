@@ -12,6 +12,17 @@ import { generateSparkMarkdown, validateSparkData } from '../utils/sparkParser';
 import { useToast } from '../utils/ToastContext';
 import { getStoredToken, getStoredUserInfo } from '../utils/github';
 
+const ENHANCED_SECTIONS_CONFIG = {
+  1: { title: '1. Spark Narrative', description: 'The core story of the idea', color: 'spark' },
+  2: { title: '2. Hypothesis Formalization', description: 'Convert into a falsifiable statement', color: 'design' },
+  3: { title: '3. Simulation / Modeling Plan', description: 'Testing before full implementation', color: 'logic' },
+  4: { title: '4. Evaluation Strategy', description: 'Evidence gathering & judgement criteria', color: 'design' },
+  5: { title: '5. Feedback & Critique', description: 'Document structured critique', color: 'spark' },
+  6: { title: '6. Results', description: 'Observed outcomes & surprises', color: 'logic' },
+  7: { title: '7. Revision Notes', description: 'How the idea evolved', color: 'design' },
+  8: { title: '8. Next Actions', description: 'Concrete steps forward', color: 'spark' }
+};
+
 export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly, onPRCreated, canPush = true }) {
   const [showPreview, setShowPreview] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -26,7 +37,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
   const [showDropdown, setShowDropdown] = useState(false);
   const [activePhasesForNewSpark, setActivePhasesForNewSpark] = useState(() => {
     // For new template sparks, start with only Spark
-    const isNewTemplate = ['New Spark', 'School Level', 'University Level'].includes(sparkData?.name);
+    const isNewTemplate = sparkData?.name === 'New Spark';
     return isNewTemplate ? [PhaseTypes.SPARK] : [PhaseTypes.SPARK, PhaseTypes.DESIGN, PhaseTypes.LOGIC];
   });
   const [expandedPhases, setExpandedPhases] = useState({
@@ -38,7 +49,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
   // Reset active phases when spark changes
   useEffect(() => {
-    const isNewTemplate = ['New Spark', 'School Level', 'University Level'].includes(sparkData?.name);
+    const isNewTemplate = sparkData?.name === 'New Spark';
     if (isNewTemplate) {
       setActivePhasesForNewSpark([PhaseTypes.SPARK]);
     } else {
@@ -48,7 +59,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
       [PhaseTypes.DESIGN]: false,
       [PhaseTypes.LOGIC]: false,
     });
-  }, [sparkData?.name]);
+  }, [sparkData?.name, sparkData?.isEnhanced]);
 
   const handleBlockUpdate = (phase, blockType, value) => {
     const updatedData = {
@@ -106,7 +117,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
   const stability = calculateStability();
   // Don't validate new sparks during editing, only check when submitting/downloading
-  const isNewTemplate = ['New Spark', 'School Level', 'University Level'].includes(sparkData?.name);
+  const isNewTemplate = sparkData?.name === 'New Spark';
   const validation = (!originalSparkData || isNewTemplate)
     ? { valid: true, errors: [] }
     : validateSparkData(sparkData);
@@ -131,9 +142,17 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
   };
 
   const openPhaseEditor = (phaseKey) => {
+    if (typeof phaseKey === 'number') {
+      setPhaseDraft(sparkData.sections?.[phaseKey] || '');
+      setEditingPhase(phaseKey);
+      return;
+    }
     const phase = sparkData.phases[phaseKey];
     if (canPush) {
-      const fallback = buildPhaseNotes(phaseKey, phase);
+      let fallback = buildPhaseNotes(phaseKey, phase);
+      if (phaseKey === PhaseTypes.SPARK && !phase.notes && sparkData.rawContent) {
+        fallback = sparkData.rawContent.replace(/^---\s*\n([\s\S]*?)\n---\s*/, '');
+      }
       setPhaseDraft(phase.notes || fallback);
     } else {
       setPhaseDraft('');
@@ -143,23 +162,35 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
   const savePhaseEditor = () => {
     if (!editingPhase) return;
-    const updated = {
-      ...sparkData,
-      phases: {
-        ...sparkData.phases,
-        [editingPhase]: {
-          ...sparkData.phases[editingPhase],
-          // If owner, update notes directly. If non-owner, update the hidden proposal field.
-          notes: canPush ? phaseDraft : sparkData.phases[editingPhase].notes,
-          proposal: canPush ? sparkData.phases[editingPhase].proposal : phaseDraft
+
+    let updated;
+    if (typeof editingPhase === 'number') {
+      updated = {
+        ...sparkData,
+        sections: {
+          ...(sparkData.sections || {}),
+          [editingPhase]: phaseDraft
+        }
+      };
+    } else {
+      updated = {
+        ...sparkData,
+        phases: {
+          ...sparkData.phases,
+          [editingPhase]: {
+            ...sparkData.phases[editingPhase],
+            // If owner, update notes directly. If non-owner, update the hidden proposal field.
+            notes: canPush ? phaseDraft : sparkData.phases[editingPhase].notes,
+            proposal: canPush ? sparkData.phases[editingPhase].proposal : phaseDraft
+          },
         },
-      },
-      // Also sync to the top-level proposals structure for the parser/generator
-      proposals: {
-        ...sparkData.proposals,
-        [editingPhase]: canPush ? (sparkData.proposals?.[editingPhase] || '') : phaseDraft
-      }
-    };
+        // Also sync to the top-level proposals structure for the parser/generator
+        proposals: {
+          ...sparkData.proposals,
+          [editingPhase]: canPush ? (sparkData.proposals?.[editingPhase] || '') : phaseDraft
+        }
+      };
+    }
     onSparkUpdate(updated);
     handleEditDone();
     setEditingPhase(null);
@@ -506,99 +537,140 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
       ) : (
         <div className="flex-1 overflow-x-auto overflow-y-auto">
           <div className="h-full flex flex-col lg:flex-row p-4 sm:p-6 gap-4 sm:gap-6 min-w-full">
-            {[
-              {
-                key: PhaseTypes.SPARK,
-                title: '🧠 Spark (Scout)',
-                description: 'Identify and submit the gap',
-                color: 'spark',
-              },
-              {
-                key: PhaseTypes.DESIGN,
-                title: '🎨 Design (Designer)',
-                description: 'Design the solution',
-                color: 'design',
-              },
-              {
-                key: PhaseTypes.LOGIC,
-                title: '🛠️ Logic (Builder)',
-                description: 'Build and test',
-                color: 'logic',
-              },
-            ]
-              .filter(phase => activePhasesForNewSpark.includes(phase.key))
-              .map((phase) => {
-                const isCollapsible = [PhaseTypes.SPARK, PhaseTypes.DESIGN, PhaseTypes.LOGIC].includes(phase.key);
-                const isExpanded = !isCollapsible || expandedPhases[phase.key];
-                return (
-                <div key={phase.key} className={`flex-1 min-w-[280px] lg:min-w-[320px] flex flex-col rounded-xl border-2 border-${phase.color}-600 theme-panel-soft`}>
-                  <div className={`bg-${phase.color}-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl`}>
-                    <h2 className="text-lg sm:text-xl font-bold">{phase.title}</h2>
-                    <p className="text-xs sm:text-sm mt-1 opacity-90">{phase.description}</p>
-                  </div>
-                  <div className="flex-1 p-3 sm:p-4 flex flex-col overflow-y-hidden">
-                    <div
-                      className={`w-full flex-1 theme-input rounded border p-3 sm:p-4 text-sm sm:text-base bg-black/10 relative ${isCollapsible
-                        ? `${isExpanded ? 'overflow-y-auto' : 'overflow-hidden'} max-h-[68vh] sm:max-h-[58vh]`
-                        : 'overflow-y-auto min-h-[240px]'
-                        }`}
-                    >
-                      <div className="prose prose-invert prose-sm max-w-none">
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm, remarkMath]}
-                          rehypePlugins={[rehypeKatex]}
-                        >
-                          {sparkData.phases[phase.key].notes || buildPhaseNotes(phase.key, sparkData.phases[phase.key])}
-                        </ReactMarkdown>
+            <div className="flex-1 flex flex-col gap-4 sm:gap-6 min-w-0">
+              {sparkData.isEnhanced ? (
+                // --- Enhanced Modular View: Points 1-8 ---
+                (sparkData.activeSections || [1]).map((sectionNum) => {
+                  const config = ENHANCED_SECTIONS_CONFIG[sectionNum];
+                  if (!config) return null;
+                  return (
+                    <div key={sectionNum} className={`flex flex-col rounded-xl border-2 border-${config.color}-600 theme-panel-soft`}>
+                      <div className={`bg-${config.color}-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl`}>
+                        <h2 className="text-lg sm:text-xl font-bold">{config.title}</h2>
+                        <p className="text-xs sm:text-sm mt-1 opacity-90">{config.description}</p>
                       </div>
-                      {isCollapsible && !isExpanded && (
-                        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/60 to-transparent" />
-                      )}
+                      <div className="p-3 sm:p-4 flex flex-col">
+                        <div className="w-full theme-input rounded border p-3 sm:p-4 text-sm sm:text-base bg-black/10 relative overflow-y-auto max-h-[68vh] sm:max-h-[58vh]">
+                          <div className="prose prose-invert prose-sm max-w-none">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm, remarkMath]}
+                              rehypePlugins={[rehypeKatex]}
+                            >
+                              {sparkData.sections?.[sectionNum] || ''}
+                            </ReactMarkdown>
+                          </div>
+                        </div>
+                        <div className="mt-2 flex items-center gap-3">
+                          <button
+                            onClick={() => openPhaseEditor(sectionNum)}
+                            disabled={isReadOnly}
+                            className={`text-xs text-${config.color}-400 hover:text-${config.color}-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            {!isReadOnly && <span>Edit</span>}
+                          </button>
+                          {sectionNum !== 1 && (
+                            <button
+                              onClick={() => {
+                                const updated = {
+                                  ...sparkData,
+                                  activeSections: sparkData.activeSections.filter(s => s !== sectionNum)
+                                };
+                                onSparkUpdate(updated);
+                              }}
+                              className="text-xs text-red-400 hover:text-red-300 ml-auto"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className="mt-2 flex items-center gap-3">
-                      {isCollapsible && (
-                        <button
-                          onClick={() =>
-                            setExpandedPhases((prev) => ({
-                              ...prev,
-                              [phase.key]: !prev[phase.key],
-                            }))
-                          }
-                          className={`text-xs text-${phase.color}-200 hover:text-${phase.color}-100 transition-colors`}
-                        >
-                          {isExpanded ? 'Less' : 'More'}
-                        </button>
-                      )}
-                      <button
-                        onClick={() => openPhaseEditor(phase.key)}
-                        disabled={isReadOnly}
-                        className={`text-xs text-${phase.color}-400 hover:text-${phase.color}-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed`}
-                      >
-                        {!isReadOnly && <span>{canPush ? 'Edit' : 'Add'}</span>}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Add Phase Buttons */}
-            <div className="flex flex-col gap-3 mt-6">
-              {!activePhasesForNewSpark.includes(PhaseTypes.DESIGN) && (
-                <button
-                  onClick={() => setActivePhasesForNewSpark([...activePhasesForNewSpark, PhaseTypes.DESIGN])}
-                  className="px-4 py-2 rounded-lg border-2 border-design-500/50 hover:border-design-500 hover:bg-design-500/10 text-design-400 font-semibold transition-all text-sm"
-                >
-                  + Add Design Phase (with AI help coming soon)
-                </button>
+                  );
+                })
+              ) : (
+                // --- Standard 3-Phase View ---
+                [
+                  { key: PhaseTypes.SPARK, title: '🧠 Spark (Scout)', description: 'Identify and submit the gap', color: 'spark' },
+                  { key: PhaseTypes.DESIGN, title: '🎨 Design (Designer)', description: 'Design the solution', color: 'design' },
+                  { key: PhaseTypes.LOGIC, title: '🛠️ Logic (Builder)', description: 'Build and test', color: 'logic' },
+                ]
+                  .filter(phase => activePhasesForNewSpark.includes(phase.key))
+                  .map((phase) => {
+                    return (
+                      <div key={phase.key} className={`flex flex-col rounded-xl border-2 border-${phase.color}-600 theme-panel-soft`}>
+                        <div className={`bg-${phase.color}-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl`}>
+                          <h2 className="text-lg sm:text-xl font-bold">{phase.title}</h2>
+                          <p className="text-xs sm:text-sm mt-1 opacity-90">{phase.description}</p>
+                        </div>
+                        <div className="p-3 sm:p-4 flex flex-col">
+                          <div className="w-full theme-input rounded border p-3 sm:p-4 text-sm sm:text-base bg-black/10 relative overflow-y-auto max-h-[68vh] sm:max-h-[58vh]">
+                            <div className="prose prose-invert prose-sm max-w-none">
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm, remarkMath]}
+                                rehypePlugins={[rehypeKatex]}
+                              >
+                                {sparkData.phases[phase.key].notes || buildPhaseNotes(phase.key, sparkData.phases[phase.key])}
+                              </ReactMarkdown>
+                            </div>
+                          </div>
+                          <div className="mt-2 flex items-center gap-3">
+                            <button
+                              onClick={() => openPhaseEditor(phase.key)}
+                              disabled={isReadOnly}
+                              className={`text-xs text-${phase.color}-400 hover:text-${phase.color}-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed`}
+                            >
+                              {!isReadOnly && <span>{canPush ? 'Edit' : 'Add'}</span>}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
               )}
-              {!activePhasesForNewSpark.includes(PhaseTypes.LOGIC) && (
-                <button
-                  onClick={() => setActivePhasesForNewSpark([...activePhasesForNewSpark, PhaseTypes.LOGIC])}
-                  className="px-4 py-2 rounded-lg border-2 border-logic-500/50 hover:border-logic-500 hover:bg-logic-500/10 text-logic-400 font-semibold transition-all text-sm"
-                >
-                  + Add Logic Phase (with AI help coming soon)
-                </button>
+            </div>
+
+            {/* Side Action Buttons */}
+            <div className="flex flex-col gap-3 min-w-[220px]">
+              {sparkData.isEnhanced ? (
+                // Enhanced Section Add-ons (exclude Section 1 from available buttons)
+                Object.entries(ENHANCED_SECTIONS_CONFIG)
+                  .filter(([num]) => parseInt(num) !== 1 && !(sparkData.activeSections || [1]).includes(parseInt(num)))
+                  .map(([num, config]) => (
+                    <button
+                      key={num}
+                      onClick={() => {
+                        const updated = {
+                          ...sparkData,
+                          // Force exactly two columns: [1(Narrative), X(Selected Slot)]
+                          activeSections: [1, parseInt(num)]
+                        };
+                        onSparkUpdate(updated);
+                      }}
+                      className={`px-4 py-2 rounded-lg border-2 border-${config.color}-500/50 hover:border-${config.color}-500 hover:bg-${config.color}-500/10 text-${config.color}-400 font-semibold transition-all text-sm text-left`}
+                    >
+                      + Add {config.title}
+                    </button>
+                  ))
+              ) : (
+                // Standard Phase Add-ons
+                <>
+                  {!activePhasesForNewSpark.includes(PhaseTypes.DESIGN) && (
+                    <button
+                      onClick={() => setActivePhasesForNewSpark([...activePhasesForNewSpark, PhaseTypes.DESIGN])}
+                      className="px-4 py-2 rounded-lg border-2 border-design-500/50 hover:border-design-500 hover:bg-design-500/10 text-design-400 font-semibold transition-all text-sm"
+                    >
+                      + Add Design Phase
+                    </button>
+                  )}
+                  {!activePhasesForNewSpark.includes(PhaseTypes.LOGIC) && (
+                    <button
+                      onClick={() => setActivePhasesForNewSpark([...activePhasesForNewSpark, PhaseTypes.LOGIC])}
+                      className="px-4 py-2 rounded-lg border-2 border-logic-500/50 hover:border-logic-500 hover:bg-logic-500/10 text-logic-400 font-semibold transition-all text-sm"
+                    >
+                      + Add Logic Phase
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>

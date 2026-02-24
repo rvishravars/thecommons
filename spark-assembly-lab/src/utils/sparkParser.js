@@ -63,6 +63,8 @@ export function parseSparkFile(content) {
     name,
     markedForDeletion,
     frontmatter: {},
+    isEnhanced: (content || '').includes('spark_type:'),
+    sections: extractGranularSections(content || ''),
     phases: {
       spark: {
         status: spark.status,
@@ -97,6 +99,32 @@ export function parseSparkFile(content) {
   };
   console.log('✅ Parsed result:', result);
   return result;
+}
+
+const ENHANCED_SECTION_HEADERS = [
+  '# 1. Spark Narrative',
+  '# 2. Hypothesis Formalization',
+  '# 3. Simulation / Modeling Plan',
+  '# 4. Evaluation Strategy',
+  '# 5. Feedback & Critique',
+  '# 6. Results (When Available)',
+  '# 7. Revision Notes',
+  '# 8. Next Actions'
+];
+
+function extractGranularSections(content) {
+  const sections = {};
+  ENHANCED_SECTION_HEADERS.forEach((header, index) => {
+    const nextHeader = ENHANCED_SECTION_HEADERS[index + 1];
+    const escapedHeader = header.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escapedNextHeader = nextHeader ? nextHeader.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '$';
+    const regex = new RegExp(`${escapedHeader}\\s*\\n?([\\s\\S]*?)(?=\\n---?\\n|\\n${escapedNextHeader}|${escapedNextHeader}|$)`, 'i');
+    const match = content.match(regex);
+    if (match) {
+      sections[index + 1] = match[1].trim();
+    }
+  });
+  return sections;
 }
 
 function extractPhaseNotes(rawPhase) {
@@ -219,6 +247,7 @@ export function buildMissionSummary(parsedSpark) {
   };
 }
 
+
 export function validateSparkData(sparkData) {
   const errors = [];
   const name = (sparkData?.name || '').trim();
@@ -227,24 +256,23 @@ export function validateSparkData(sparkData) {
 
   const handlePattern = /^[A-Za-z0-9-]+$/;
 
-  if (!name) {
-    errors.push('Spark name is required');
+  if (!name || name === 'New Spark') {
+    errors.push('Please give your spark a descriptive name');
   }
 
   if (!contributors.scout || !handlePattern.test(contributors.scout)) {
     errors.push('Spark requires a valid scout handle');
   }
-  // Designer and builder handles are optional for partial sparks
-  if (contributors.designer && !handlePattern.test(contributors.designer)) {
-    errors.push('Designer handle must be valid');
-  }
-  if (contributors.builder && !handlePattern.test(contributors.builder)) {
-    errors.push('Builder handle must be valid');
-  }
 
   const spark = phases.spark || {};
-  const design = phases.design || {};
-  const logic = phases.logic || {};
+
+  // Enforce Spark Narrative for enhanced sparks
+  if (sparkData.isEnhanced) {
+    const content = spark.notes || '';
+    if (!content.includes('Spark Narrative') || content.length < 50) {
+      errors.push('The Spark Narrative is a mandatory requirement for new sparks');
+    }
+  }
 
   return {
     valid: errors.length === 0,
@@ -357,7 +385,54 @@ export function generateSparkMarkdown(sparkData) {
     return deduped.join(' ').trim();
   };
 
-  let markdown = `# ${name}\n\n`;
+  let markdown = '';
+
+  // If this is the new enhanced template and we have raw content,
+  // we can reconstruct it by replacing the title and injecting the phases where appropriate.
+  // For a simpler approach, we'll try to just output the standard format but with
+  // the phase notes injected, since the new template handles its own formatting inside the Notes.
+  // Actually, wait, when a user edits the phase, it just updates phases[key].notes.
+  // If we just use the original generator, it will wrap it in "## 🧠 Phase 1: The Spark" etc.
+  // Let's modify the generator to cleanly output just the notes if it's the new format,
+  // or rather, we can just replace the title in rawContent if it's the completely new template.
+
+  // Let's check if the rawContent exists and seems to be the enhanced template
+  if (sparkData.rawContent && sparkData.rawContent.includes('spark_type:')) {
+    markdown = sparkData.rawContent.replace(/^title:\s*".*?"/m, `title: "${name}"`);
+    // If we want to support full editing of the enhanced template fields, we'd need a more
+    // complex parser, but for now, we just let them copy/download the raw text if they haven't 
+    // edited via the Phase fields. 
+    // If they HAVE edited via the Phase fields (phases.*.notes is dirty), we must drop the rawContent
+    // and let the standard generator take over, or inject their notes into the raw content.
+
+    // Quick check: if the user actually typed into the Phase boxes, those notes will differ from the template.
+    // For simplicity, we just output the standard format if they used the Phase boxes.
+    const isEdited = phases.spark?.notes || phases.design?.notes || phases.logic?.notes;
+
+    if (!isEdited) {
+      // Just return the updated raw template
+      return markdown;
+    }
+  }
+
+  markdown = `# ${name}\n\n`;
+
+  // For enhanced sparks, we generate based on granular sections
+  if (sparkData.isEnhanced) {
+    const contactInfo = contributors.scout ? `*Scout: @${contributors.scout}*\n\n` : '';
+    markdown += contactInfo;
+
+    const sections = sparkData.sections || {};
+    ENHANCED_SECTION_HEADERS.forEach((header, index) => {
+      const sectionNum = index + 1;
+      if (sections[sectionNum]) {
+        markdown += `${header}\n${sections[sectionNum]}\n\n---\n\n`;
+      }
+    });
+
+    markdown += `> *Instructions: This is an enhanced spark template. Use the sections above to document the evolution from idea to implementation.*\n`;
+    return markdown;
+  }
 
   // Add YAML frontmatter with deletion flag
   if (markedForDeletion) {

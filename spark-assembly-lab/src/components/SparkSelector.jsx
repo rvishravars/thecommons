@@ -5,7 +5,7 @@ import { getStoredToken, loadSparksFromGitHub } from '../utils/github';
 import RepoInput from './RepoInput';
 import GlobalSparkSearch from './GlobalSparkSearch';
 
-export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, onRepoChange, currentSparkData, onPRRefresh, onPermissionChange }) {
+export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, onRepoChange, currentSparkData, onPRRefresh, onPermissionChange, user }) {
   console.log('🚀 SparkSelector component mounted!');
   const [activeTab, setActiveTab] = useState('repo'); // 'repo' or 'global'
   const [sparks, setSparks] = useState([]);
@@ -266,8 +266,8 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         <button
           onClick={() => setActiveTab('repo')}
           className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold transition-colors ${activeTab === 'repo'
-              ? 'theme-card border-b-2 border-design-500'
-              : 'theme-subtle hover:theme-text'
+            ? 'theme-card border-b-2 border-design-500'
+            : 'theme-subtle hover:theme-text'
             }`}
         >
           <FolderGit2 className="h-4 w-4" />
@@ -276,8 +276,8 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         <button
           onClick={() => setActiveTab('global')}
           className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-semibold transition-colors ${activeTab === 'global'
-              ? 'theme-card border-b-2 border-design-500'
-              : 'theme-subtle hover:theme-text'
+            ? 'theme-card border-b-2 border-design-500'
+            : 'theme-subtle hover:theme-text'
             }`}
         >
           <Globe className="h-4 w-4" />
@@ -298,7 +298,13 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
           <div className="p-4 border-b theme-border">
             <button
               onClick={onNewSpark}
-              className="w-full flex items-center justify-center space-x-2 rounded-lg bg-design-600 px-4 py-3 text-sm font-semibold hover:bg-design-700 transition-colors"
+              disabled={!user}
+              title={!user ? "Please login with GitHub first" : "Create a new spark"}
+              className={`w-full flex items-center justify-center space-x-2 rounded-lg px-4 py-3 text-sm font-semibold transition-colors
+                ${user
+                  ? 'bg-design-600 hover:bg-design-700'
+                  : 'bg-design-600/50 cursor-not-allowed opacity-50'
+                }`}
             >
               <Plus className="h-4 w-4" />
               <span>New Spark</span>

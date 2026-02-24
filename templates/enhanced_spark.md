@@ -1,64 +1,60 @@
 ---
-id: spark_energy_optimized_ci
-title: "Energy-Optimized CI Pipelines"
-domain: "engineering"
-spark_type: "hypothesis"
+id: spark_<unique_id>
+title: "<Clear, concise spark title>"
+domain: "<research | engineering | policy | education | product | other>"
+spark_type: "<hypothesis | reframing | contradiction | system_design | constraint | exploration>"
 
-maturity_level: "seed"
-status: "draft"
+maturity_level: "<seed | structured | modeled | validated | implemented>"
+status: "<draft | under_review | iterating | accepted | archived>"
 
-core_claim: "Optimize CI for energy efficiency instead of build time."
+core_claim: "<One-sentence central claim or shift>"
 
-problem_statement: "Current defaults focus on minimizing execution time rather than energy consumption."
+problem_statement: "<What gap or inefficiency does this address?>"
 
 assumptions:
-  - "Energy can be measured per workflow."
-  - "Slower builds might use less power."
+  - "<Assumption 1>"
+  - "<Assumption 2>"
 
 unknowns:
-  - "How to measure accurately?"
-  - "Trade-off with developer productivity?"
+  - "<Unknown 1>"
+  - "<Unknown 2>"
 
 variables:
   independent:
-    - "Scheduling"
-    - "Hardware selection"
-    - "Workload batching"
+    - "<Variable manipulated>"
   dependent:
-    - "Energy consumption"
+    - "<Outcome measured>"
 
 metrics:
-  - "Energy used per workflow run"
-  - "Total build time vs energy consumed"
+  - "<Metric 1>"
+  - "<Metric 2>"
 
 constraints:
-  - "Must not severely block developer productivity"
+  - "<Budget / time / technical constraint>"
+  - "<Acceptable trade-offs>"
 
 risks:
-  - "Measurement inaccuracy"
-  - "Developer friction"
+  - "<Technical risk>"
+  - "<Adoption risk>"
+  - "<Ethical or unintended consequence>"
 
 evaluation_strategy:
-  method: "experiment"
-  success_criteria: "Demonstrable reduction in CI energy footprint"
+  method: "<experiment | simulation | case study | prototype | survey | analysis>"
+  success_criteria: "<What defines success?>"
   falsifiable: true
 
 related_sparks:
-  - ""
+  - "<spark_id_if_any>"
 
 revision_history:
   - version: "0.1"
-    note: "Migrated to enhanced structured spark"
+    note: "Initial structured spark"
 ---
 
-*Scout: @rvishravars*
-
 # 1. Spark Narrative
-Optimize CI for energy efficiency instead of build time. Current defaults focus on minimizing execution time rather than energy consumption. However, energy can be measured per workflow, and slower builds might consume less power overall.
-
-There's a tension between the current default of minimizing execution time and the alternative of minimizing energy consumption.
-
-Possible axes for exploration include scheduling, hardware selection, and workload batching.
+<!-- Describe the idea clearly and compellingly.
+     Explain the shift in thinking.
+     What makes this different from current approaches? -->
 
 ---
 
@@ -141,4 +137,11 @@ Possible axes for exploration include scheduling, hardware selection, and worklo
 - [ ] Publish findings
 
 ---
-> *Instructions: This is an enhanced spark template. Use the sections above to document the evolution from idea to implementation.*
+
+# Maturity Guide (Reference)
+
+- **Seed** → Conceptual spark only
+- **Structured** → Hypothesis defined
+- **Modeled** → Simulated or analyzed
+- **Validated** → Empirical support
+- **Implemented** → Deployed in real context

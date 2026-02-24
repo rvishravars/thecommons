@@ -7,6 +7,8 @@ import Header from './components/Header';
 import { Sparkles, X } from 'lucide-react';
 import { generateSparkMarkdown } from './utils/sparkParser';
 import { getStoredUserInfo } from './utils/github';
+import { parseSparkFile } from './utils/sparkParser';
+import { ENHANCED_SPARK_TEMPLATE } from './utils/templates';
 
 // Main application component
 function AppMain() {
@@ -79,17 +81,23 @@ function AppMain() {
   const handleTemplateSelect = (template) => {
     setSelectedSpark(null);
     const userHandle = user?.login || '';
+
+    // Parse the enhanced template to get the structure
+    const parsedTemplate = parseSparkFile(ENHANCED_SPARK_TEMPLATE);
+
     setSparkData({
-      name: template.name,
+      name: 'New Spark',
       markedForDeletion: false,
-      phases: {
-        spark: { status: 'Active', observation: template.spark.observation || '', gap: template.spark.gap || '', why: template.spark.why || '', notes: '' },
-        design: { status: 'Pending', novel_core: '', blueprint: '', interface: '', prior_art: '', notes: '' },
-        logic: { status: 'In-Progress', technical_impl: '', clutch_test: '', dependencies: '', notes: '' },
-      },
+      isEnhanced: true,
+      sections: parsedTemplate.sections, // All 8 sections from the template
+      activeSections: [1], // Only Section 1 is active by default
+      phases: parsedTemplate.phases,
       contributors: { scout: userHandle, designer: '', builder: '' },
+      proposals: parsedTemplate.proposals || { spark: '', design: '', logic: '' },
       sourcePath: null,
+      rawContent: ENHANCED_SPARK_TEMPLATE
     });
+
     setOriginalSparkData(null);
     setIsMobileMenuOpen(false);
     setShowTemplateSelector(false);
@@ -98,6 +106,14 @@ function AppMain() {
   const handleResetSpark = () => {
     if (!originalSparkData) return;
     setSparkData(JSON.parse(JSON.stringify(originalSparkData)));
+  };
+
+  const handleGoHome = () => {
+    setSelectedSpark(null);
+    setSparkData(null);
+    setOriginalSparkData(null);
+    setIsMobileMenuOpen(false);
+    setShowTemplateSelector(false);
   };
 
   useEffect(() => {
@@ -114,6 +130,7 @@ function AppMain() {
           isMobileMenuOpen={isMobileMenuOpen}
           user={user}
           onUserChange={setUser}
+          onGoHome={handleGoHome}
         />
 
         <div className="flex flex-1 overflow-hidden relative">
@@ -150,6 +167,7 @@ function AppMain() {
               currentSparkData={sparkData}
               onPRRefresh={setPrRefreshCallback}
               onPermissionChange={handlePermissionChange}
+              user={user}
             />
           </aside>
 
@@ -202,38 +220,14 @@ function AppMain() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto">
                 {/* Generic Template */}
                 <button
                   onClick={() => handleTemplateSelect({ name: 'New Spark', spark: { observation: '', gap: '', why: '' } })}
                   className="p-4 rounded-lg border-2 border-design-500/30 hover:border-design-500 hover:bg-design-500/10 transition-all text-left"
                 >
                   <h3 className="font-semibold text-design-400 mb-2">Generic Spark</h3>
-                  <p className="text-sm text-gray-300">A blank canvas for any idea or project</p>
-                </button>
-
-                {/* School Level Template */}
-                <button
-                  onClick={() => handleTemplateSelect({
-                    name: 'School Level',
-                    spark: { observation: '', gap: '', why: '' }
-                  })}
-                  className="p-4 rounded-lg border-2 border-spark-500/30 hover:border-spark-500 hover:bg-spark-500/10 transition-all text-left"
-                >
-                  <h3 className="font-semibold text-spark-400 mb-2">🏫 School Level</h3>
-                  <p className="text-sm text-gray-300">Educational project for students to explore and learn</p>
-                </button>
-
-                {/* University Level Template */}
-                <button
-                  onClick={() => handleTemplateSelect({
-                    name: 'University Level',
-                    spark: { observation: '', gap: '', why: '' }
-                  })}
-                  className="p-4 rounded-lg border-2 border-logic-500/30 hover:border-logic-500 hover:bg-logic-500/10 transition-all text-left"
-                >
-                  <h3 className="font-semibold text-logic-400 mb-2">🎓 University Level</h3>
-                  <p className="text-sm text-gray-300">Research-focused project with academic rigor</p>
+                  <p className="text-sm text-gray-300">A structured template for any new idea or project</p>
                 </button>
               </div>
             </div>

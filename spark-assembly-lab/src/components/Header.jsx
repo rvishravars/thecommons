@@ -6,7 +6,7 @@ const THEME_OPTIONS = [
   { value: 'light-theme', label: 'Light Theme' },
 ];
 
-export default function Header({ theme, onThemeChange, onMenuToggle, user, onUserChange }) {
+export default function Header({ theme, onThemeChange, onMenuToggle, user, onUserChange, onGoHome }) {
   return (
     <header className="border-b theme-border theme-surface px-4 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-between">
@@ -20,15 +20,21 @@ export default function Header({ theme, onThemeChange, onMenuToggle, user, onUse
             <Menu className="h-6 w-6" />
           </button>
 
-          <Boxes className="h-6 w-6 sm:h-8 sm:w-8 text-design-500 flex-shrink-0" />
-          <div className="min-w-0">
-            <h1 className="text-lg sm:text-2xl font-bold font-mono truncate">
-              Spark Assembly Lab
-            </h1>
-            <p className="text-xs sm:text-sm theme-muted hidden sm:block">
-              TheCommons v2.0 | Build in LEGO-style
-            </p>
-          </div>
+          <button
+            onClick={onGoHome}
+            className="flex items-center space-x-2 sm:space-x-3 text-left hover:opacity-80 transition-opacity focus:outline-none"
+            title="Go to Home"
+          >
+            <Boxes className="h-6 w-6 sm:h-8 sm:w-8 text-design-500 flex-shrink-0" />
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold font-mono truncate">
+                Spark Assembly Lab
+              </h1>
+              <p className="text-xs sm:text-sm theme-muted hidden sm:block">
+                TheCommons v2.0 | Build in LEGO-style
+              </p>
+            </div>
+          </button>
         </div>
 
         <div className="flex items-center space-x-2 sm:space-x-4">
