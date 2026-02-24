@@ -93,7 +93,7 @@ function AppMain() {
     setShowTemplateSelector(true);
   };
 
-  const handleTemplateSelect = (template) => {
+  const handleTemplateSelect = () => {
     setSelectedSpark(null);
     const userHandle = user?.login || '';
 

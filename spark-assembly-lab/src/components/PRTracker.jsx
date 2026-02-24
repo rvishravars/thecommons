@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { GitPullRequest, ChevronDown, ChevronUp, Code2, Plus, Minus, AlertCircle, GitCommit } from 'lucide-react';
-import { fetchOpenPullRequests, fetchOpenIssues, fetchPRFiles, fetchPRDiff, parseRepoUrl, fetchFileCommitHistory, fetchCommitDetails } from '../utils/github';
+import { fetchOpenPullRequests, fetchOpenIssues, fetchPRFiles, parseRepoUrl, fetchFileCommitHistory, fetchCommitDetails } from '../utils/github';
 
 export default function PRTracker({ repoUrl, sparkFile, user }) {
   const [prs, setPrs] = useState([]);
@@ -20,6 +20,7 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
   useEffect(() => {
     if (!repoUrl || !sparkFile) return;
     loadPRs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [repoUrl, sparkFile]);
 
   const loadPRs = async () => {
@@ -148,12 +149,12 @@ export default function PRTracker({ repoUrl, sparkFile, user }) {
     });
   };
 
-  const getStatsBadgeColor = (stat) => {
-    if (stat.status === 'added') return 'bg-logic-100 border-logic-600 text-logic-900';
-    if (stat.status === 'removed') return 'bg-red-100 border-red-600 text-red-900';
-    if (stat.status === 'modified') return 'bg-design-100 border-design-600 text-design-900';
-    return 'bg-gray-100 border-gray-600 text-gray-900';
-  };
+  // const getStatsBadgeColor = (stat) => {
+  //   if (stat.status === 'added') return 'bg-logic-100 border-logic-600 text-logic-900';
+  //   if (stat.status === 'removed') return 'bg-red-100 border-red-600 text-red-900';
+  //   if (stat.status === 'modified') return 'bg-design-100 border-design-600 text-design-900';
+  //   return 'bg-gray-100 border-gray-600 text-gray-900';
+  // };
 
   if (!user) {
     return (

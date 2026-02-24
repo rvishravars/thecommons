@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, FileText, Zap, RefreshCw, Search, X, Globe, FolderGit2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, FileText, Zap, RefreshCw, Search, X, Globe, FolderGit2, ChevronDown, ChevronUp, GitPullRequest } from 'lucide-react';
 import { buildMissionSummary, parseSparkFile } from '../utils/sparkParser';
 import { getStoredToken, loadSparksFromGitHub } from '../utils/github';
 import RepoInput from './RepoInput';
@@ -12,7 +12,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [errorType, setErrorType] = useState(null); // 'repo-not-found', 'no-sparks', 'network-error'
-  const [repoInfo, setRepoInfo] = useState(null);
+  // const [repoInfo, setRepoInfo] = useState(null);
   const [missionSummary, setMissionSummary] = useState(null);
   const [missionLoading, setMissionLoading] = useState(false);
   const [missionError, setMissionError] = useState(null);
@@ -74,6 +74,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         );
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSparkData?.name, selectedSpark?.sourceFile, selectedSpark?.sourcePath]);
 
   const loadSparks = useCallback(async () => {
@@ -119,9 +120,9 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
       }
 
       // Store repo info for display
-      if (result.owner && result.repo) {
-        setRepoInfo(`${result.owner}/${result.repo}`);
-      }
+      // if (result.owner && result.repo) {
+      //   setRepoInfo(`${result.owner}/${result.repo}`);
+      // }
 
       // Check if we have files
       if (result.files && result.files.length > 0) {
@@ -257,6 +258,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
 
     loadPrs();
     return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSpark, repoUrl, refreshToken]);
 
   return (

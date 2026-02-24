@@ -519,7 +519,7 @@ export const globalSearchSparkFiles = async (searchQuery = '', options = {}) => 
 
     if (!response.ok) {
       if (response.status === 403) {
-        const resetTime = response.headers.get('X-RateLimit-Reset');
+        // const resetTime = response.headers.get('X-RateLimit-Reset');
         throw new Error('GitHub API rate limit exceeded. Please add a GitHub token or try again later.');
       }
       if (response.status === 422) {

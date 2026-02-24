@@ -14,6 +14,7 @@ export default function RepoInput({ onRepoChange, currentRepo, currentBranch, on
     if (currentRepo) {
       loadBranchesForRepo(currentRepo);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentRepo]);
 
   const loadBranchesForRepo = async (repo) => {

@@ -41,10 +41,10 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
     const isNewTemplate = sparkData?.name === 'New Spark';
     return isNewTemplate ? [PhaseTypes.SPARK] : [PhaseTypes.SPARK, PhaseTypes.DESIGN, PhaseTypes.LOGIC];
   });
-  const [expandedPhases, setExpandedPhases] = useState({
-    [PhaseTypes.DESIGN]: false,
-    [PhaseTypes.LOGIC]: false,
-  });
+  // const [expandedPhases, setExpandedPhases] = useState({
+  //   [PhaseTypes.DESIGN]: false,
+  //   [PhaseTypes.LOGIC]: false,
+  // });
   const toast = useToast();
   const user = getStoredUserInfo();
 
@@ -56,25 +56,25 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
     } else {
       setActivePhasesForNewSpark([PhaseTypes.SPARK, PhaseTypes.DESIGN, PhaseTypes.LOGIC]);
     }
-    setExpandedPhases({
-      [PhaseTypes.DESIGN]: false,
-      [PhaseTypes.LOGIC]: false,
-    });
+    // setExpandedPhases({
+    //   [PhaseTypes.DESIGN]: false,
+    //   [PhaseTypes.LOGIC]: false,
+    // });
   }, [sparkData?.name, sparkData?.isEnhanced]);
 
-  const handleBlockUpdate = (phase, blockType, value) => {
-    const updatedData = {
-      ...sparkData,
-      phases: {
-        ...sparkData.phases,
-        [phase]: {
-          ...sparkData.phases[phase],
-          [blockType]: value,
-        },
-      },
-    };
-    onSparkUpdate(updatedData);
-  };
+  // const handleBlockUpdate = (phase, blockType, value) => {
+  //   const updatedData = {
+  //     ...sparkData,
+  //     phases: {
+  //       ...sparkData.phases,
+  //       [phase]: {
+  //         ...sparkData.phases[phase],
+  //         [blockType]: value,
+  //       },
+  //     },
+  //   };
+  //   onSparkUpdate(updatedData);
+  // };
 
   const handleDownload = () => {
     const validation = validateSparkData(sparkData);
@@ -797,7 +797,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
             <div className="bg-logic-900/20 p-4 text-center border-t border-logic-900/30">
               <p className="text-[10px] font-mono text-logic-400/60 uppercase tracking-widest">
-                Instruction Set v2.0 // Standard Gauge: 100% Correct
+                Instruction Set v2.0 &#47;&#47; Standard Gauge: 100% Correct
               </p>
             </div>
           </div>
@@ -828,7 +828,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                   You are about to request the deletion of this spark:
                 </p>
                 <p className="text-lg font-bold text-red-400">
-                  "{sparkData.name}"
+                  &ldquo;{sparkData.name}&rdquo;
                 </p>
                 <div className="text-xs text-white/70 space-y-2 pt-2">
                   <p>• A pull request will be created to remove this spark</p>
@@ -870,7 +870,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
 
             <div className="bg-red-900/20 p-4 text-center border-t border-red-900/30">
               <p className="text-[10px] font-mono text-red-400/60 uppercase tracking-widest">
-                This action creates a deletion PR // Community Approval Required
+                This action creates a deletion PR &#47;&#47; Community Approval Required
               </p>
             </div>
           </div>
