@@ -72,15 +72,16 @@ export default function RepoInput({ onRepoChange, currentRepo, currentBranch, on
           
           {/* Branch Selector */}
           <div className="flex items-center space-x-2">
-            <GitBranch className="h-4 w-4 theme-muted flex-shrink-0" />
+            <GitBranch className="h-3.5 w-3.5 theme-muted flex-shrink-0" />
             <select
               value={selectedBranch}
               onChange={handleBranchChange}
               disabled={loadingBranches}
-              className="flex-1 px-2 py-1.5 text-sm rounded theme-input focus:outline-none focus:ring-2 focus:ring-design-500"
+              className="flex-1 px-2 py-1 text-xs rounded theme-input focus:outline-none focus:ring-1 focus:ring-design-500 truncate max-w-[180px]"
+              title={`Branch: ${selectedBranch}`}
             >
               {branches.map(branch => (
-                <option key={branch} value={branch}>
+                <option key={branch} value={branch} title={branch}>
                   {branch}
                 </option>
               ))}

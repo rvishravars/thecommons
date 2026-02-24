@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import 'katex/dist/katex.min.css';
 
 export default function BuildingBlock({ title, description, icon, color, value, onUpdate, onDone, isReadOnly }) {
   const [isExpanded, setIsExpanded] = useState(false);
