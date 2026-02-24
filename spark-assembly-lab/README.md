@@ -1,69 +1,54 @@
 # Spark Assembly Lab
 
-A React-based LEGO-style interface for building and visualizing **Sparks** in TheCommons v2.0 modular meritocracy.
+A React-based modular interface for building and visualizing **Enhanced Sparks** in TheCommons v3.0 maturity meritocracy.
 
 ## 📸 Screenshots
 
-### Main Assembly Interface
+### Enhanced Two-Column Interface
 ![Assembly Canvas](./docs/screenshots/assembly-canvas.png)
-*The three-phase LEGO-style interface: Intuition (Blue), Design (Yellow), and Logic (Green)*
+*The split-view interface: Fixed Narrative (Left) and Swappable Research Modules (Right)*
 
-### Building Blocks in Action
+### 8-Section Building Blocks
 ![Building Blocks](./docs/screenshots/building-blocks.png)
-*Expandable building blocks with phase-specific colors and icons*
+*Modular sections (Narrative, Hypothesis, Modeling, etc.) with maturity-specific indicators*
 
 ### Full-Screen Editor
 ![Full Screen Editor](./docs/screenshots/fullscreen-editor.png)
-*Click the maximize icon to expand any block to full-screen for focused editing*
+*Maximize any section for focused, distraction-free drafting*
 
-### Improve Spark Feature
+### Improve Spark (Maturity Audit)
 ![Improvement Mode](./docs/screenshots/quiz-mode.png)
-*Get AI feedback to strengthen and refine your spark*
+*Get AI feedback to advance your spark from `seed` to `validated`*
 
-### Spark Selector & Preview
-![Spark Selector](./docs/screenshots/spark-selector.png)
-*Sidebar showing existing sparks with stability indicators and live markdown preview*
+---
 
 ## 🎯 Features
 
-- **GitHub Authentication**: Login with your GitHub account using Personal Access Token (PAT)
-- **Visual Assembly**: Build sparks using a 3-lane LEGO-style interface (Intuition, Design, Logic)
-- **Building Blocks**: Modular components for each phase with expandable form fields
-- **Full-Screen Editor**: Maximize any block for focused, distraction-free editing
-- **Improve Spark**: AI-powered reflection system that provides feedback to strengthen and refine your spark content (requires login)
-- **Global Spark Search**: Search for `.spark.md` files across all of GitHub with advanced filters for organization and user
-- **Repository Browser**: Load sparks from any GitHub repository dynamically with local search
-- **Mobile Responsive**: Fully optimized for mobile devices with drawer navigation
-- **Live Preview**: Real-time markdown preview of your spark
-- **Stability Tracking**: Visual indicators showing completion status (0/3 to 3/3 Stable)
-- **Smart Loading**: Automatically loads existing sparks from the `/sparks/` directory or external repos
-- **Export**: Download sparks as properly formatted markdown files
-- **Toast Notifications**: User-friendly feedback for actions
-- **Theme**: Blueprint-inspired design with phase-specific colors (Blue, Yellow, Green)
+- **Split-View Canvas**: Always-on visibility of the **Spark Narrative** while iterating on technical sections.
+- **8-Section Standard**: Full support for the v3.0 Enhanced Spark template (Hypothesis, Modeling, Evaluation, etc.).
+- **Smart Maturity Tracking**: Stability indicators scale based on active sections (e.g., `4/8 Stable`).
+- **Glass Box AI Feedback**: Powered by local-first models or Cloud APIs to audit your hypothesis and results.
+- **Global Spark Search**: Find `.spark.md` files across all of GitHub with advanced filters.
+- **GitHub Integration**: Login via PAT to load/save sparks directly to repositories.
+- **Mobile Responsive**: Optimized viewports with drawer navigation for on-the-go scouting.
+- **Live Markdown Preview**: Real-time rendering of your complex spark structures.
 
-## 🏗️ The Three Phases
+---
 
-### 🧠 Intuition (Scout) - Blue (#0066cc)
-Identify the gap in the ecosystem
-- **The Observation**: What is missing?
-- **The Gap**: Identify the specific problem
-- **The "Why"**: Explain why this matters
-- **Reward**: +5 CS
+## 📈 The Maturity Lifecycle
 
-### 🎨 Design (Designer) - Yellow (#ffcc00)
-Design the solution
-- **The Novel Core**: The 10% Delta
-- **The Blueprint**: Describe the unique design
-- **The Interface**: How does this snap into the ecosystem?
-- **Prior Art**: Why existing solutions don't work
-- **Reward**: +15 CS (+5 Echo Bonus)
+Instead of static phases, the Lab supports 8 modular sections that define a spark's maturity:
 
-### 🛠️ Logic (Builder) - Green (#00cc66)
-Build and test
-- **Technical Implementation**: The actual code/logic
-- **Clutch Power Test**: Verify compatibility
-- **Dependencies**: Required sparks or libraries
-- **Reward**: +25 CS (+10 Prototype Bonus)
+1. **Spark Narrative** (Required for `seed`)
+2. **Hypothesis Formalization** (Required for `structured`)
+3. **Simulation / Modeling Plan** (Required for `modeled`)
+4. **Evaluation Strategy**
+5. **Feedback & Critique**
+6. **Results** (Required for `validated`)
+7. **Revision Notes**
+8. **Next Actions**
+
+---
 
 ## 🚀 Quick Start (Docker Only)
 
@@ -73,339 +58,66 @@ Build and test
 # From the spark-assembly-lab directory
 docker compose up
 
-# Or run in detached mode
-docker compose up -d
-
 # Visit http://localhost:3000
 ```
 
-**Note:** Use `docker compose` (V2, no hyphen) instead of `docker-compose` (V1, deprecated).
-
-The Docker setup automatically:
-- Installs all dependencies
-- Mounts the repo for live updates
-- Enables hot module replacement (HMR)
-- Runs the Flask API on port 8080
+**Note:** Use `docker compose` (V2) instead of `docker-compose` (V1). The Docker setup automatically installs dependencies and enables Hot Module Replacement (HMR).
 
 ### Building for Production (Docker)
 
-All builds should be run through Docker. Use the build script from the repo root:
+All builds must be run through Docker to ensure consistency:
 
 ```bash
 # From the repo root
 ./build.sh
 
-# Or manually using docker-compose
-cd spark-assembly-lab
-docker compose -f docker-compose.prod.yml build
-
-# Or use docker build directly
+# Or manually
 docker build -f spark-assembly-lab/Dockerfile.prod -t spark-assembly-lab:latest .
 ```
 
-The production build:
-- ✅ Builds React app with Vite (inside Docker)
-- ✅ Compiles TypeScript/JSX
-- ✅ Optimizes assets and bundles
-- ✅ Creates production-ready Flask container
-- ✅ Produces final `spark-assembly-lab:latest` image
-
-### Running Production Build
-
-```bash
-# Run the built image locally on port 8080
-docker run -p 8080:8080 spark-assembly-lab:latest
-
-# Or use docker-compose for production
-cd spark-assembly-lab
-docker compose -f docker-compose.prod.yml up
-
-# Visit http://localhost:8080
-```
-
-### Cloud Deployment (Cloud Run)
-
-```bash
-# From the repo root
-./build.sh
-
-# Tag for Cloud Run
-docker tag spark-assembly-lab:latest gcr.io/YOUR_PROJECT/spark-assembly-lab:latest
-
-# Push to Container Registry
-docker push gcr.io/YOUR_PROJECT/spark-assembly-lab:latest
-
-# Deploy to Cloud Run
-gcloud run deploy spark-assembly-lab \
-   --image gcr.io/YOUR_PROJECT/spark-assembly-lab:latest \
-   --region us-central1 \
-   --allow-unauthenticated \
-   --port 8080
-```
-
-## ⚠️ Important: Docker-Only Build Process
-
-**Do NOT run `npm run build` locally.** All builds must be run through Docker to ensure:
-- ✅ Consistent environments
-- ✅ No local dependency issues
-- ✅ Reproducible production builds
-- ✅ Proper layer caching for performance
-
-Use the provided `./build.sh` script or Docker commands instead.
-
-## 📁 Project Structure
-
-```
-spark-assembly-lab/
-├── src/
-│   ├── components/
-│   │   ├── AssemblyCanvas.jsx      # Main workspace with 3 lanes
-│   │   ├── PhaseLane.jsx           # Individual phase column
-│   │   ├── BuildingBlock.jsx       # Expandable form component
-│   │   ├── SparkSelector.jsx       # Sidebar with repo/global search tabs
-│   │   ├── GlobalSparkSearch.jsx   # Global GitHub search interface
-│   │   ├── MarkdownPreview.jsx     # Live markdown preview
-│   │   ├── GitHubAuth.jsx          # GitHub authentication component
-│   │   ├── Header.jsx              # App header with auth
-│   │   └── Toast.jsx               # Toast notification
-│   ├── utils/
-│   │   ├── github.js               # GitHub API utilities (auth, search, repos)
-│   │   ├── sparkParser.js          # Markdown parsing & generation
-│   │   └── ToastContext.jsx        # Toast notification provider
-│   ├── types/
-│   │   └── spark.js                # Type definitions & metadata
-│   ├── App.jsx                     # Main application
-│   ├── main.jsx                    # Entry point
-│   └── index.css                   # Global styles
-├── public/
-│   └── sparks/                     # Mounted from parent /sparks/
-├── Dockerfile
-├── docker-compose.yml
-└── package.json
-```
-
-## 🎨 Design System
-
-### Colors
-- **Intuition Blue**: `#0066cc` - Represents discovery and observation
-- **Design Yellow**: `#ffcc00` - Represents creativity and design
-- **Logic Green**: `#00cc66` - Represents execution and building
-- **Commons Dark**: `#1a1a2e` - Main background
-- **Commons Darker**: `#16161f` - Deeper background
-
-### Typography
-- **Headers**: Bold, sans-serif (Inter)
-- **Code**: Monospace (JetBrains Mono)
-- **Body**: Sans-serif (Inter)
+---
 
 ## 🔧 Technical Stack
 
 - **Framework**: React 18
 - **Build Tool**: Vite 5
-- **Styling**: Tailwind CSS 3
-- **Markdown**: react-markdown + gray-matter
-- **Drag & Drop**: react-dnd (prepared for future enhancements)
-- **Icons**: lucide-react
-- **Authentication**: GitHub Personal Access Token (PAT)
-- **API**: GitHub REST API v3 (including Code Search API)
+- **Styling**: Vanilla CSS (Cyan/Yellow/Green Blueprint Theme)
+- **Markdown**: `react-markdown` + `gray-matter`
+- **Icons**: `lucide-react`
+- **Authentication**: GitHub PAT
+- **API**: GitHub REST API v3
 - **Containerization**: Docker
-
-## 📖 Usage Guide
-
-### GitHub Authentication
-
-The app uses a simple Personal Access Token (PAT) authentication system:
-
-1. Click the **Login** button in the header (top-right)
-2. A token input field will appear
-3. Get your token using one of these methods:
-   - **CLI Method**: Run `gh auth token` in your terminal (requires GitHub CLI)
-   - **Web Method**: Click "Create new token" to open GitHub Settings and generate a new token
-4. Paste your token into the input field and click **Login**
-5. Your profile will appear in the header showing your avatar and username
-6. Click **Logout** (arrow icon) to sign out
-
-**Note:** Your token is stored locally in your browser and never sent to any server except GitHub's API for validation.
-
-### Creating a New Spark
-
-1. Click **"New Spark"** in the sidebar
-2. Enter a name for your spark
-3. Fill in the building blocks for each phase:
-   - Click on a block to expand it
-   - Enter your content in the text area
-   - Click outside or on another block to collapse
-4. Click **"Preview"** to see the markdown output
-5. Click **"Download"** to save as a `.spark.md` file
-6. Or click **"Copy MD"** to copy to clipboard
-
-### Loading Existing Sparks
-
-There are two ways to find and load sparks:
-
-#### Option 1: Repository Browser (Repository Tab)
-
-1. **Enter Repository URL**: 
-   - Enter a GitHub repository URL in the "Git Repository" input at the top of the sidebar
-   - Supported formats:
-     - `https://github.com/owner/repo`
-     - `github.com/owner/repo`
-     - `owner/repo`
-   - Click the search icon or press Enter to load sparks from that repository
-   - The app will search for all `.spark.md` files in the repository
-   - Your choice is saved in localStorage and persists across sessions
-2. **Local Search**: Use the search bar to filter loaded sparks by name, filename, or content
-3. Click on any spark in the sidebar to load it
-4. The stability indicator shows completion level
-5. Click **"Refresh"** icon to reload sparks from the current source
-
-#### Option 2: Global Spark Search (Global Search Tab)
-
-Search for spark files across all of GitHub:
-
-1. **Switch to Global Search Tab**: Click the "Global Search" tab in the sidebar
-2. **Enter Search Query**: Type keywords like "reputation", "governance", "voting", etc.
-3. **Apply Filters (Optional)**:
-   - Click "Show Filters" to reveal organization and user filters
-   - **Organization**: Filter by org name (e.g., `facebook`, `ethereum`, `google`)
-   - **User**: Filter by GitHub username (e.g., `torvalds`, `gvanrossum`)
-   - You can search with just filters (no keywords) to browse all sparks from an org/user
-4. **Click "Search GitHub"**: Execute the search across all public repositories
-5. **Browse Results**: View spark files with repository information, descriptions, and star counts
-6. **Load a Spark**: Click "Load Spark" on any result to open it in the editor
-7. **Browse Repository**: Click "Browse Repo" to switch your active repository to explore more sparks
-8. **Pagination**: Use "Previous" and "Next" buttons to navigate through results (20 per page)
-
-**Search Examples:**
-- Just keywords: `reputation` (finds all sparks mentioning reputation)
-- Keyword + org: `governance` + org:`ethereum` (governance sparks in Ethereum org)
-- Just filters: org:`facebook` (browse all sparks from Facebook's repos)
-- User sparks: user:`vitalik` (all sparks by a specific user)
-
-**Note:** Global search requires GitHub API access. Using a GitHub token (via Login) provides higher rate limits.
-
-### Improve Spark Feature
-
-The app includes an AI-powered reflection system to strengthen and refine your spark:
-
-**Prerequisites**: You must be logged in with GitHub to use the Improve Spark feature.
-
-1. **Login**: Click the "Login" button in the header and enter your GitHub token
-2. **Open a Spark**: Load any existing spark from the sidebar
-3. **Click "Improve Spark"**: Located in the toolbar at the top of the assembly canvas
-4. **Pick a Focus**: Strengthen Spark, Improve Design, or Tighten Logic
-5. **Choose a Provider**: Gemini or OpenAI
-6. **Enter API Key**: Use a Gemini API key from Google AI Studio or an OpenAI API key
-7. **Optional: Save to browser**: Store the key in localStorage for future use
-8. **Answer Reflection Questions**: Respond to 5 reflection prompts about your spark
-9. **View Feedback**: Receive a detailed improvement report with actionable insights
-
-The AI providers generate reflection prompts focused on:
-- The problem/gap identified (Spark phase)
-- The Novel Core and design approach (Design phase)
-- Technical implementation details (Logic phase)
-- TheCommons framework concepts
-
-**Where are API keys stored?**
-- API keys are stored in your browser's `localStorage` (if you check "Save to browser")
-- Gemini keys are sent directly from your browser to Gemini
-- OpenAI keys are sent to the backend proxy for feedback generation
-- You can clear saved keys at any time using the "Clear" button
-
-**Testing with Docker:**
-```bash
-# No configuration needed! Just start the container
-docker compose up --build
-
-# Visit http://localhost:3000 and try the Improve Spark feature
-# Enter your Gemini API key when prompted
-```
-
-### Server Configuration (Optional)
-
-The server supports environment variables for configuration:
-
-```bash
-# GitHub authentication (optional)
-GITHUB_TOKEN=your_token_here      # For private repos or higher rate limits
-
-# Cache settings
-SPARK_CACHE_TTL_SECONDS=60        # Cache duration (default: 60 seconds)
-
-# AI Integration (optional fallback)
-# Users can enter API keys in the browser UI (recommended)
-# These are only used as fallback if no API key is provided by the user
-OPENAI_API_KEY=sk-...             # For OpenAI feedback generation (gpt-4o-mini, gpt-4o)
-```
-
-Create a `.env` file in the `spark-assembly-lab/` directory based on `.env.example` to configure these settings.
-
-The application does not have a default repository - users must specify a repository URL to load sparks.
-
-### Stability Levels
-
-- **0/3 Stable** (Red): No phases completed
-- **1/3 Stable** (Blue): Intuition phase filled
-- **2/3 Stable** (Yellow): Intuition + Design filled
-- **3/3 Stable** (Green): All phases completed
-
-## 🐳 Docker Configuration
-
-The `docker-compose.yml` mounts the parent `/sparks/` directory as read-only, allowing the UI to load actual spark files without modifying them directly. This ensures:
-
-- Live updates when sparks are added/modified
-- Safe read-only access to production sparks
-- Easy development and testing
-
-### Docker Commands
-
-```bash
-# Start containers
-docker compose up
-
-# Start in background
-docker compose up -d
-
-# Stop containers
-docker compose down
-
-# View logs
-docker compose logs -f
-
-# Rebuild and restart
-docker compose up --build
-
-# Stop and remove everything
-docker compose down -v
-```
-
-## 🚧 Future Enhancements
-
-- [ ] Drag-and-drop block reordering
-- [ ] Collaborative editing with real-time sync
-- [ ] GitHub integration for direct PR creation with authenticated user
-- [ ] Spark comparison view
-- [ ] Contribution history timeline
-- [ ] CS point calculator
-- [ ] Auto-save to local storage
-- [ ] Dark/Light theme toggle
-- [ ] Mobile responsive design
-- [ ] Spark dependency graph visualization
-- [ ] Integration with GitHub GraphQL API for advanced features
-
-## 📝 Contributing
-
-To add new building block types:
-
-1. Add the block type to `src/types/spark.js` → `BlockTypes`
-2. Add metadata to `BlockMetadata` with title, description, icon
-3. Update `src/utils/sparkParser.js` to parse/generate the new block
-4. The UI will automatically include it in the appropriate phase
-
-## 📄 License
-
-Part of TheCommons v2.0 - See parent repository for license details
 
 ---
 
-> *"Build with LEGO-style clarity. Snap ideas together. Create what matters."*
+## 🏗️ Stability Calculation
+
+Stability is no longer a simple 1-2-3 count. It is calculated based on the number of **Active Sections** that contain meaningful content:
+
+- **Seed**: Narrative (S1) + Hypothesis (S2) populated.
+- **Stable (8/8)**: All sections populated and validated against the Scribe's glass-box criteria.
+- **Indicator**: Visual progress bar in the sidebar and canvas header.
+
+---
+
+## 📝 Usage Guide
+
+### Composing Enhanced Sparks
+1. Click **"New Spark"** and enter a title.
+2. Draft your core idea in the **Left Column** (Spark Narrative).
+3. Use the **Right Column Picker** to select a module to work on (e.g., Hypothesis).
+4. Use the **Bottom Tab Strip** to quickly swap between active modules.
+5. Click **Download** to save the `.spark.md` file with full YAML frontmatter.
+
+### GitHub Search
+- Switch to the **Global Search** tab.
+- Filter by `org:`, `user:`, or keywords.
+- "Load Spark" to pull any `.spark.md` from the public web directly into your workspace.
+
+---
+
+## 📄 License
+
+Part of TheCommons v3.0 - Modular Meritocracy.
+
+> *"Execution is the Moat. Build with clarity. Validate with rigor."*

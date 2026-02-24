@@ -1,104 +1,174 @@
-# 📜 TheCommons: Master Framework (v2.0)
+# 📜 TheCommons: Master Framework (v3.0)
+
+> *"The Commons rewards the intuition to see the gap, the design to shape it, and the logic to make it stick — and the discipline to validate it."*
 
 ---
 
 ## Part 1: The Manifesto
 
-### 1. The Trinity of the Build
-TheCommons is a modular meritocracy. Like LEGO, we do not value isolated ideas; we value **"Clutch Power"**—the ability for a contribution to snap into the existing structure and hold firm. Every contribution is categorized by its "Chemistry":
+### 1. The Spark as the Unit of Value
 
-* **1.1 🧠 Intuition (The Scout):** The "gut feel." Identifying a gap, a flaw, or a future need. This is the **Signal**.
-* **1.2 🎨 Design (The Designer):** The "leap." Visualizing the solution and defining the **Novel Core** (the 10% delta). This is the **Blueprint**.
-* **1.3 🛠️ Logic (The Builder):** The "rigor." Engineering, coding, and stress-testing the solution. This is the **Clutch Power**.
+TheCommons is a **modular idea meritocracy**. Every contribution is a **Spark** — a structured, falsifiable idea that evolves through defined maturity stages. We value **"Clutch Power"**: the ability of a spark to be validated, built upon, and snapped into the commons.
+
+A Spark is not owned by a single role. It is a living document that any contributor can advance — from a raw observation to a deployed reality.
 
 ### 2. Governance: The Republic of Bricks
-Influence is earned through tangible value. The system is designed to reward the "Chain of Value" from the first hunch to the final code.
 
-#### 2.1 The Value Hierarchy
-| Element | Role | Reward | Purpose |
-| :--- | :--- | :--- | :--- |
-| **🧠 Intuition** | **Scout** | +5 CS | **Discovery:** Identifying "Loose Studs" or gaps in the ecosystem. |
-| **🎨 Design** | **Designer** | +15 CS | **Invention:** Defining a "Novel Core" and drafting a buildable blueprint. |
-| **🛠️ Logic** | **Builder** | +25 CS | **Execution:** Proving the idea works with merged, functional code. |
-| **🏛️ Structure** | **Architect** | +50 CS | **Foundation:** Proposing structural amendments to this Manifesto. |
+Influence is earned through tangible value. The system rewards the full "Chain of Value" — from the first hunch to the final deployed code.
 
-#### 2.2 The "Snap" Multipliers
-* **The Echo Bonus:** If a Scout’s `!HUNCH` is officially "claimed" by a Designer, the Scout receives an additional **+5 CS**.
-* **The Prototype Bonus:** If a Designer’s `!SHAPE` is successfully translated into a working MVP by a Builder, the Designer receives **+10 CS**.
-* **The Stability Audit:** A Builder earns **+10 CS** for identifying a logic flaw in a merged Spark and providing a stabilizing patch.
+#### 2.1 The Contribution Value Hierarchy
+
+CS (Contribution Score) is earned by advancing a spark's maturity:
+
+| Action | Reward | Trigger |
+| :--- | :--- | :--- |
+| **Open a Spark** | +5 CS | Submit a valid Spark Narrative (Section 1 + 2) |
+| **Formalize a Hypothesis** | +10 CS | Complete Section 2 (falsifiable statement) |
+| **Model or Simulate** | +15 CS | Complete Sections 3 & 4 |
+| **Validate with Evidence** | +25 CS | Populate Section 6 (Results) |
+| **Implement & Deploy** | +35 CS | Spark reaches `implemented` maturity |
+| **Structural Amendment** | +50 CS | Propose a Manifesto-level change |
+
+#### 2.2 Collaboration Bonuses
+
+* **The Echo Bonus:** If someone advances a spark you opened (Sections 3–6), you receive **+5 CS**.
+* **The Validation Bonus:** If your modelled spark is confirmed by an independent replication or peer critique (Section 5), earn **+10 CS**.
+* **The Stability Audit:** Earn **+10 CS** for identifying a critical flaw in a merged spark and providing a corrective revision.
 
 #### 2.3 Logarithmic Voting Power
+
 To prevent "Whale Dictatorship," influence scales non-linearly:
-$$Weight = log_{10}(CS)$$
+
+$$Weight = \log_{10}(CS_{active})$$
+
+> **Note:** Voting uses `active_cs` — Scout-only contributions decay at **10% per month** unless the contributor advances to Design or Logic tier.
+
 * **Sybil Protection:** Voting rights are restricted to contributors with **CS > 20** or **3 merged actions**.
 
-### 3. The Scribe: Distributed Intelligence
-The AI Scribe is the **Instruction Manual**, not the Master Builder.
-*   **3.1 Frugal Compute:** The Scribe utilizes low-cost "Mini-Models" for basic checks and a community-powered **DePIN Grid** for heavy logic audits to ensure zero cost-barriers.
-*   **3.2 The Standard Gauge:** The Scribe’s primary function is **Compatibility Verification**—ensuring every new "brick" adheres to the Commons technical standards.
+### 3. The Scribe v2.0: Glass Box Intelligence
+
+The AI Scribe is the system's **Automated Standards Enforcer**, not a gatekeeper. It is:
+
+* **3.1 Local-First:** Runs locally using nano-models (Qwen2.5-1.5B-GGUF). Falls back to Groq API only when local resources are insufficient. Zero mandatory cost.
+* **3.2 Transparent (Glass Box):** Every decision includes a human-readable reasoning log: hardware used, prompts applied, stability findings, and decision path.
+* **3.3 Deterministic:** Hardware-agnostic switching (NVIDIA GPU → Apple Metal → CPU) ensures reproducible results across contributor environments.
+* **3.4 Phase-Aware:** Validates `Spark Narrative` for conceptual soundness and `Hypothesis Formalization` for falsifiability before merge.
 
 ### 4. Conflict & Dispute Resolution (The Logic Audit)
-*   **4.1 The Challenge:** Contributors may file a `!CHALLENGE` if they believe a Spark lacks Logic (it's "wobbly") or Design (it's a duplicate brick).
-*   **4.2 The Cooling Rack:** If a Spark receives >5 critical flaws in 24 hours, the AI locks the thread for 12 hours to prevent dogpiling and allow the Builder to apply "Clutch Power" (fixes).
+
+* **4.1 The Challenge:** Contributors may file a `!CHALLENGE` if they believe a Spark lacks evidence (it's "wobbly") or its hypothesis is unfalsifiable.
+* **4.2 The Cooling Rack:** If a Spark receives >5 critical flaws in 24 hours, the Scribe locks the thread for 12 hours to prevent dogpiling and allow the author to apply "Clutch Power" (revision).
+
+---
 
 ## 🏛️ Theoretical Foundation
 
-TheCommons is built upon decades of research into decentralized cooperation, institutional economics, and stigmergic systems. Our "LEGO" model is a practical implementation of the following academic pillars:
+TheCommons is built upon decades of research into decentralised cooperation, institutional economics, and stigmergic systems.
 
 ### 1. The Governance of the Commons
-Based on the work of Nobel Laureate **Elinor Ostrom** (*Governing the Commons*, 1990).
+Based on **Elinor Ostrom** (*Governing the Commons*, 1990).
 * **The Principle:** Successful common-pool resources require "graduated sanctions" and "collective-choice arrangements."
-* **Application:** Our **Manifesto** serves as the constitutional layer, while the **AI Scribe** acts as the automated monitor to ensure the "Bricks" meet community standards.
+* **Application:** The **Manifesto** is the constitutional layer. The **Scribe** is the automated monitor. The **Reputation Shield** (CS decay) is the graduated sanction.
 
 ### 2. Commons-Based Peer Production (CBPP)
-Based on the theories of **Yochai Benkler** (*The Wealth of Networks*, 2006).
-* **The Principle:** CBPP succeeds when tasks are broken down into **Granular** and **Modular** components.
-* **Application:** The **Intuition → Design → Logic** trinity allows for "low-friction entry," where a Scout can contribute a small Hunch without needing the technical Logic to build the entire system.
+Based on **Yochai Benkler** (*The Wealth of Networks*, 2006).
+* **The Principle:** CBPP succeeds when tasks are **Granular** and **Modular**.
+* **Application:** The Enhanced Spark template breaks a contribution into 8 independent sections. A contributor can advance a spark from any angle — formalising a hypothesis, modelling it, or critiquing it — without needing to own the entire idea.
 
 ### 3. Stigmergic Coordination
-Based on the research of **Mark Elliott** (*Stigmergic Collaboration*, 2016).
-* **The Principle:** Agents coordinate by leaving "traces" in the environment that stimulate further action (e.g., how ants follow pheromone trails).
-* **Application:** Every `!HUNCH` or `!SHAPE` left in the `/sparks/` directory is a digital pheromone. The environment (the repo) directs the community's energy without the need for central management.
+Based on **Mark Elliott** (*Stigmergic Collaboration*, 2016).
+* **The Principle:** Agents coordinate by leaving "traces" that stimulate further action.
+* **Application:** Every `.spark.md` in `/sparks/` is a digital signal. A `seed` spark invites hypothesis refinement; a `modelled` spark invites validation; a `validated` spark invites implementation.
 
 ### 4. Non-Linear Influence & Meritocracy
-Based on **Logarithmic Scaling** and **Plural Control** theories (**Glen Weyl et al.**).
-* **The Principle:** To prevent "Whale Dictatorship" in decentralized systems, voting power should not scale linearly with capital or points.
-* **Application:** We implement $$Weight = log_{10}(CS)$$ to ensure that while high-contributors (Architects) have more say, they cannot easily silence the collective "Intuition" of the Scouts.
+Based on **Logarithmic Scaling** and **Plural Control** (Glen Weyl et al.).
+* **The Principle:** Voting power must not scale linearly with capital or points.
+* **Application:** $$Weight = \log_{10}(CS_{active})$$ with time-decay for Scout-only contributions ensures that Scouts collectively retain voice against high-CS actors.
 
 ### 5. Open-Source Translucence
 Based on **Dabbish et al.** (*Social Translucence in GitHub*, 2012).
-* **The Principle:** Deep transparency in contribution history drives trust and attracts high-quality "Builders."
-* **Application:** **"Execution is the Moat"**—by making all Logic audits and Contribution Scores public, we create a high-trust environment where the most capable actors naturally rise to the top.
+* **The Principle:** Transparency in contribution history drives trust and attracts quality Builders.
+* **Application:** All Spark sections, revision histories, Glass Box Scribe logs, and CS scores are public. **"Execution is the Moat."**
 
 ---
 
-## Part 2: Getting Started Guide
+## Part 2: The Enhanced Spark Standard
 
-### 1. Level 1: Use your Intuition (+5 CS)
-Browse the repository or the current `/sparks/`. Find a "Loose Stud"—a typo, a broken link, or a missing feature. 
-* **Action:** Submit via `!HUNCH [Description]`.
-* **Goal:** Provide the "Signal" for others to build upon.
+All sparks in TheCommons must follow the **Enhanced Spark Template** (`templates/enhanced_spark.md`). A valid spark file contains:
 
-### 2. Level 2: Use your Design (+15 CS)
-Take a Hunch and give it a shape. You don't need to code yet, but you must define the **Novel Core**.
-1.  Use `!SHAPE [Blueprint Name]`.
-2.  Define how this brick "snaps" into existing ones.
-3.  Defend the design against "Logic" critiques to secure your points.
+### Frontmatter (Metadata)
+```yaml
+id: spark_<unique_id>
+title: "<Clear, concise spark title>"
+domain: "<research | engineering | policy | education | product | other>"
+spark_type: "<hypothesis | reframing | contradiction | system_design | constraint | exploration>"
+maturity_level: "<seed | structured | modeled | validated | implemented>"
+status: "<draft | under_review | iterating | accepted | archived>"
+core_claim: "<One-sentence central claim or shift>"
+```
 
-### 3. Level 3: Apply your Logic (+25 CS)
-The heaviest lift. Turn a Blueprint into a functional reality.
-1.  Write the code/logic for a pending `!SHAPE`.
-2.  Submit a Pull Request (PR) to the `/sparks/` directory.
-3.  Once the **Standard Gauge** (AI) and a Peer review pass, your brick is merged.
+### 8 Sections (Mandatory → Optional)
+
+| # | Section | Maturity Gate | Required for merge? |
+|---|---------|--------------|---------------------|
+| 1 | **Spark Narrative** | Seed | ✅ Always |
+| 2 | **Hypothesis Formalization** | Structured | ✅ Before Design review |
+| 3 | **Simulation / Modeling Plan** | Modeled | ⬜ Recommended |
+| 4 | **Evaluation Strategy** | Modeled | ⬜ Recommended |
+| 5 | **Feedback & Critique** | Any | ⬜ Encouraged |
+| 6 | **Results (When Available)** | Validated | ⬜ Required for Validated status |
+| 7 | **Revision Notes** | Any | ⬜ Auto-tracked |
+| 8 | **Next Actions** | Any | ⬜ Encouraged |
+
+### Maturity Lifecycle
+
+```
+Seed → Structured → Modeled → Validated → Implemented
+ ↑          ↑           ↑          ↑            ↑
+[S.1]    [S.1+S.2]   [S.3+S.4]  [S.6]       [S.7+S.8 ✓]
+```
 
 ---
 
-## Part 3: The Development Roadmap
+## Part 3: Getting Started
 
-* [x] **Manifesto v2.0:** Integrated LEGO-style meritocracy (Intuition/Design/Logic).
-* [ ] **The DePIN Grid:** Set up the community-powered GPU node for the Scribe.
-* [ ] **The "Snap" Bot:** Automate the multi-role reward system (Echo & Prototype bonuses).
-* [ ] **Modular Spark:** Create the `!SHAPE` markdown template for Designers.
+### Level 1 — Open a Spark (+5 CS)
+You have an observation — a gap, an inefficiency, a contradiction.
+
+1. Fork the repo
+2. Copy `templates/enhanced_spark.md` → `/sparks/<name>.spark.md`
+3. Fill in the YAML frontmatter and **Section 1 (Spark Narrative)**
+4. Add a falsifiable **Section 2 (Hypothesis)**
+5. Set `maturity_level: seed` and open a PR
+
+### Level 2 — Advance a Spark (+10–15 CS)
+Find a `seed` or `structured` spark you can strengthen.
+
+1. Add **Section 3 (Simulation / Modeling Plan)** and/or **Section 4 (Evaluation Strategy)**
+2. Update `maturity_level: structured` or `modeled`
+3. Open a PR — earn the **Echo Bonus** if you're advancing someone else's spark
+
+### Level 3 — Validate or Implement (+25–35 CS)
+Run the experiment, simulation, or implementation.
+
+1. Populate **Section 6 (Results)** with real evidence
+2. Update `maturity_level: validated` or `implemented`
+3. Merge via PR — earn the **Validation Bonus** if confirmed by peer review
 
 ---
-> *"The Commons rewards the intuition to see the gap, the design to design the piece, and the logic to make it stick."*
+
+## Part 4: Development Roadmap
+
+* [x] **Manifesto v2.0:** Integrated LEGO-style meritocracy (Scout/Designer/Builder).
+* [x] **Scribe v2.0:** Glass Box AI agent — local CPU inference, hardware switching, PR bot.
+* [x] **Spark Assembly Lab:** React-based canvas for composing and submitting sparks.
+* [x] **Reputation Shield:** CS decay for Scout-only contributors (10%/month via logarithmic scaling).
+* [x] **Enhanced Spark Template:** 8-section modular format with YAML frontmatter and maturity levels.
+* [x] **Manifesto v3.0:** Updated governance, Scribe spec, and Enhanced Spark Standard.
+* [ ] **The DePIN Grid:** Community-powered GPU node for Scribe heavy-compute tasks.
+* [ ] **The "Snap" Bot:** Automate Echo & Prototype bonus distribution via GitHub Actions.
+* [ ] **Governance Vote v1:** First on-chain (or off-chain weighted) vote using logarithmic CS weights.
+
+---
+
+> *Based on: Ostrom (1990), Benkler (2006), Elliott (2016), Weyl et al. (2018), Dabbish et al. (2012)*

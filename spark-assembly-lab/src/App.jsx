@@ -31,20 +31,27 @@ function AppMain() {
   const handleSparkSelect = (spark) => {
     setSelectedSpark(spark);
     if (spark) {
+      const isEnhanced = spark.isEnhanced || false;
       // Load spark data from parsed file
       const loaded = {
         name: spark.name,
         markedForDeletion: spark.markedForDeletion || false,
+        isEnhanced,
+        // For enhanced sparks, load all section data but only show section 1 by default
+        sections: spark.sections || {},
+        activeSections: isEnhanced ? [1] : undefined,
         phases: spark.phases,
         contributors: spark.contributors,
         proposals: spark.proposals || { spark: '', design: '', logic: '' },
         sourcePath: spark.sourcePath || spark.sourceFile || null,
       };
-      loaded.phases = {
-        spark: { ...loaded.phases.spark, notes: loaded.phases.spark?.notes || '' },
-        design: { ...loaded.phases.design, notes: loaded.phases.design?.notes || '' },
-        logic: { ...loaded.phases.logic, notes: loaded.phases.logic?.notes || '' },
-      };
+      if (!isEnhanced) {
+        loaded.phases = {
+          spark: { ...loaded.phases.spark, notes: loaded.phases.spark?.notes || '' },
+          design: { ...loaded.phases.design, notes: loaded.phases.design?.notes || '' },
+          logic: { ...loaded.phases.logic, notes: loaded.phases.logic?.notes || '' },
+        };
+      }
       setSparkData(loaded);
       setOriginalSparkData(JSON.parse(JSON.stringify(loaded)));
     }

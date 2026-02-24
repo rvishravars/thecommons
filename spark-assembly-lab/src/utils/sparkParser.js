@@ -13,9 +13,13 @@ export function parseSparkFile(content) {
   const frontmatterMatch = content.match(/^---\s*\n([\s\S]*?)\n---/);
   if (frontmatterMatch) {
     const yaml = frontmatterMatch[1];
+    // Try `name:` first, then `title:` (used by enhanced sparks)
     const nameFieldMatch = yaml.match(/^name:\s*(.+)$/m);
+    const titleFieldMatch = yaml.match(/^title:\s*(.+)$/m);
     if (nameFieldMatch) {
       name = nameFieldMatch[1].trim().replace(/^["']|["']$/g, '');
+    } else if (titleFieldMatch) {
+      name = titleFieldMatch[1].trim().replace(/^["']|["']$/g, '');
     }
     // Check for deletion flag
     const deletionFlagMatch = yaml.match(/^marked_for_deletion:\s*(true|yes)$/mi);
@@ -24,21 +28,24 @@ export function parseSparkFile(content) {
     }
   }
 
-  // If no name in frontmatter, try the first H1 heading
-  const lines = content.split('\n');
-  for (let line of lines) {
-    line = line.trim();
-    if (line.startsWith('#')) {
-      // Extract the title part after #
-      const rawTitle = line.replace(/^#\s*/, '').trim();
-      if (!rawTitle) continue;
+  // If no name found in frontmatter, fall back to the first H1 heading
+  // but skip enhanced template section headings like '# 1. Spark Narrative'
+  if (name === 'Untitled Spark') {
+    const lines = content.split('\n');
+    for (let line of lines) {
+      line = line.trim();
+      if (line.startsWith('#') && !/^#\s*\d+\./.test(line)) {
+        // Extract the title part after #
+        const rawTitle = line.replace(/^#\s*/, '').trim();
+        if (!rawTitle) continue;
 
-      // Strip optional emoji and brand prefixes (Spark, Template)
-      // This regex handles: 🧩 Spark: My Name, Spark: My Name, # My Name, etc.
-      const cleanTitle = rawTitle.replace(/^(?:[^\w\s\u{1F300}-\u{1F9FF}]|\s)*(?:Spark|Template|The)\s*[:\s]\s*/iu, '').trim();
+        // Strip optional emoji and brand prefixes (Spark, Template)
+        // This regex handles: 🧩 Spark: My Name, Spark: My Name, # My Name, etc.
+        const cleanTitle = rawTitle.replace(/^(?:[^\w\s\u{1F300}-\u{1F9FF}]|\s)*(?:Spark|Template|The)\s*[:\s]\s*/iu, '').trim();
 
-      name = cleanTitle || rawTitle;
-      break;
+        name = cleanTitle || rawTitle;
+        break;
+      }
     }
   }
 
@@ -58,6 +65,17 @@ export function parseSparkFile(content) {
 
   const stability = calculateStability({ spark, design, logic });
   console.log('📊 Stability:', stability);
+
+  // For enhanced sparks, try to extract contributors from *Scout: @handle* lines
+  let enhancedContributors = { scout: '', designer: '', builder: '' };
+  if ((content || '').includes('spark_type:')) {
+    const scoutMatch = content.match(/\*Scout:\s*@?([\w-]+)\*/);
+    const designerMatch = content.match(/\*Designer:\s*@?([\w-]+)\*/);
+    const builderMatch = content.match(/\*Builder:\s*@?([\w-]+)\*/);
+    if (scoutMatch) enhancedContributors.scout = scoutMatch[1];
+    if (designerMatch) enhancedContributors.designer = designerMatch[1];
+    if (builderMatch) enhancedContributors.builder = builderMatch[1];
+  }
 
   const result = {
     name,
@@ -90,9 +108,9 @@ export function parseSparkFile(content) {
       },
     },
     contributors: {
-      scout: spark.contributor || '',
-      designer: design.contributor || '',
-      builder: logic.contributor || '',
+      scout: enhancedContributors.scout || spark.contributor || '',
+      designer: enhancedContributors.designer || design.contributor || '',
+      builder: enhancedContributors.builder || logic.contributor || '',
     },
     stability,
     proposals: parseProposals(content),
@@ -252,25 +270,41 @@ export function validateSparkData(sparkData) {
   const errors = [];
   const name = (sparkData?.name || '').trim();
   const contributors = sparkData?.contributors || {};
-  const phases = sparkData?.phases || {};
 
   const handlePattern = /^[A-Za-z0-9-]+$/;
 
+  // --- Common checks ---
   if (!name || name === 'New Spark') {
     errors.push('Please give your spark a descriptive name');
   }
 
-  if (!contributors.scout || !handlePattern.test(contributors.scout)) {
+  if (!contributors.scout || !handlePattern.test(contributors.scout.replace(/^@/, ''))) {
     errors.push('Spark requires a valid scout handle');
   }
 
-  const spark = phases.spark || {};
+  // --- Enhanced spark checks (sections-based) ---
+  if (sparkData?.isEnhanced) {
+    const sections = sparkData.sections || {};
+    const narrativeContent = (sections[1] || '').trim();
 
-  // Enforce Spark Narrative for enhanced sparks
-  if (sparkData.isEnhanced) {
-    const content = spark.notes || '';
-    if (!content.includes('Spark Narrative') || content.length < 50) {
-      errors.push('The Spark Narrative is a mandatory requirement for new sparks');
+    if (!narrativeContent || narrativeContent.length < 50) {
+      errors.push('Section 1 (Spark Narrative) must have meaningful content — minimum 50 characters');
+    }
+
+    const activeSections = sparkData.activeSections || [1];
+    for (const sectionNum of activeSections) {
+      const content = (sections[sectionNum] || '').trim();
+      if (!content || content.length < 10) {
+        errors.push(`Section ${sectionNum} is active but has no content — fill it in or remove it`);
+      }
+    }
+  } else {
+    // --- Standard 3-phase spark checks ---
+    const phases = sparkData?.phases || {};
+    const spark = phases.spark || {};
+    const sparkContent = spark.notes || spark.observation || '';
+    if (!sparkContent || sparkContent.length < 20) {
+      errors.push('Spark phase (Scout observation) must have some content');
     }
   }
 
