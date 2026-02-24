@@ -16,6 +16,7 @@ function AppMain() {
   const [theme, setTheme] = useState(() => localStorage.getItem('sparkTheme') || 'studio');
   const [selectedSpark, setSelectedSpark] = useState(null);
   const [repoUrl, setRepoUrl] = useState(() => localStorage.getItem('sparkRepoUrl') || 'https://github.com/rvishravars/thecommons');
+  const [branch, setBranch] = useState(() => localStorage.getItem('sparkBranch') || 'main');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [originalSparkData, setOriginalSparkData] = useState(null);
   const [sparkData, setSparkData] = useState(null);
@@ -78,6 +79,13 @@ function AppMain() {
     setRepoUrl(newRepoUrl);
     localStorage.setItem('sparkRepoUrl', newRepoUrl);
     // Clear selected spark when changing repos
+    setSelectedSpark(null);
+  };
+
+  const handleBranchChange = (newBranch) => {
+    setBranch(newBranch);
+    localStorage.setItem('sparkBranch', newBranch);
+    // Clear selected spark when changing branches
     setSelectedSpark(null);
   };
 
@@ -170,7 +178,9 @@ function AppMain() {
               onSparkSelect={handleSparkSelect}
               onNewSpark={handleNewSpark}
               repoUrl={repoUrl}
+              branch={branch}
               onRepoChange={handleRepoChange}
+              onBranchChange={handleBranchChange}
               currentSparkData={sparkData}
               onPRRefresh={setPrRefreshCallback}
               onPermissionChange={handlePermissionChange}

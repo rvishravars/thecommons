@@ -296,6 +296,44 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
 };
 
 /**
+ * Fetch branches from a GitHub repository
+ */
+export const fetchBranches = async (repoInput) => {
+  try {
+    const { owner, repo } = parseRepoUrl(repoInput);
+    const url = `https://api.github.com/repos/${owner}/${repo}/branches`;
+
+    const response = await fetch(url, {
+      headers: buildGitHubHeaders(),
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error(`Repository '${owner}/${repo}' not found`);
+      }
+      if (response.status === 403) {
+        throw new Error('GitHub API rate limit exceeded. Please add a GitHub token or try again later.');
+      }
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+
+    const branches = await response.json();
+    return {
+      success: true,
+      branches: branches.map(b => b.name),
+      defaultBranch: branches.find(b => b.name === 'main' || b.name === 'master')?.name || branches[0]?.name || 'main',
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err.message || 'Failed to fetch branches',
+      branches: ['main'],
+      defaultBranch: 'main',
+    };
+  }
+};
+
+/**
  * Fetch all open pull requests in a repository
  */
 export const fetchOpenPullRequests = async (owner, repo) => {

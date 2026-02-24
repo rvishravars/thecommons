@@ -5,7 +5,7 @@ import { getStoredToken, loadSparksFromGitHub } from '../utils/github';
 import RepoInput from './RepoInput';
 import GlobalSparkSearch from './GlobalSparkSearch';
 
-export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, onRepoChange, currentSparkData, onPRRefresh, onPermissionChange, user }) {
+export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, branch = 'main', onRepoChange, onBranchChange, currentSparkData, onPRRefresh, onPermissionChange, user }) {
   console.log('🚀 SparkSelector component mounted!');
   const [activeTab, setActiveTab] = useState('repo'); // 'repo' or 'global'
   const [sparks, setSparks] = useState([]);
@@ -94,7 +94,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
       }
 
       // Load sparks directly from GitHub
-      const result = await loadSparksFromGitHub(repoUrl, 'main', 'sparks');
+      const result = await loadSparksFromGitHub(repoUrl, branch || 'main', 'sparks');
 
       if (!result.success) {
         // Handle errors
@@ -150,7 +150,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
     } finally {
       setLoading(false);
     }
-  }, [buildSparkEntry, repoUrl]);
+  }, [buildSparkEntry, repoUrl, branch]);
 
   useEffect(() => {
     loadSparks();
@@ -293,7 +293,12 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         />
       ) : (
         <>
-          <RepoInput onRepoChange={onRepoChange} currentRepo={repoUrl} />
+          <RepoInput 
+            onRepoChange={onRepoChange} 
+            currentRepo={repoUrl}
+            currentBranch={branch}
+            onBranchChange={onBranchChange}
+          />
 
           <div className="p-4 border-b theme-border">
             <button
