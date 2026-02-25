@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Download, Copy, Eye, Brain, GitPullRequest, RotateCcw, Trash2, MoreVertical } from 'lucide-react';
 import MarkdownPreview from './MarkdownPreview';
 import ReactMarkdown from 'react-markdown';
@@ -41,7 +41,9 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
     let repoOwner = '';
     try {
       repoOwner = parseRepoUrl(repoUrl).owner;
-    } catch (e) { }
+    } catch (e) {
+      console.warn("Error parsing repo URL in isOwner check:", e);
+    }
     return (
       user.login?.toLowerCase() === sparkData?.contributors?.scout?.toLowerCase() ||
       user.login?.toLowerCase() === repoOwner.toLowerCase()
@@ -746,7 +748,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                     <p className="text-xs sm:text-sm opacity-90 truncate">Update the full block for this section.</p>
                   </div>
                   <button
-                    onClick={() => setEditingPhase(null)}
+                    onClick={() => setEditingSection(null)}
                     className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
                     title="Close"
                   >

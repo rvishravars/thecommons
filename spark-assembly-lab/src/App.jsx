@@ -28,7 +28,9 @@ function AppMain() {
     let repoOwner = '';
     try {
       repoOwner = parseRepoUrl(repoUrl).owner;
-    } catch (e) { }
+    } catch (e) {
+      console.warn("Error parsing repo URL in handlePermissionChange:", e);
+    }
 
     const userIsOwner = user && sparkData && (
       user.login?.toLowerCase() === sparkData.contributors?.scout?.toLowerCase() ||
@@ -59,7 +61,9 @@ function AppMain() {
       let repoOwner = '';
       try {
         repoOwner = parseRepoUrl(repoUrl).owner;
-      } catch (e) { }
+      } catch (e) {
+        console.warn("Error parsing repo URL in handleSparkSelect:", e);
+      }
 
       const userIsOwner = user && (
         user.login?.toLowerCase() === loaded.contributors.scout?.toLowerCase() ||
