@@ -6,7 +6,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 
-export default function BuildingBlock({ title, description, icon, color, value, onUpdate, onDone, isReadOnly }) {
+export default function BuildingBlock({ title, description, icon, color, value, onUpdate, onDone, isReadOnly, isOwner = true }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [draftValue, setDraftValue] = useState(value || '');
 
@@ -82,7 +82,7 @@ export default function BuildingBlock({ title, description, icon, color, value, 
             disabled={isReadOnly}
           >
             <Edit3 className="h-3 w-3" />
-            <span>Edit</span>
+            <span>{isOwner ? 'Edit' : 'Add'}</span>
           </button>
         </div>
       </div>

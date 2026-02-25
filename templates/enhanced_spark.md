@@ -138,6 +138,53 @@ revision_history:
 
 ---
 
+# 9. Community Proposals
+<!-- Non-owner contributions section. Community members can propose improvements to sections. -->
+
+## Proposed Changes to Section 1 (Spark Narrative)
+<!-- Describe proposed improvements to the core story or narrative. -->
+
+---
+
+## Proposed Changes to Section 2 (Hypothesis Formalization)
+<!-- Propose alternative or refined hypothesis statements. -->
+
+---
+
+## Proposed Changes to Section 3 (Simulation / Modeling Plan)
+<!-- Suggest modeling improvements or alternative evaluation approaches. -->
+
+---
+
+## Proposed Changes to Section 4 (Evaluation Strategy)
+<!-- Propose refinements to success criteria or measurement methods. -->
+
+---
+
+## Proposed Changes to Section 5 (Feedback & Critique)
+<!-- Add structured critiques or counter-hypotheses. -->
+
+---
+
+## Proposed Changes to Section 6 (Results)
+<!-- Community replications or additional findings. -->
+
+---
+
+## Proposed Changes to Section 7 (Revision Notes)
+<!-- Suggest evolutionary improvements to the spark. -->
+
+---
+
+## Proposed Changes to Section 8 (Next Actions)
+<!-- Suggest concrete next steps or refinements. -->
+
+---
+
+> **Proposal Tracking**: Each proposal is tracked with contributor attribution for Echo Bonus (+5 CS) and Validation Bonus (+10 CS) rewards per the Manifesto.
+
+---
+
 # Maturity Guide (Reference)
 
 - **Seed** → Conceptual spark only

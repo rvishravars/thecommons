@@ -26,7 +26,9 @@ function AppMain() {
   const [canPush, setCanPush] = useState(true);
 
   const handlePermissionChange = (allowed) => {
-    setCanPush(allowed);
+    // Only allow push if user has repo permissions AND is the spark owner
+    const userIsOwner = user && sparkData && user.login === sparkData.contributors.scout;
+    setCanPush(allowed && userIsOwner);
   };
 
   const handleSparkSelect = (spark) => {
@@ -43,7 +45,7 @@ function AppMain() {
         activeSections: isEnhanced ? [1] : undefined,
         phases: spark.phases,
         contributors: spark.contributors,
-        proposals: spark.proposals || { spark: '', design: '', logic: '' },
+        proposals: spark.proposals || (isEnhanced ? { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' } : { spark: '', design: '', logic: '' }),
         sourcePath: spark.sourcePath || spark.sourceFile || null,
       };
       if (!isEnhanced) {
@@ -55,6 +57,10 @@ function AppMain() {
       }
       setSparkData(loaded);
       setOriginalSparkData(JSON.parse(JSON.stringify(loaded)));
+      
+      // Check if current user is the owner (scout) of this spark
+      const userIsOwner = user && user.login === loaded.contributors.scout;
+      setCanPush(userIsOwner);
     }
     // Close mobile menu after selection
     setIsMobileMenuOpen(false);
@@ -108,7 +114,7 @@ function AppMain() {
       activeSections: [1], // Only Section 1 is active by default
       phases: parsedTemplate.phases,
       contributors: { scout: userHandle, designer: '', builder: '' },
-      proposals: parsedTemplate.proposals || { spark: '', design: '', logic: '' },
+      proposals: parsedTemplate.proposals || { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' },
       sourcePath: null,
       rawContent: ENHANCED_SPARK_TEMPLATE
     });

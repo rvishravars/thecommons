@@ -47,6 +47,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
   // });
   const toast = useToast();
   const user = getStoredUserInfo();
+  const isOwner = user && sparkData && user.login === sparkData.contributors?.scout;
 
   // Reset active phases when spark changes
   useEffect(() => {
@@ -266,6 +267,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
           content: markdown,
           title,
           body,
+          isProposal: !canPush,
         }),
       });
 
@@ -275,13 +277,13 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
       }
 
       if (data.is_proposal) {
-        toast.success(`Proposal submitted as an Issue: ${data.issue_url}`);
+        toast.success(`Proposal submitted as a PR: ${data.pr_url}`);
       } else {
         toast.success(`PR created: ${data.pr_url}`);
       }
       setShowConfirmation(false);
-      if (data.issue_url || data.pr_url) {
-        window.open(data.issue_url || data.pr_url, '_blank');
+      if (data.pr_url) {
+        window.open(data.pr_url, '_blank');
       }
       // Refresh PR counts
       if (onPRCreated) {
@@ -575,7 +577,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                       <div className="mt-2">
                         <button onClick={() => openPhaseEditor(1)} disabled={isReadOnly}
                           className={`text-xs text-${config.color}-400 hover:text-${config.color}-300 disabled:opacity-50 disabled:cursor-not-allowed`}>
-                          {!isReadOnly && <span>Edit</span>}
+                          {!isReadOnly && <span>{isOwner ? 'Edit' : 'Add'}</span>}
                         </button>
                       </div>
                     </div>
@@ -616,7 +618,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                         <div className="mt-2">
                           <button onClick={() => openPhaseEditor(rightSectionNum)} disabled={isReadOnly}
                             className={`text-xs text-${config.color}-400 hover:text-${config.color}-300 disabled:opacity-50 disabled:cursor-not-allowed`}>
-                            {!isReadOnly && <span>Edit</span>}
+                            {!isReadOnly && <span>{isOwner ? 'Edit' : 'Add'}</span>}
                           </button>
                         </div>
                       </div>
