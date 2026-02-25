@@ -10,10 +10,10 @@ The Scribe v2.0 Glass Box AI Agent has been successfully implemented according t
 
 ### 1. ✅ Spark File Created
 **File:** [sparks/scribe-v2-implementation.md](../sparks/scribe-v2-implementation.md)
-- **Phase:** !SHAPE (Design) - Design blueprint for v2.0
+- **Maturity:** Seed/Structured - Mission: Narrative & Design Audit
 - **Designer:** @CopilotAgent
-- **Status:** Complete with all three phases (Intuition, Design, Logic)
-- **Key Innovation:** Glass Box Scribe with deterministic hardware switching
+- **Status:** Complete with 8-section alignment
+- **Key Innovation:** Glass Box Scribe with hardware telemetry switching
 
 ### 2. ✅ Git Branch Created
 **Branch:** `feat/scribe-v2-nano`
@@ -39,18 +39,18 @@ scribe/
 ```
 
 ### 4. ✅ System Prompts Implemented
-- **hunch_eval.md** - Validates !HUNCH for:
+- **Mission: Narrative Audit (Section 1)** - Validates for:
   - Specificity (concrete observations)
-  - Actionability (Designer can build on it)
+  - Actionability (leads to hypothesis)
   - Novelty (new gap vs. duplicate)
-  - Scope alignment (relevant to Commons)
+  - Manifesto alignment (relevant to Commons)
   
-- **shape_eval.md** - Validates !SHAPE for:
+- **Mission: Design & Hypothesis Audit (Sections 2-4)** - Validates for:
   - Novel Core (10% delta defined)
-  - Buildability (clear implementation path)
-  - Integration (snaps cleanly)
+  - Falsifiability (Section 2 hypothesis)
+  - Integration (snaps cleanly into Bricks)
   - Prior Art check (differentiation)
-  - Risk awareness (challenges identified)
+  - Risk awareness (Loose Studs identified)
 
 ### 5. ✅ Scribe Brain Router Built
 **File:** `scribe/scribe_brain.py` - 600+ lines of production-ready code
@@ -152,12 +152,12 @@ The entire Scribe implementation uses MANIFESTO terminology consistently:
 
 | Term | Usage in Scribe |
 |------|-----------------|
-| **Loose Studs** | Gaps/flaws detected in Intuition phase |
-| **Clutch Power** | Specificity & actionability scores |
-| **Stability** | Structural soundness of Sparks |
-| **Snap** | How cleanly designs integrate (Integration score) |
+| **Loose Studs** | Gaps/flaws detected in Spark Narratives |
+| **Clutch Power** | Specificity, actionability & falsifiability |
+| **Stability** | Structural soundness of Spark Sections |
+| **Snap** | How cleanly designs integrate with Bricks |
 | **Novel Core** | 10% delta validated in Design phase |
-| **Bricks** | Modular Spark components |
+| **Bricks** | Modular Spark components (Manifesto, Code, etc.) |
 
 ---
 
@@ -216,24 +216,26 @@ console.log(status.thinking_step);  // "Checking Clutch Power..."
 ```json
 {
   "status": "approved",
-  "phase": "hunch",
+  "mission": "narrative_audit",
   "stability_score": 8.5,
   "reasoning": {
     "glass_box": {
       "hardware_used": "cpu",
+      "hardware_acceleration": "None (CPU)",
       "time_elapsed_ms": 1234.5,
       "memory_used_mb": 125.3,
+      "model_name": "Qwen2.5-1.5B-GGUF",
       "prompts_tested": ["hunch_eval.md"],
       "decision_path": [
         "Scanning for Loose Studs...",
-        "Checking Clutch Power (specificity)...",
-        "Validating actionability...",
-        "Novelty assessment complete"
+        "Checking Clutch Power (Mission: Narrative Audit)...",
+        "Validating Manifesto alignment...",
+        "Hardware Telemetry: cpu integration verified"
       ],
       "stability_score": 8.5,
       "critical_flaws": [],
       "recommendations": [
-        "Consider expanding with concrete examples"
+        "Consider expanding Section 2 with a falsifiable hypothesis"
       ]
     }
   }

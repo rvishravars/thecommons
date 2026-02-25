@@ -37,7 +37,7 @@ def run_command(cmd, description):
 def main():
     """Run all checks."""
     print("\n" + "="*70)
-    print("🧠 SCRIBE V2.0 QUICK START VERIFICATION")
+    print("🧠 SCRIBE v3.0 MISSION VERIFICATION (MANIFESTO ALIGNED)")
     print("="*70)
 
     base_path = Path(__file__).parent

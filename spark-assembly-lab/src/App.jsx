@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import SparkSelector from './components/SparkSelector';
 import AssemblyCanvas from './components/AssemblyCanvas';
 import Header from './components/Header';
@@ -30,7 +28,9 @@ function AppMain() {
     let repoOwner = '';
     try {
       repoOwner = parseRepoUrl(repoUrl).owner;
-    } catch (e) { }
+    } catch (e) {
+      console.warn("Error parsing repo URL in handlePermissionChange:", e);
+    }
 
     const userIsOwner = user && sparkData && (
       user.login?.toLowerCase() === sparkData.contributors?.scout?.toLowerCase() ||
@@ -42,27 +42,18 @@ function AppMain() {
   const handleSparkSelect = (spark) => {
     setSelectedSpark(spark);
     if (spark) {
-      const isEnhanced = spark.isEnhanced || false;
       // Load spark data from parsed file
       const loaded = {
         name: spark.name,
         markedForDeletion: spark.markedForDeletion || false,
-        isEnhanced,
-        // For enhanced sparks, load all section data but only show section 1 by default
+        isEnhanced: true,
+        // Load all section data but only show section 1 by default
         sections: spark.sections || {},
-        activeSections: isEnhanced ? [1] : undefined,
-        phases: spark.phases,
+        activeSections: [1],
         contributors: spark.contributors,
-        proposals: spark.proposals || (isEnhanced ? { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' } : { spark: '', design: '', logic: '' }),
+        proposals: spark.proposals || { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' },
         sourcePath: spark.sourcePath || spark.sourceFile || null,
       };
-      if (!isEnhanced) {
-        loaded.phases = {
-          spark: { ...loaded.phases.spark, notes: loaded.phases.spark?.notes || '' },
-          design: { ...loaded.phases.design, notes: loaded.phases.design?.notes || '' },
-          logic: { ...loaded.phases.logic, notes: loaded.phases.logic?.notes || '' },
-        };
-      }
       setSparkData(loaded);
       setOriginalSparkData(JSON.parse(JSON.stringify(loaded)));
 
@@ -70,7 +61,9 @@ function AppMain() {
       let repoOwner = '';
       try {
         repoOwner = parseRepoUrl(repoUrl).owner;
-      } catch (e) { }
+      } catch (e) {
+        console.warn("Error parsing repo URL in handleSparkSelect:", e);
+      }
 
       const userIsOwner = user && (
         user.login?.toLowerCase() === loaded.contributors.scout?.toLowerCase() ||
@@ -89,7 +82,6 @@ function AppMain() {
       setSelectedSpark({
         ...selectedSpark,
         name: updatedData.name,
-        phases: updatedData.phases,
         contributors: updatedData.contributors,
         proposals: updatedData.proposals,
         rawContent: generateSparkMarkdown(updatedData)
@@ -128,7 +120,6 @@ function AppMain() {
       isEnhanced: true,
       sections: parsedTemplate.sections, // All 8 sections from the template
       activeSections: [1], // Only Section 1 is active by default
-      phases: parsedTemplate.phases,
       contributors: { scout: userHandle },
       proposals: parsedTemplate.proposals || { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' },
       sourcePath: null,
@@ -158,122 +149,120 @@ function AppMain() {
   }, [theme]);
 
   return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="flex h-screen flex-col theme-app" data-theme={theme}>
-        <Header
-          theme={theme}
-          onThemeChange={setTheme}
-          onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          isMobileMenuOpen={isMobileMenuOpen}
-          user={user}
-          onUserChange={setUser}
-          onGoHome={handleGoHome}
-        />
+    <div className="flex h-screen flex-col theme-app" data-theme={theme}>
+      <Header
+        theme={theme}
+        onThemeChange={setTheme}
+        onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        isMobileMenuOpen={isMobileMenuOpen}
+        user={user}
+        onUserChange={setUser}
+        onGoHome={handleGoHome}
+      />
 
-        <div className="flex flex-1 overflow-hidden relative">
-          {/* Mobile Overlay */}
-          {isMobileMenuOpen && (
-            <div
-              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
-          )}
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Mobile Overlay */}
+        {isMobileMenuOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
 
-          {/* Sidebar: Spark Selector */}
-          <aside className={`
+        {/* Sidebar: Spark Selector */}
+        <aside className={`
             w-80 border-r theme-border theme-surface overflow-y-auto
             fixed lg:static inset-y-0 left-0 z-50
             transform transition-transform duration-300 ease-in-out
             ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
             top-[73px] lg:top-0
           `}>
-            {/* Mobile Close Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="lg:hidden absolute top-4 right-4 p-2 rounded-lg theme-muted-hover"
-            >
-              <X className="h-5 w-5" />
-            </button>
+          {/* Mobile Close Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="lg:hidden absolute top-4 right-4 p-2 rounded-lg theme-muted-hover"
+          >
+            <X className="h-5 w-5" />
+          </button>
 
-            <SparkSelector
-              selectedSpark={selectedSpark}
-              onSparkSelect={handleSparkSelect}
-              onNewSpark={handleNewSpark}
+          <SparkSelector
+            selectedSpark={selectedSpark}
+            onSparkSelect={handleSparkSelect}
+            onNewSpark={handleNewSpark}
+            repoUrl={repoUrl}
+            branch={branch}
+            onRepoChange={handleRepoChange}
+            onBranchChange={handleBranchChange}
+            currentSparkData={sparkData}
+            onPRRefresh={setPrRefreshCallback}
+            onPermissionChange={handlePermissionChange}
+            user={user}
+          />
+        </aside>
+
+        {/* Main Canvas */}
+        <main className="flex-1 overflow-y-auto w-full">
+          {sparkData && sparkData.name ? (
+            <AssemblyCanvas
+              sparkData={sparkData}
+              onSparkUpdate={handleSparkUpdate}
               repoUrl={repoUrl}
-              branch={branch}
-              onRepoChange={handleRepoChange}
-              onBranchChange={handleBranchChange}
-              currentSparkData={sparkData}
-              onPRRefresh={setPrRefreshCallback}
-              onPermissionChange={handlePermissionChange}
-              user={user}
+              originalSparkData={originalSparkData}
+              onResetSpark={handleResetSpark}
+              isReadOnly={!user}
+              onPRCreated={() => prRefreshCallback?.()}
+              canPush={canPush}
             />
-          </aside>
-
-          {/* Main Canvas */}
-          <main className="flex-1 overflow-y-auto w-full">
-            {sparkData && sparkData.name ? (
-              <AssemblyCanvas
-                sparkData={sparkData}
-                onSparkUpdate={handleSparkUpdate}
-                repoUrl={repoUrl}
-                originalSparkData={originalSparkData}
-                onResetSpark={handleResetSpark}
-                isReadOnly={!user}
-                onPRCreated={() => prRefreshCallback?.()}
-                canPush={canPush}
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center p-4">
-                <div className="text-center max-w-md">
-                  <Sparkles className="mx-auto h-12 w-12 sm:h-16 sm:w-16 theme-faint" />
-                  <h3 className="mt-4 text-lg sm:text-xl font-semibold theme-muted">
-                    Select a Spark or Create a New One
-                  </h3>
-                  <p className="mt-2 text-sm sm:text-base theme-subtle">
-                    Choose from existing sparks or start building from scratch
-                  </p>
-                  <button
-                    onClick={() => setIsMobileMenuOpen(true)}
-                    className="mt-4 lg:hidden px-4 py-2 bg-design-600 rounded-lg text-sm font-semibold hover:bg-design-700 transition-colors"
-                  >
-                    Browse Sparks
-                  </button>
-                </div>
-              </div>
-            )}
-          </main>
-        </div>
-
-        {/* Template Selector Modal */}
-        {showTemplateSelector && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-            <div className="bg-gray-900 rounded-lg border border-design-500/30 max-w-2xl w-full p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Choose a Template</h2>
+          ) : (
+            <div className="flex h-full items-center justify-center p-4">
+              <div className="text-center max-w-md">
+                <Sparkles className="mx-auto h-12 w-12 sm:h-16 sm:w-16 theme-faint" />
+                <h3 className="mt-4 text-lg sm:text-xl font-semibold theme-muted">
+                  Select a Spark or Create a New One
+                </h3>
+                <p className="mt-2 text-sm sm:text-base theme-subtle">
+                  Choose from existing sparks or start building from scratch
+                </p>
                 <button
-                  onClick={() => setShowTemplateSelector(false)}
-                  className="text-gray-400 hover:text-white"
+                  onClick={() => setIsMobileMenuOpen(true)}
+                  className="mt-4 lg:hidden px-4 py-2 bg-design-600 rounded-lg text-sm font-semibold hover:bg-design-700 transition-colors"
                 >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto">
-                {/* Generic Template */}
-                <button
-                  onClick={() => handleTemplateSelect({ name: 'New Spark', spark: { observation: '', gap: '', why: '' } })}
-                  className="p-4 rounded-lg border-2 border-design-500/30 hover:border-design-500 hover:bg-design-500/10 transition-all text-left"
-                >
-                  <h3 className="font-semibold text-design-400 mb-2">Generic Spark</h3>
-                  <p className="text-sm text-gray-300">A structured template for any new idea or project</p>
+                  Browse Sparks
                 </button>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </main>
       </div>
-    </DndProvider>
+
+      {/* Template Selector Modal */}
+      {showTemplateSelector && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-900 rounded-lg border border-design-500/30 max-w-2xl w-full p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">Choose a Template</h2>
+              <button
+                onClick={() => setShowTemplateSelector(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto">
+              {/* Generic Template */}
+              <button
+                onClick={handleTemplateSelect}
+                className="p-4 rounded-lg border-2 border-design-500/30 hover:border-design-500 hover:bg-design-500/10 transition-all text-left"
+              >
+                <h3 className="font-semibold text-design-400 mb-2">Generic Spark</h3>
+                <p className="text-sm text-gray-300">A structured template for any new idea or project</p>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
