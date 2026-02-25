@@ -11,7 +11,7 @@ import PRTracker from './PRTracker';
 import { PhaseTypes } from '../types/spark';
 import { generateSparkMarkdown, validateSparkData } from '../utils/sparkParser';
 import { useToast } from '../utils/ToastContext';
-import { getStoredToken, getStoredUserInfo } from '../utils/github';
+import { getStoredToken, getStoredUserInfo, parseRepoUrl } from '../utils/github';
 
 const ENHANCED_SECTIONS_CONFIG = {
   1: { title: '1. Spark Narrative', description: 'The core story of the idea', color: 'spark' },
@@ -47,7 +47,16 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
   // });
   const toast = useToast();
   const user = getStoredUserInfo();
-  const isOwner = user && sparkData && user.login === sparkData.contributors?.scout;
+  const isOwner = user && (() => {
+    let repoOwner = '';
+    try {
+      repoOwner = parseRepoUrl(repoUrl).owner;
+    } catch (e) { }
+    return (
+      user.login?.toLowerCase() === sparkData?.contributors?.scout?.toLowerCase() ||
+      user.login?.toLowerCase() === repoOwner.toLowerCase()
+    );
+  })();
 
   // Reset active phases when spark changes
   useEffect(() => {
@@ -310,9 +319,9 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
   };
 
   const handleDeleteRequest = async () => {
-    // Check if user is the owner (scout)
-    if (sparkData.contributors.scout !== user?.login) {
-      toast.error('Only the spark owner (scout) can delete a spark');
+    // Check if user is the owner
+    if (!isOwner) {
+      toast.error('Only the spark owner can delete a spark');
       return;
     }
 
@@ -680,9 +689,9 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
             <div className="h-full flex flex-col lg:flex-row p-4 sm:p-6 gap-4 sm:gap-6">
               <div className="flex-1 flex flex-col gap-4 sm:gap-6 min-w-0">
                 {[
-                  { key: PhaseTypes.SPARK, title: '🧠 Spark (Scout)', description: 'Identify and submit the gap', color: 'spark' },
-                  { key: PhaseTypes.DESIGN, title: '🎨 Design (Designer)', description: 'Design the solution', color: 'design' },
-                  { key: PhaseTypes.LOGIC, title: '🛠️ Logic (Builder)', description: 'Build and test', color: 'logic' },
+                  { key: PhaseTypes.SPARK, title: '🧠 Spark', description: 'Identify and submit the gap', color: 'spark' },
+                  { key: PhaseTypes.DESIGN, title: '🎨 Design', description: 'Design the solution', color: 'design' },
+                  { key: PhaseTypes.LOGIC, title: '🛠️ Logic', description: 'Build and test', color: 'logic' },
                 ]
                   .filter(phase => activePhasesForNewSpark.includes(phase.key))
                   .map((phase) => (

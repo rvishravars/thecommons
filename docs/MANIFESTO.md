@@ -41,7 +41,7 @@ To prevent "Whale Dictatorship," influence scales non-linearly:
 
 $$Weight = \log_{10}(CS_{active})$$
 
-> **Note:** Voting uses `active_cs` — Scout-only contributions decay at **10% per month** unless the contributor advances to Design or Logic tier.
+> **Note:** Voting uses `active_cs` — contributions decay at **10% per month** if the contributor remains inactive for >60 days.
 
 * **Sybil Protection:** Voting rights are restricted to contributors with **CS > 20** or **3 merged actions**.
 
@@ -83,7 +83,7 @@ Based on **Mark Elliott** (*Stigmergic Collaboration*, 2016).
 ### 4. Non-Linear Influence & Meritocracy
 Based on **Logarithmic Scaling** and **Plural Control** (Glen Weyl et al.).
 * **The Principle:** Voting power must not scale linearly with capital or points.
-* **Application:** $$Weight = \log_{10}(CS_{active})$$ with time-decay for Scout-only contributions ensures that Scouts collectively retain voice against high-CS actors.
+* **Application:** $$Weight = \log_{10}(CS_{active})$$ with time-decay for inactive contributors ensures a dynamic meritocracy.
 
 ### 5. Open-Source Translucence
 Based on **Dabbish et al.** (*Social Translucence in GitHub*, 2012).
@@ -159,10 +159,10 @@ Run the experiment, simulation, or implementation.
 
 ## Part 4: Development Roadmap
 
-* [x] **Manifesto v2.0:** Integrated LEGO-style meritocracy (Scout/Designer/Builder).
+* [x] **Manifesto v2.0:** Integrated modular meritocracy (Owner/Others).
 * [x] **Scribe v2.0:** Glass Box AI agent — local CPU inference, hardware switching, PR bot.
 * [x] **Spark Assembly Lab:** React-based canvas for composing and submitting sparks.
-* [x] **Reputation Shield:** CS decay for Scout-only contributors (10%/month via logarithmic scaling).
+* [x] **Reputation Shield:** CS decay for inactive contributors (10%/month via logarithmic scaling).
 * [x] **Enhanced Spark Template:** 8-section modular format with YAML frontmatter and maturity levels.
 * [x] **Manifesto v3.0:** Updated governance, Scribe spec, and Enhanced Spark Standard.
 * [ ] **The DePIN Grid:** Community-powered GPU node for Scribe heavy-compute tasks.

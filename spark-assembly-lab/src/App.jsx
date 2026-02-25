@@ -6,7 +6,7 @@ import AssemblyCanvas from './components/AssemblyCanvas';
 import Header from './components/Header';
 import { Sparkles, X } from 'lucide-react';
 import { generateSparkMarkdown } from './utils/sparkParser';
-import { getStoredUserInfo } from './utils/github';
+import { getStoredUserInfo, parseRepoUrl } from './utils/github';
 import { parseSparkFile } from './utils/sparkParser';
 import { ENHANCED_SPARK_TEMPLATE } from './utils/templates';
 
@@ -27,7 +27,15 @@ function AppMain() {
 
   const handlePermissionChange = (allowed) => {
     // Only allow push if user has repo permissions AND is the spark owner
-    const userIsOwner = user && sparkData && user.login === sparkData.contributors.scout;
+    let repoOwner = '';
+    try {
+      repoOwner = parseRepoUrl(repoUrl).owner;
+    } catch (e) { }
+
+    const userIsOwner = user && sparkData && (
+      user.login?.toLowerCase() === sparkData.contributors?.scout?.toLowerCase() ||
+      user.login?.toLowerCase() === repoOwner.toLowerCase()
+    );
     setCanPush(allowed && userIsOwner);
   };
 
@@ -57,9 +65,17 @@ function AppMain() {
       }
       setSparkData(loaded);
       setOriginalSparkData(JSON.parse(JSON.stringify(loaded)));
-      
-      // Check if current user is the owner (scout) of this spark
-      const userIsOwner = user && user.login === loaded.contributors.scout;
+
+      // Check if current user is the owner of this spark
+      let repoOwner = '';
+      try {
+        repoOwner = parseRepoUrl(repoUrl).owner;
+      } catch (e) { }
+
+      const userIsOwner = user && (
+        user.login?.toLowerCase() === loaded.contributors.scout?.toLowerCase() ||
+        user.login?.toLowerCase() === repoOwner.toLowerCase()
+      );
       setCanPush(userIsOwner);
     }
     // Close mobile menu after selection
@@ -113,7 +129,7 @@ function AppMain() {
       sections: parsedTemplate.sections, // All 8 sections from the template
       activeSections: [1], // Only Section 1 is active by default
       phases: parsedTemplate.phases,
-      contributors: { scout: userHandle, designer: '', builder: '' },
+      contributors: { scout: userHandle },
       proposals: parsedTemplate.proposals || { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' },
       sourcePath: null,
       rawContent: ENHANCED_SPARK_TEMPLATE
