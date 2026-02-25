@@ -12,9 +12,9 @@ The Scribe v2.0 Glass Box AI Agent has been **fully implemented, tested, and is 
 - **downloader.py** - GGUF model management
 - **GitHub Actions** - Automated PR validation
 
-### ✅ System Prompts
-- **hunch_eval.md** - Validates !HUNCH for clarity and actionability
-- **shape_eval.md** - Validates !SHAPE for novelty and feasibility
+### ✅ System Prompts (Manifesto v3.0 Missions)
+- **hunch_eval.md** - Mission: Narrative Audit (Section 1)
+- **shape_eval.md** - Mission: Design & Hypothesis Audit (Sections 2-4)
 
 ### ✅ Documentation (4 comprehensive guides)
 - **GETTING_STARTED.md** - Quick 5-minute intro
@@ -84,7 +84,7 @@ GitHub:
 └── .github/workflows/scribe-bot.yml (PR automation)
 
 Design:
-└── sparks/scribe-v2-implementation.md (!SHAPE blueprint)
+└── sparks/scribe-v2-implementation.md (Seed/Structured blueprint)
 ```
 
 ## ✅ Verification Results

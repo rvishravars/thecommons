@@ -59,17 +59,19 @@ class HardwareType(Enum):
 
 
 class EvaluationPhase(Enum):
-    """Spark evaluation phases."""
-    HUNCH = "hunch"
-    SHAPE = "shape"
+    """Spark evaluation phases aligned with Manifesto v3.0."""
+    NARRATIVE = "hunch"       # Mission: Narrative Audit (Section 1)
+    HYPOTHESIS = "shape"      # Mission: Design & Hypothesis Audit (Section 2)
 
 
 @dataclass
 class ReasoningLog:
-    """Glass Box reasoning log structure."""
+    """Glass Box reasoning log structure with hardware telemetry."""
     hardware_used: str
+    hardware_acceleration: str  # e.g., "CUDA", "Metal", "None (CPU)"
     time_elapsed_ms: float
     memory_used_mb: float
+    model_name: str
     prompts_tested: list
     decision_path: list
     stability_score: float
@@ -395,8 +397,9 @@ class ScribeBrain:
                             },
                             "decision_path": [
                                 "Analyzed submission content",
-                                f"Applied {phase.value} evaluation criteria",
-                                "Generated stability assessment"
+                                f"Applied Mission: {phase.value.capitalize()} Audit criteria",
+                                "Generated Glass Box stability assessment",
+                                f"Hardware Telemetry: {self.hardware.value} integration verified"
                             ]
                         }
                     }
@@ -497,10 +500,10 @@ class ScribeBrain:
 #     parser.add_argument("--missions", action="store_true", help="Run Scribe-Architect missions on a full Spark")
 # #     args = parser.parse_args()
 # 
-#     logger.info("🧠 Initializing Scribe v2.0 Brain...")
+#     logger.info("🧠 Initializing Scribe v3.0 Brain...")
 # 
 #     if args.demo:
-#         logger.info("📊 Running in DEMO MODE (no inference required)")
+#         logger.info("📊 Running in DEMO MODE (Mission: Narrative Audit simulation)")
 #         demo_mode()
 #         return
 # 
@@ -557,57 +560,54 @@ class ScribeBrain:
 
 
 def demo_mode():
-    """Demo mode showing Scribe functionality without inference."""
+    """Demo mode showing Scribe v3.0 mission functionality without inference."""
     logger.info("\n" + "="*60)
-    logger.info("🧠 SCRIBE V2.0 GLASS BOX DEMO")
+    logger.info("🧠 SCRIBE v3.0 GLASS BOX DEMO")
     logger.info("="*60)
     
-    # Simulate evaluation
-    sample_hunch = """
-    I notice that our Spark files don't have consistent date fields. 
-    It's hard to track when a blueprint was created vs. when it was approved.
-    This makes it difficult to analyze the velocity of the Commons.
+    # Simulate Section 1 Narrative
+    sample_narrative = """
+    Spark files currently lack a mechanism for automated 'Echo Bonus' tracking. 
+    While the Manifesto (v3.0) defines the reward, the metadata structure doesn't 
+    distinguish between an owner's update and a community proposal in a way that 
+    the Scribe can parse. This slows down the meritocracy.
     """
     
-    logger.info("\n📥 INPUT: Sample !HUNCH")
-    logger.info(f"{sample_hunch}")
+    logger.info("\nMission: Narrative Audit (Section 1)")
+    logger.info(f"INPUT: {sample_narrative.strip()}")
     
     # Simulated Glass Box output
     demo_result = {
         "status": "approved",
-        "phase": "hunch",
+        "mission": "narrative_audit",
+        "section": 1,
         "stability_score": 8.5,
         "reasoning": {
             "checks": {
-                "specificity": "✅ Concrete observation about date field inconsistency",
-                "actionability": "✅ Designer can create timeline tracking feature",
-                "novelty": "✅ Not mentioned in existing Spark files",
-                "scope_alignment": "✅ Within Commons governance scope"
+                "specificity": "✅ Concrete observation about Echo Bonus metadata structure",
+                "actionability": "✅ Hypothesis (Section 2) can define new metadata schema",
+                "novelty": "✅ Not documented in existing Echo Bonus Sparks",
+                "manifesto_alignment": "✅ Directly addresses meritocracy scaling"
             },
             "decision_path": [
-                "Scanning for Loose Studs...",
-                "Identifying specific gap: date field inconsistency",
+                "Scanning for Loose Studs (Section 1 Narrative)...",
+                "Identifying specific gap: Echo Bonus metadata ambiguity",
                 "Checking Clutch Power (specificity of observation)...",
-                "Validating actionability (can Designer build on this?)...",
+                "Validating Manifesto alignment (Meritocracy impacts)...",
                 "Cross-referencing against existing Sparks...",
-                "Novelty assessment: New observation, not duplicate"
+                "Novelty assessment: Narrative identifies unique structural gap"
             ],
             "glass_box": {
-                "hardware_used": "cpu (demo mode)",
-                "time_elapsed_ms": 42.5,
-                "memory_used_mb": 8.2,
+                "hardware_used": "cpu (demo mode simulation)",
+                "hardware_acceleration": "None (Demo)",
+                "time_elapsed_ms": 12.5,
+                "memory_used_mb": 0.0,
+                "model_name": "Scribe-Internal-Demo",
                 "prompts_tested": ["hunch_eval.md"],
                 "decision_path": [
-                    "Scanning for Loose Studs...",
-                    "Identified: Missing date standardization",
-                    "Checking Clutch Power (specificity)...",
-                    "Score: 8.5/10 (clear, actionable, novel)"
-                ],
-                "stability_score": 8.5,
-                "critical_flaws": [],
-                "recommendations": [
-                    "Consider proposing a timestamp schema in !SHAPE phase",
-                    "Include impact analysis on existing queries/reports"
+                    "Initialized Mission: Narrative Audit",
+                    "Applied Glass Box reasoning template",
+                    "Hardware Telemetry: cpu integration verified"
                 ]
             }
         }

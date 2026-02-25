@@ -1,13 +1,13 @@
-# 🧠 Scribe v2.0 - Getting Started Guide
+# 🧠 Scribe v3.0 - Getting Started Guide
 
-Welcome to the Scribe v2.0 Glass Box AI Agent for TheCommons! This guide will help you understand and use the system.
+Welcome to the Scribe v3.0 Glass Box AI Agent for TheCommons! This guide will help you understand and use the system.
 
 ## 📋 Quick Overview
 
-The Scribe v2.0 is an intelligent quality-assurance system that:
-- ✅ **Validates Sparks** for structural integrity (Intuition → Design → Logic phases)
-- 🔍 **Evaluates Novelty** to ensure unique ideas
-- 📊 **Generates Glass Box Logs** showing all reasoning transparently
+The Scribe v3.0 is an intelligent quality-assurance system that:
+- ✅ **Validates Sparks** for Manifesto alignment (Section 1 Narrative → Section 2 Hypothesis)
+- 🔍 **Evaluates Missions** (Narrative Audit & Design/Hypothesis Audit)
+- 📊 **Generates Glass Box Logs** showing all reasoning and hardware telemetry
 - 🔄 **Switches Hardware** automatically (GPU → CPU → Cloud API)
 - 🤖 **Automates PR Reviews** with GitHub Actions
 
@@ -75,10 +75,10 @@ python3 scribe/scribe_brain.py --help    # See all options
 
 ### 2. Stability Auditor (`scribe/logic/stability_audit.py`)
 Validates Spark structural integrity:
-- Checks all 3 phases are present (Intuition/Design/Logic)
+- Checks core sections are substantive (Section 1 Narrative / Section 2 Hypothesis)
 - Verifies contributor handles (@username)
 - Calculates novelty scores (0-100)
-- Identifies critical flaws
+- Identifies critical flaws (Loose Studs)
 - Generates recommendations
 
 **Usage:**
@@ -89,13 +89,13 @@ python3 scribe/logic/stability_audit.py --json  # Machine-readable output
 ```
 
 ### 3. System Prompts
-**Hunch Evaluator** (`scribe/prompts/hunch_eval.md`)
-- Validates !HUNCH (Intuition) submissions
-- Checks: specificity, actionability, novelty, scope alignment
+**Mission: Narrative Auditor** (`scribe/prompts/hunch_eval.md`)
+- Validates Section 1 (Narrative) submissions
+- Checks: specificity, actionability (to Section 2), novelty, Manifesto alignment
 
-**Shape Evaluator** (`scribe/prompts/shape_eval.md`)
-- Validates !SHAPE (Design) submissions  
-- Checks: Novel Core clarity, buildability, integration, prior art, risk awareness
+**Mission: Design & Hypothesis Validator** (`scribe/prompts/shape_eval.md`)
+- Validates Section 2 (Hypothesis) and Sections 3-4 (Modeling) submissions  
+- Checks: Novel Core clarity, falsifiability, integration, prior art, risk awareness
 
 ### 4. Model Downloader (`scribe/models/downloader.py`)
 Manages the Qwen2.5-1.5B GGUF model:
@@ -118,18 +118,21 @@ Every Scribe decision includes transparent reasoning:
 ```json
 {
   "status": "approved",
-  "phase": "hunch",
+  "mission": "narrative_audit",
   "stability_score": 8.5,
   "reasoning": {
-    "hardware_used": "cpu",
-    "time_elapsed_ms": 1234.5,
-    "decision_path": [
-      "Scanning for Loose Studs...",
-      "Checking Clutch Power (specificity)...",
-      "Validating actionability..."
-    ],
-    "critical_flaws": [],
-    "recommendations": ["Consider adding examples..."]
+    "glass_box": {
+      "hardware_used": "cpu",
+      "hardware_acceleration": "None (CPU)",
+      "time_elapsed_ms": 1234.5,
+      "decision_path": [
+        "Scanning for Loose Studs...",
+        "Checking Clutch Power (Mission: Narrative Audit)...",
+        "Validating Manifesto v3.0 alignment..."
+      ],
+      "critical_flaws": [],
+      "recommendations": ["Consider expanding Section 2 with a falsifiable hypothesis"]
+    }
   }
 }
 ```

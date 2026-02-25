@@ -16,17 +16,15 @@ from dataclasses import dataclass, asdict
 
 
 class AuditStatus(Enum):
-    """Audit status levels."""
-    GREEN = "GREEN"      # All three phases filled with substantive content
-    YELLOW = "YELLOW"    # One or more phases incomplete
-    RED = "RED"          # Critical fields empty or contradictory logic
+    """Audit status levels aligned with Manifesto v3.0."""
+    GREEN = "GREEN"      # Mission goals met; stable for merge/vouch
+    YELLOW = "YELLOW"    # Loose studs identified; lacks full Clutch Power
+    RED = "RED"          # Unstable; fails core Manifesto/Modular gates
 
 
 class MeritRole(Enum):
     """Contribution roles."""
-    SCOUT = "Scout"
-    DESIGNER = "Designer"
-    BUILDER = "Builder"
+    OWNER = "Owner"
 
 
 @dataclass
@@ -85,7 +83,7 @@ class Mission1DataParser:
                 "spark_name": spark_name,
                 "is_enhanced": True,
                 "sections": sections,
-                "contributors": {"scout": "", "designer": "", "builder": ""}
+                "contributors": {"owner": ""}
             }
         else:
             # Parse legacy 3-phase format
@@ -109,10 +107,10 @@ class Mission1DataParser:
     @staticmethod
     def _extract_id(content: str) -> str:
         """Extract spark ID from YAML frontmatter or generate from name."""
-        frontmatter_match = re.search(r'^---\s*\n([\s\S]*?)\n---', content)
+        frontmatter_match = re.search(r'^\s*---\s*\n([\s\S]*?)\n---', content, re.MULTILINE)
         if frontmatter_match:
             yaml = frontmatter_match.group(1)
-            id_match = re.search(r'^id:\s*(.+)$', yaml, re.MULTILINE)
+            id_match = re.search(r'^\s*id:\s*(.+)$', yaml, re.MULTILINE)
             if id_match:
                 return id_match.group(1).strip().strip('"\'')
         
@@ -126,11 +124,12 @@ class Mission1DataParser:
         if not content:
             return "Untitled Spark"
 
-        # Try YAML frontmatter name
-        frontmatter_match = re.search(r'^---\s*\n([\s\S]*?)\n---', content)
+        # Try YAML frontmatter name or title
+        frontmatter_match = re.search(r'^\s*---\s*\n([\s\S]*?)\n---', content, re.MULTILINE)
         if frontmatter_match:
             yaml_block = frontmatter_match.group(1)
-            name_match = re.search(r'^name:\s*(.+)$', yaml_block, re.MULTILINE)
+            # Check for name: or title:
+            name_match = re.search(r'^\s*(?:name|title):\s*(.+)$', yaml_block, re.MULTILINE)
             if name_match:
                 extracted = name_match.group(1).strip().strip('"\'')
                 if extracted:
@@ -162,13 +161,21 @@ class Mission1DataParser:
 
     @staticmethod
     def _is_enhanced_spark(content: str) -> bool:
-        """Detect if this is an Enhanced spark (has spark_type: in YAML frontmatter)."""
-        frontmatter_match = re.search(r'^---\s*\n([\s\S]*?)\n---', content)
+        """
+        Detect if this is an Enhanced spark.
+        Checks for spark_type in YAML or presence of 8-section headers.
+        """
+        # 1. Check YAML frontmatter for spark_type
+        frontmatter_match = re.search(r'^\s*---\s*\n([\s\S]*?)\n---', content, re.MULTILINE)
         if frontmatter_match:
             yaml_block = frontmatter_match.group(1)
-            # Check for spark_type field (indicates enhanced format)
             if re.search(r'^\s*spark_type:\s*', yaml_block, re.MULTILINE):
                 return True
+        
+        # 2. Fallback: Check for section headers (e.g., "# 1. Spark Narrative")
+        if re.search(r'^#\s*1\.\s+Spark Narrative', content, re.MULTILINE):
+            return True
+            
         return False
 
     @staticmethod
@@ -296,24 +303,16 @@ class Mission1DataParser:
 
     @staticmethod
     def _extract_contributors(content: str, spark: PhaseContent, design: PhaseContent, logic: PhaseContent) -> Dict[str, str]:
-        """Extract contributor handles from phase sections."""
+        """Extract contributor handles from spark content."""
         contributors = {
-            "scout": "",
-            "designer": "",
-            "builder": ""
+            "owner": ""
         }
         
-        # Extract from phase status lines (e.g., "@username")
-        patterns = {
-            "spark": (r"## 🧠 Phase 1.*?@([\w-]+)", "scout"),
-            "design": (r"## 🎨 Phase 2.*?@([\w-]+)", "designer"),
-            "logic": (r"## 🛠️ Phase 3.*?@([\w-]+)", "builder")
-        }
-        
-        for phase_name, (pattern, role) in patterns.items():
-            match = re.search(pattern, content, re.DOTALL)
-            if match:
-                contributors[role] = match.group(1)
+        # Extract from YAML or Spark status lines (e.g., "@username")
+        # Try both Owner and Scout (legacy) keywords
+        match = re.search(r"\*(?:Owner|Scout):\s*@?([\w-]+)\*", content, re.IGNORECASE)
+        if match:
+            contributors["owner"] = match.group(1)
         
         return contributors
 
@@ -361,7 +360,7 @@ class Mission2StabilityAudit:
         
         if stable_count == 3:
             status = AuditStatus.GREEN
-            report = "✅ Fully stable across core sections (1, 2, 3/4)."
+            report = "✅ Mission: Narrative & Design Audit complete. High Clutch Power detected."
         elif stable_count >= 2:
             status = AuditStatus.YELLOW
             missing = []
@@ -371,10 +370,10 @@ class Mission2StabilityAudit:
                 missing.append("Section 2 (Hypothesis)")
             if not section_3_or_4_complete:
                 missing.append("Section 3/4 (Simulation/Evaluation)")
-            report = f"⚠️ Needs refinement: {', '.join(missing)} incomplete."
+            report = f"⚠️ Loose Studs detected: {', '.join(missing)} incomplete. Advance to Structured maturity to merge."
         else:
             status = AuditStatus.RED
-            report = "❌ Unstable. Critical sections are missing or incomplete."
+            report = "❌ Unstable. Fails core Manifesto gates. Section 1 (Narrative) must be substantiated."
         
         critical_flaws = Mission2StabilityAudit._detect_flaws_enhanced(sections)
         
@@ -495,7 +494,7 @@ class Mission3GovernanceAdvisory:
             confidence = "low"
         
         # Calculate merit distribution
-        merit_plan = Mission3GovernanceAdvisory._calculate_merit(spark_data, audit_status)
+        merit_plan = Mission3GovernanceAdvisory._calculate_merit(spark_data, audit_status, audit_details)
         
         # Generate governance advisory
         advisory = {
@@ -510,51 +509,56 @@ class Mission3GovernanceAdvisory:
         return advisory
 
     @staticmethod
-    def _calculate_merit(spark_data: Dict[str, Any], audit_status: AuditStatus) -> List[Dict[str, str]]:
+    def _calculate_merit(spark_data: Dict[str, Any], audit_status: AuditStatus, audit_details: Dict[str, Any]) -> List[Dict[str, str]]:
         """
-        Calculate merit (CS = Contribution Score) distribution based on contributions.
-        
-        Args:
-            spark_data: Parsed spark data
-            audit_status: Audit status
-            
-        Returns:
-            List of merit entries with contributor handles and rewards
+        Calculate merit (CS = Contribution Score) distribution based on Manifesto v3.0.
         """
         merit = []
         contributors = spark_data.get("contributors", {})
+        is_enhanced = spark_data.get("is_enhanced", False)
         
-        # Scout: +5 CS for completing spark
-        if contributors.get("scout"):
-            scout_reward = "+5 CS"
-            if spark_data.get("spark", {}).get("is_stable"):
+        # Owner / Scout rewards
+        owner_handle = contributors.get("owner") or contributors.get("scout")
+        if owner_handle:
+            total_cs = 0
+            bonuses = []
+            
+            if is_enhanced:
+                sections = spark_data.get("sections", {})
+                checks = audit_details.get("checks", {})
+                
+                # Section 1 + 2: Open a Spark (+5 CS)
+                if checks.get("section_1_complete") and checks.get("section_2_complete"):
+                    total_cs += 5
+                
+                # Section 2: Formalize Hypothesis (+10 CS)
+                if checks.get("section_2_complete"):
+                    total_cs += 10
+                    
+                # Sections 3 & 4: Model or Simulate (+15 CS)
+                if checks.get("section_3_or_4_complete"):
+                    total_cs += 15
+                
+                # Section 6: Results (+25 CS)
+                if bool(sections.get(6, "").strip()) and len(sections.get(6, "")) > 50:
+                    total_cs += 25
+            else:
+                # Legacy Phase 1/Spark: +5 CS
+                if spark_data.get("spark", {}).get("is_stable"):
+                    total_cs += 5
+                # Legacy Phase 2/Design: +15 CS
+                if spark_data.get("design", {}).get("is_stable"):
+                    total_cs += 15
+                # Legacy Phase 3/Logic: +25 CS
+                if spark_data.get("logic", {}).get("is_stable"):
+                    total_cs += 25
+            
+            if total_cs > 0:
                 merit.append({
-                    "handle": f"@{contributors['scout']}",
-                    "role": MeritRole.SCOUT.value,
-                    "reward": scout_reward
+                    "handle": f"@{owner_handle}",
+                    "role": MeritRole.OWNER.value,
+                    "reward": f"+{total_cs} CS"
                 })
-        
-        # Designer: +15 CS for completing design (+ echo bonus if stable)
-        if contributors.get("designer"):
-            designer_reward = "+15 CS"
-            if spark_data.get("design", {}).get("is_stable") and audit_status == AuditStatus.GREEN:
-                designer_reward = "+15 CS (+5 Echo bonus)"
-            merit.append({
-                "handle": f"@{contributors['designer']}",
-                "role": MeritRole.DESIGNER.value,
-                "reward": designer_reward
-            })
-        
-        # Builder: +25 CS for completing logic (+ prototype bonus if merged)
-        if contributors.get("builder"):
-            builder_reward = "+25 CS"
-            if audit_status == AuditStatus.GREEN:
-                builder_reward = "+25 CS (+10 Prototype bonus)"
-            merit.append({
-                "handle": f"@{contributors['builder']}",
-                "role": MeritRole.BUILDER.value,
-                "reward": builder_reward
-            })
         
         return merit
 
@@ -591,31 +595,14 @@ def evaluate_spark_mission(content: str) -> Dict[str, Any]:
     advisory = Mission3GovernanceAdvisory.generate_advisory(spark_data, audit_status, audit_details)
     
     # Compile output schema
+    is_enhanced = spark_data.get("is_enhanced", False)
+    
     output = {
         "spark_info": {
             "id": spark_data.get("spark_id"),
             "name": spark_data.get("spark_name"),
-            "stability_score": audit_details.get("stable_phases", 0)
-        },
-        "content": {
-            "spark": {
-                "observation": spark_data.get("spark", {}).get("observation", ""),
-                "gap": spark_data.get("spark", {}).get("gap", ""),
-                "why": spark_data.get("spark", {}).get("why", ""),
-                "is_stable": spark_data.get("spark", {}).get("is_stable", False)
-            },
-            "design": {
-                "core": spark_data.get("design", {}).get("novel_core", ""),
-                "blueprint": spark_data.get("design", {}).get("blueprint", ""),
-                "interface": spark_data.get("design", {}).get("interface", ""),
-                "is_stable": spark_data.get("design", {}).get("is_stable", False)
-            },
-            "logic": {
-                "implementation": spark_data.get("logic", {}).get("technical_impl", ""),
-                "test_pass": spark_data.get("logic", {}).get("clutch_test", ""),
-                "dependencies": spark_data.get("logic", {}).get("dependencies", ""),
-                "is_stable": spark_data.get("logic", {}).get("is_stable", False)
-            }
+            "is_enhanced": is_enhanced,
+            "stability_score": audit_details.get("stable_sections" if is_enhanced else "stable_phases", 0)
         },
         "audit": {
             "status": audit_status.value,
@@ -628,6 +615,15 @@ def evaluate_spark_mission(content: str) -> Dict[str, Any]:
         "merit_plan": advisory.get("merit_distribution", []),
         "governance_notes": advisory.get("governance_notes", "")
     }
+    
+    if is_enhanced:
+        output["sections"] = spark_data.get("sections", {})
+    else:
+        output["content"] = {
+            "spark": spark_data.get("spark", {}),
+            "design": spark_data.get("design", {}),
+            "logic": spark_data.get("logic", {})
+        }
     
     return output
 

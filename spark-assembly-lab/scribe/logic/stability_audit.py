@@ -46,21 +46,15 @@ class StabilityAuditor:
     PHASES = {
         "Spark (!HUNCH)": {
             "order": 1,
-            "patterns": [r"The Observation", r"The Gap", r"The \"Why\""],
-            "required_role": r"\*Scout: @([\w-]+)",
-            "role_title": "Scout"
+            "patterns": [r"The Observation", r"The Gap", r"The \"Why\""]
         },
         "Design (!SHAPE)": {
             "order": 2,
-            "patterns": [r"The Novel Core", r"The Blueprint", r"The Interface"],
-            "required_role": r"\*Designer: @([\w-]+)",
-            "role_title": "Designer"
+            "patterns": [r"The Novel Core", r"The Blueprint", r"The Interface"]
         },
         "Logic (!BUILD)": {
             "order": 3,
-            "patterns": [r"Technical Implementation", r"Clutch Power Test"],
-            "required_role": r"\*Builder: @([\w-]+)",
-            "role_title": "Builder"
+            "patterns": [r"Technical Implementation", r"Clutch Power Test"]
         }
     }
 
@@ -84,12 +78,17 @@ class StabilityAuditor:
         """Check completion status of each phase."""
         phase_statuses = []
 
+        # Find owner handle (search entire file)
+        owner_match = re.search(r"\*(?:Owner|Scout):\s*@?([\w-]+)\*", self.content, re.IGNORECASE)
+        owner_handle = owner_match.group(1) if owner_match else None
+
         for phase_name, phase_config in self.PHASES.items():
             status = PhaseStatus(
                 phase_name=phase_name,
                 is_complete=False,
-                has_role=False,
-                missing_patterns=[]
+                has_role=bool(owner_handle),
+                missing_patterns=[],
+                role_handle=owner_handle
             )
 
             # Check if phase header exists
@@ -97,18 +96,12 @@ class StabilityAuditor:
                 phase_statuses.append(status)
                 continue
 
-            # Check for required role/handle
-            role_match = re.search(phase_config["required_role"], self.content)
-            if role_match:
-                status.has_role = True
-                status.role_handle = role_match.group(1)
-
             # Check for required pattern components
             for pattern in phase_config["patterns"]:
                 if not re.search(pattern, self.content, re.IGNORECASE):
                     status.missing_patterns.append(pattern)
 
-            # Phase is complete only if role exists AND all patterns present
+            # Phase is complete if owner exists AND all patterns present
             status.is_complete = status.has_role and len(status.missing_patterns) == 0
 
             phase_statuses.append(status)

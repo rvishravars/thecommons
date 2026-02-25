@@ -6,9 +6,9 @@ The Scribe v2.0 is TheCommons' deterministic, hardware-agnostic AI agent for eva
 
 The Scribe enforces TheCommons Manifesto through three key functions:
 
-1. **!HUNCH Evaluator** - Validates Intuition submissions for clarity and specificity
-2. **!SHAPE Evaluator** - Validates Design submissions for novelty and feasibility
-3. **Stability Auditor** - Checks all Sparks for structural integrity and LEGO-alignment
+1. **Narrative Auditor (Section 1)** - Validates Spark Narratives for clarity and specificity (Seed maturity)
+2. **Design & Hypothesis Validator (Sections 2-4)** - Validates Design submissions for novelty, falsifiability, and feasibility (Structured/Modeled maturity)
+3. **Stability auditor** - Checks all Sparks for structural integrity and Manifesto v3.0 alignment
 
 Every decision includes a **Glass Box reasoning log** explaining which hardware was used, which prompts were tested, and the logic path taken.
 
@@ -18,8 +18,8 @@ Every decision includes a **Glass Box reasoning log** explaining which hardware 
 scribe/
 ├── scribe_brain.py              # Core router (hardware switching, orchestration)
 ├── prompts/
-│   ├── hunch_eval.md            # System prompt for !HUNCH validation
-│   └── shape_eval.md            # System prompt for !SHAPE validation
+│   ├── hunch_eval.md            # System prompt for Narrative Audit (Section 1)
+│   └── shape_eval.md            # System prompt for Design & Hypothesis Audit (Section 2-4)
 ├── models/
 │   └── downloader.py            # Fetch Qwen2.5-1.5B model (if needed)
 ├── logic/
@@ -116,17 +116,20 @@ Every evaluation includes a transparent reasoning log:
 ```json
 {
   "status": "approved",
-  "phase": "hunch",
+  "mission": "narrative_audit",
   "reasoning": {
     "glass_box": {
       "hardware_used": "cpu",
+      "hardware_acceleration": "None (CPU)",
       "time_elapsed_ms": 1234.5,
       "memory_used_mb": 125.3,
+      "model_name": "Qwen2.5-1.5B-GGUF",
       "prompts_tested": ["hunch_eval.md"],
       "decision_path": [
         "Scanning for Loose Studs...",
-        "Checking Clutch Power (specificity)...",
-        "Validating actionability..."
+        "Checking Clutch Power (Mission: Narrative Audit)...",
+        "Validating Manifesto v3.0 alignment...",
+        "Hardware Telemetry: cpu integration verified"
       ],
       "stability_score": 8.5,
       "critical_flaws": [],
@@ -150,31 +153,26 @@ The Scribe writes thinking steps to `scribe_status.json` for React UI integratio
 
 ## 📖 System Prompts
 
-### hunch_eval.md
-Evaluates !HUNCH submissions on:
+### Mission: Narrative Audit (hunch_eval.md)
+Evaluates **Section 1 (Narrative)** submissions on:
 - **Specificity** - Is the observation concrete?
-- **Actionability** - Can a Designer build on this?
+- **Actionability** - Does it lead to a falsifiable hypothesis?
 - **Novelty** - Is it a new gap or duplicate?
-- **Scope Alignment** - Is it within TheCommons context?
+- **Manifesto Alignment** - Is it within the modular framework?
 
-**Output Scores:**
-- ✅ **Approved** - Ready for Designer attention
-- ⏳ **Needs Clarification** - Request more details
-- ❌ **Rejected** - Does not meet criteria
-
-### shape_eval.md
-Evaluates !SHAPE submissions on:
+### Mission: Design & Hypothesis Audit (shape_eval.md)
+Evaluates **Section 2 (Hypothesis)** and **Sections 3-4 (Modeling)** on:
 - **Novel Core** - Clear articulation of the 10% delta
-- **Buildability** - Can a Builder implement this?
+- **Falsifiability** - Can the hypothesis be proven wrong?
 - **Integration** - Does it snap cleanly into existing Bricks?
 - **Prior Art Check** - How is it differentiated?
-- **Risk Awareness** - Are challenges identified?
+- **Risk Awareness** - Are Loose Studs identified?
 - **Manifesto Alignment** - Uses LEGO terminology correctly
 
 **Output Scores:**
 - ✅ **Approved** - Buildable blueprint
 - ⏳ **Needs Refinement** - Strengthen the design
-- 🔴 **High-Risk Prototype** - Experimental (extra Builder scrutiny)
+- 🔴 **High-Risk Prototype** - Experimental
 - ❌ **Rejected** - Insufficient novelty or duplicate
 
 ## 🔧 Development
@@ -253,7 +251,6 @@ print(HardwareDetector.detect_gpu())  # Should be True if CUDA available
 ## 📚 References
 
 - [MANIFESTO.md](../docs/MANIFESTO.md) - TheCommons principles
-- [SPARK_VALIDATION_RULES.md](../docs/SPARK_VALIDATION_RULES.md) - Spark standards
 - [scribe-v2-implementation.spark](../sparks/scribe-v2-implementation.md) - Design document
 
 ## 📝 License

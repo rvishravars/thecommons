@@ -1,4 +1,4 @@
-# 🧪 Scribe v2.0 Testing Guide
+# 🧪 Scribe v3.0 Testing Guide
 
 Quick reference for testing the Scribe Brain without heavy dependencies.
 
@@ -94,12 +94,14 @@ python3 -c "from groq import Groq; print('✅ Groq OK')" || echo "⚠️  Groq n
 
 ### Demo Mode Output Structure
 ```
-🧠 SCRIBE V2.0 GLASS BOX DEMO
+🧠 SCRIBE v3.0 GLASS BOX DEMO
 ============================================================
-📥 INPUT: Sample !HUNCH
+📥 INPUT: Section 1 Narrative
 📊 OUTPUT: Glass Box Reasoning Log
+- mission: "narrative_audit|design_hypothesis_audit"
 - status: "approved|rejected|needs_clarification"
 - stability_score: 0-10
+- hardware_telemetry: [...]
 - decision_path: [...] 
 - critical_flaws: [...]
 - recommendations: [...]
@@ -111,10 +113,10 @@ python3 -c "from groq import Groq; print('✅ Groq OK')" || echo "⚠️  Groq n
 ```
 🧱 Stability Report: filename.spark.md
 ✅ Status: Valid|Invalid
-📊 Completion Level: X/3 phases
+📊 Completion Level: X/8 sections
 💎 Novelty Score: 0-100
-🔨 Phase Status: [Intuition, Design, Logic]
-⚠️  Warnings: [if any]
+🔨 Section Stability: [Narrative, Hypothesis, Modeling...]
+⚠️  Loose Studs Identified: [if any]
 💡 Recommendations: [if any]
 ```
 
