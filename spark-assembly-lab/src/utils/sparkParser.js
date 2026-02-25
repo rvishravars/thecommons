@@ -5,6 +5,8 @@
 export function parseSparkFile(content) {
   console.log('🔍 Parsing spark file, content length:', content.length);
 
+  let enhancedContributors = { scout: '' };
+
   // Extract spark name - support multiple formats
   let name = 'Untitled Spark';
   let markedForDeletion = false;
@@ -25,6 +27,11 @@ export function parseSparkFile(content) {
     const deletionFlagMatch = yaml.match(/^marked_for_deletion:\s*(true|yes)$/mi);
     if (deletionFlagMatch) {
       markedForDeletion = true;
+    }
+    // Also extract scout/owner from frontmatter if present
+    const scoutFM = yaml.match(/^(?:scout|owner):\s*@?([\w-]+)/m);
+    if (scoutFM && !enhancedContributors.scout) {
+      enhancedContributors.scout = scoutFM[1];
     }
   }
 
@@ -66,15 +73,10 @@ export function parseSparkFile(content) {
   const stability = calculateStability({ spark, design, logic });
   console.log('📊 Stability:', stability);
 
-  // For enhanced sparks, try to extract contributors from *Scout: @handle* lines
-  let enhancedContributors = { scout: '', designer: '', builder: '' };
+  // For enhanced sparks, already extracted from frontmatter or try to extract from *Scout: @handle* lines
   if ((content || '').includes('spark_type:')) {
-    const scoutMatch = content.match(/\*Scout:\s*@?([\w-]+)\*/);
-    const designerMatch = content.match(/\*Designer:\s*@?([\w-]+)\*/);
-    const builderMatch = content.match(/\*Builder:\s*@?([\w-]+)\*/);
+    const scoutMatch = content.match(/\*(?:Scout|Owner):\s*@?([\w-]+)\*/i);
     if (scoutMatch) enhancedContributors.scout = scoutMatch[1];
-    if (designerMatch) enhancedContributors.designer = designerMatch[1];
-    if (builderMatch) enhancedContributors.builder = builderMatch[1];
   }
 
   const result = {
@@ -109,8 +111,6 @@ export function parseSparkFile(content) {
     },
     contributors: {
       scout: enhancedContributors.scout || spark.contributor || '',
-      designer: enhancedContributors.designer || design.contributor || '',
-      builder: enhancedContributors.builder || logic.contributor || '',
     },
     stability,
     proposals: parseProposals(content),
@@ -264,7 +264,7 @@ export function buildMissionSummary(parsedSpark) {
     if (parsedSpark?.contributors?.scout) {
       meritPlan.push({
         handle: `@${parsedSpark.contributors.scout}`,
-        role: 'Scout',
+        role: 'Owner',
         reward: '+5 CS',
       });
     }
@@ -333,22 +333,8 @@ export function buildMissionSummary(parsedSpark) {
     if (parsedSpark?.contributors?.scout) {
       meritPlan.push({
         handle: `@${parsedSpark.contributors.scout}`,
-        role: 'Scout',
+        role: 'Owner',
         reward: '+5 CS',
-      });
-    }
-    if (parsedSpark?.contributors?.designer) {
-      meritPlan.push({
-        handle: `@${parsedSpark.contributors.designer}`,
-        role: 'Designer',
-        reward: status === 'GREEN' ? '+15 CS (+5 Echo bonus)' : '+15 CS',
-      });
-    }
-    if (parsedSpark?.contributors?.builder) {
-      meritPlan.push({
-        handle: `@${parsedSpark.contributors.builder}`,
-        role: 'Builder',
-        reward: status === 'GREEN' ? '+25 CS (+10 Prototype bonus)' : '+25 CS',
       });
     }
 
@@ -543,7 +529,7 @@ export function generateSparkMarkdown(sparkData) {
 
   // For enhanced sparks, we generate based on granular sections
   if (sparkData.isEnhanced) {
-    const contactInfo = contributors.scout ? `*Scout: @${contributors.scout}*\n\n` : '';
+    const contactInfo = contributors.scout ? `*Owner: @${contributors.scout}*\n\n` : '';
     markdown += contactInfo;
 
     const sections = sparkData.sections || {};
@@ -569,7 +555,7 @@ export function generateSparkMarkdown(sparkData) {
   // Phase 1: Spark
   markdown += `## 🧠 Phase 1: The Spark (!HUNCH)\n`;
   markdown += `*Status: [${phases.spark.status || 'Active'}]* `;
-  markdown += `*Scout: @${contributors.scout || 'YourGitHubHandle'}*\n\n`;
+  markdown += `*Owner: @${contributors.scout || 'YourGitHubHandle'}*\n\n`;
 
   if (phases.spark.notes) {
     markdown += `${phases.spark.notes.trim()}\n\n`;
@@ -584,8 +570,7 @@ export function generateSparkMarkdown(sparkData) {
 
   // Phase 2: Design
   markdown += `## 🎨 Phase 2: The Design (!SHAPE)\n`;
-  markdown += `*Status: [${phases.design.status || 'Pending'}]* `;
-  markdown += `*Designer: @${contributors.designer || 'Handle'}*\n\n`;
+  markdown += `*Status: [${phases.design.status || 'Pending'}]*\n\n`;
 
   if (phases.design.notes) {
     markdown += `${phases.design.notes.trim()}\n\n`;
@@ -601,8 +586,7 @@ export function generateSparkMarkdown(sparkData) {
 
   // Phase 3: Logic
   markdown += `## 🛠️ Phase 3: The Logic (!BUILD)\n`;
-  markdown += `*Status: [${phases.logic.status || 'In-Progress'}]* `;
-  markdown += `*Builder: @${contributors.builder || 'Handle'}*\n\n`;
+  markdown += `*Status: [${phases.logic.status || 'In-Progress'}]*\n\n`;
 
   if (phases.logic.notes) {
     markdown += `${phases.logic.notes.trim()}\n\n`;
@@ -619,9 +603,7 @@ export function generateSparkMarkdown(sparkData) {
   markdown += `## 📊 Contribution Log (CS Tracker)\n`;
   markdown += `| Phase | Contributor | Action | Reward |\n`;
   markdown += `| :--- | :--- | :--- | :--- |\n`;
-  markdown += `| **Spark** | @${contributors.scout || 'user1'} | Submitted Hunch | +5 CS |\n`;
-  markdown += `| **Design** | @${contributors.designer || 'user2'} | Designed Shape | +15 CS (+5 Echo) |\n`;
-  markdown += `| **Logic** | @${contributors.builder || 'user3'} | Merged Build | +25 CS (+10 Prototype) |\n\n`;
+  markdown += `| **Spark** | @${contributors.scout || 'user1'} | Merged Build | +5 CS |\n\n`;
 
   markdown += `---\n\n`;
 
