@@ -197,7 +197,7 @@ export function buildMissionSummary(parsedSpark) {
     parsedSpark.rawContent.includes('spark_type:')
   );
   const isEnhanced = (parsedSpark?.isEnhanced === true) || hasEnhancedSections || hasEnhancedRawContent;
-  
+
   console.log('🔍 buildMissionSummary debug:', {
     isEnhanced,
     hasIsEnhancedFlag: parsedSpark?.isEnhanced,
@@ -205,11 +205,11 @@ export function buildMissionSummary(parsedSpark) {
     hasEnhancedRawContent,
     sectionCount: parsedSpark?.sections ? Object.keys(parsedSpark.sections).length : 0,
   });
-  
+
   if (isEnhanced) {
     // Enhanced spark validation (8 sections)
     const sections = parsedSpark?.sections || {};
-    
+
     // Helper to check if section has meaningful content (not just comments or placeholders)
     const hasMeaningfulContent = (content) => {
       if (!content) return false;
@@ -220,15 +220,15 @@ export function buildMissionSummary(parsedSpark) {
         .trim();
       return cleaned && cleaned.length > 20;
     };
-    
+
     const checks = {
       section_1_complete: hasMeaningfulContent(sections[1]), // Spark Narrative
       section_2_complete: hasMeaningfulContent(sections[2]), // Hypothesis Formalization
-      section_3_or_4_complete: 
-        hasMeaningfulContent(sections[3]) || 
+      section_3_or_4_complete:
+        hasMeaningfulContent(sections[3]) ||
         hasMeaningfulContent(sections[4]) // Simulation or Evaluation
     };
-    
+
     const stableCount = Object.values(checks).filter(Boolean).length;
     let status = 'RED';
     if (stableCount === 3) {
@@ -236,7 +236,7 @@ export function buildMissionSummary(parsedSpark) {
     } else if (stableCount >= 2) {
       status = 'YELLOW';
     }
-    
+
     const criticalFlaws = [];
     if (!checks.section_1_complete) {
       criticalFlaws.push('Section 1 (Spark Narrative) is missing or needs more detail');
@@ -247,7 +247,7 @@ export function buildMissionSummary(parsedSpark) {
     if (!checks.section_3_or_4_complete) {
       criticalFlaws.push('Section 3 (Simulation) or Section 4 (Evaluation) needed');
     }
-    
+
     const recommendation = status === 'GREEN'
       ? 'Final Lock'
       : status === 'YELLOW'
@@ -366,7 +366,6 @@ export function buildMissionSummary(parsedSpark) {
 export function validateSparkData(sparkData) {
   const errors = [];
   const name = (sparkData?.name || '').trim();
-  const contributors = sparkData?.contributors || {};
 
   // --- Common checks ---
   if (!name || name === 'New Spark') {
@@ -638,7 +637,7 @@ export function generateSparkMarkdown(sparkData) {
     7: 'Revision Notes',
     8: 'Next Actions'
   };
-  
+
   const hasProposals = Object.keys(proposals).some(k => proposals[k]);
   if (hasProposals) {
     markdown += `# 9. Community Proposals\n\n`;
