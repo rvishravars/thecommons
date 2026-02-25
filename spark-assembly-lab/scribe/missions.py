@@ -62,33 +62,49 @@ class Mission1DataParser:
     def parse_spark_file(content: str) -> Dict[str, Any]:
         """
         Parse a Spark markdown file into structured JSON.
+        Supports both Enhanced (section-based) and Legacy (phase-based) formats.
         
         Args:
             content: Raw markdown content
             
         Returns:
-            Dictionary with spark metadata and phase content
+            Dictionary with spark metadata and phase/section content
         """
         # Extract spark metadata
         spark_id = Mission1DataParser._extract_id(content)
         spark_name = Mission1DataParser._extract_name(content)
         
-        # Parse phases
-        spark = Mission1DataParser._parse_phase(content, "spark")
-        design = Mission1DataParser._parse_phase(content, "design")
-        logic = Mission1DataParser._parse_phase(content, "logic")
+        # Detect if this is an Enhanced spark (has spark_type: in YAML)
+        is_enhanced = Mission1DataParser._is_enhanced_spark(content)
         
-        # Extract contributors
-        contributors = Mission1DataParser._extract_contributors(content, spark, design, logic)
-        
-        return {
-            "spark_id": spark_id,
-            "spark_name": spark_name,
-            "spark": asdict(spark),
-            "design": asdict(design),
-            "logic": asdict(logic),
-            "contributors": contributors
-        }
+        if is_enhanced:
+            # Parse enhanced 8-section format
+            sections = Mission1DataParser._parse_enhanced_sections(content)
+            return {
+                "spark_id": spark_id,
+                "spark_name": spark_name,
+                "is_enhanced": True,
+                "sections": sections,
+                "contributors": {"scout": "", "designer": "", "builder": ""}
+            }
+        else:
+            # Parse legacy 3-phase format
+            spark = Mission1DataParser._parse_phase(content, "spark")
+            design = Mission1DataParser._parse_phase(content, "design")
+            logic = Mission1DataParser._parse_phase(content, "logic")
+            
+            # Extract contributors
+            contributors = Mission1DataParser._extract_contributors(content, spark, design, logic)
+            
+            return {
+                "spark_id": spark_id,
+                "spark_name": spark_name,
+                "is_enhanced": False,
+                "spark": asdict(spark),
+                "design": asdict(design),
+                "logic": asdict(logic),
+                "contributors": contributors
+            }
 
     @staticmethod
     def _extract_id(content: str) -> str:
@@ -143,6 +159,59 @@ class Mission1DataParser:
                 return final_name
         
         return "Untitled Spark"
+
+    @staticmethod
+    def _is_enhanced_spark(content: str) -> bool:
+        """Detect if this is an Enhanced spark (has spark_type: in YAML frontmatter)."""
+        frontmatter_match = re.search(r'^---\s*\n([\s\S]*?)\n---', content)
+        if frontmatter_match:
+            yaml_block = frontmatter_match.group(1)
+            # Check for spark_type field (indicates enhanced format)
+            if re.search(r'^\s*spark_type:\s*', yaml_block, re.MULTILINE):
+                return True
+        return False
+
+    @staticmethod
+    def _parse_enhanced_sections(content: str) -> Dict[int, str]:
+        """
+        Parse Enhanced spark content into 8 sections.
+        
+        Args:
+            content: Full markdown content
+            
+        Returns:
+            Dictionary mapping section numbers (1-8) to their content
+        """
+        sections = {1: "", 2: "", 3: "", 4: "", 5: "", 6: "", 7: "", 8: ""}
+        
+        # Split by section headers (# 1. ..., # 2. ..., etc)
+        section_pattern = r'^#\s*(\d+)\.\s+(.+?)$'
+        
+        lines = content.split('\n')
+        current_section = None
+        current_content = []
+        
+        for line in lines:
+            # Check if this line starts a new section
+            match = re.match(section_pattern, line)
+            if match:
+                # Save previous section if any
+                if current_section is not None and current_section in sections:
+                    sections[current_section] = '\n'.join(current_content).strip()
+                
+                # Start new section
+                current_section = int(match.group(1))
+                current_content = []
+            elif current_section is not None:
+                # Add line to current section (skip empty lines at start)
+                if current_content or line.strip():
+                    current_content.append(line)
+        
+        # Save last section
+        if current_section is not None and current_section in sections:
+            sections[current_section] = '\n'.join(current_content).strip()
+        
+        return sections
 
     @staticmethod
     def _parse_phase(content: str, phase_name: str) -> PhaseContent:
@@ -259,6 +328,7 @@ class Mission2StabilityAudit:
     def audit_spark(spark_data: Dict[str, Any]) -> Tuple[AuditStatus, str, Dict[str, Any]]:
         """
         Audit a parsed Spark for stability and quality.
+        Supports both enhanced (section-based) and legacy (phase-based) sparks.
         
         Args:
             spark_data: Output from Mission1DataParser.parse_spark_file()
@@ -266,6 +336,64 @@ class Mission2StabilityAudit:
         Returns:
             Tuple of (status, scribe_report, audit_details)
         """
+        # Detect if this is an enhanced spark using the is_enhanced flag
+        is_enhanced = spark_data.get("is_enhanced", False)
+        
+        if is_enhanced:
+            return Mission2StabilityAudit._audit_enhanced_spark(spark_data)
+        else:
+            return Mission2StabilityAudit._audit_legacy_spark(spark_data)
+
+    @staticmethod
+    def _audit_enhanced_spark(spark_data: Dict[str, Any]) -> Tuple[AuditStatus, str, Dict[str, Any]]:
+        """Audit enhanced spark (8-section format)."""
+        sections = spark_data.get("sections", {})
+        
+        # Check critical sections
+        section_1_complete = bool(sections.get(1, "").strip()) and len(sections.get(1, "")) > 50
+        section_2_complete = bool(sections.get(2, "").strip()) and len(sections.get(2, "")) > 30
+        section_3_or_4_complete = (
+            (bool(sections.get(3, "").strip()) and len(sections.get(3, "")) > 30) or
+            (bool(sections.get(4, "").strip()) and len(sections.get(4, "")) > 30)
+        )
+        
+        stable_count = sum([section_1_complete, section_2_complete, section_3_or_4_complete])
+        
+        if stable_count == 3:
+            status = AuditStatus.GREEN
+            report = "✅ Fully stable across core sections (1, 2, 3/4)."
+        elif stable_count >= 2:
+            status = AuditStatus.YELLOW
+            missing = []
+            if not section_1_complete:
+                missing.append("Section 1 (Spark Narrative)")
+            if not section_2_complete:
+                missing.append("Section 2 (Hypothesis)")
+            if not section_3_or_4_complete:
+                missing.append("Section 3/4 (Simulation/Evaluation)")
+            report = f"⚠️ Needs refinement: {', '.join(missing)} incomplete."
+        else:
+            status = AuditStatus.RED
+            report = "❌ Unstable. Critical sections are missing or incomplete."
+        
+        critical_flaws = Mission2StabilityAudit._detect_flaws_enhanced(sections)
+        
+        audit_details = {
+            "stable_sections": stable_count,
+            "total_required": 3,
+            "critical_flaws": critical_flaws,
+            "checks": {
+                "section_1_complete": section_1_complete,
+                "section_2_complete": section_2_complete,
+                "section_3_or_4_complete": section_3_or_4_complete,
+            }
+        }
+        
+        return status, report, audit_details
+
+    @staticmethod
+    def _audit_legacy_spark(spark_data: Dict[str, Any]) -> Tuple[AuditStatus, str, Dict[str, Any]]:
+        """Audit legacy spark (3-phase format)."""
         spark = spark_data.get("spark", {})
         design = spark_data.get("design", {})
         logic = spark_data.get("logic", {})
@@ -296,7 +424,7 @@ class Mission2StabilityAudit:
             report = "❌ Unstable. Critical phases are missing or empty."
         
         # Check for critical flaws
-        critical_flaws = Mission2StabilityAudit._detect_flaws(spark_data)
+        critical_flaws = Mission2StabilityAudit._detect_flaws_legacy(spark_data)
         
         audit_details = {
             "stable_phases": stable_phases,
@@ -314,8 +442,23 @@ class Mission2StabilityAudit:
         return status, report, audit_details
 
     @staticmethod
-    def _detect_flaws(spark_data: Dict[str, Any]) -> List[str]:
-        """Detect critical flaws in spark content."""
+    def _detect_flaws_enhanced(sections: Dict[int, str]) -> List[str]:
+        """Detect critical flaws in enhanced spark content."""
+        flaws = []
+        
+        # Check for placeholder text
+        placeholder_text = ["<", ">", "(", ")", "Describe", "Define", "TBD"]
+        
+        if len(sections.get(1, "")) < 50:
+            flaws.append("Section 1 narrative too brief")
+        if not sections.get(2, "").strip():
+            flaws.append("Section 2 hypothesis missing")
+            
+        return flaws
+
+    @staticmethod
+    def _detect_flaws_legacy(spark_data: Dict[str, Any]) -> List[str]:
+        """Detect critical flaws in legacy spark content."""
         flaws = []
         
         return flaws

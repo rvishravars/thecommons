@@ -159,18 +159,23 @@ function extractPhaseNotes(rawPhase) {
 }
 
 function parseProposals(content) {
-  const proposals = { spark: '', design: '', logic: '' };
-  const sectionMatch = content.match(/## 📝 Community Proposals\s*\n([\s\S]*?)(?=\n---\n> \*Instructions:|$)/);
+  const proposals = { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' };
+  const sectionMatch = content.match(/# 9\. Community Proposals\s*\n([\s\S]*?)(?=\n---\n# Maturity Guide|$)/);
   if (!sectionMatch) return proposals;
 
   const section = sectionMatch[1];
-  const phases = {
-    spark: /### Proposed Addition to Spark Phase\s*\n([\s\S]*?)(?=\n###|$)/,
-    design: /### Proposed Addition to Design Phase\s*\n([\s\S]*?)(?=\n###|$)/,
-    logic: /### Proposed Addition to Logic Phase\s*\n([\s\S]*?)(?=\n###|$)/,
+  const sectionRegex = {
+    1: /## Proposed Changes to Section 1 \(Spark Narrative\)\s*\n([\s\S]*?)(?=\n---\n## Proposed Changes to Section 2|$)/,
+    2: /## Proposed Changes to Section 2 \(Hypothesis Formalization\)\s*\n([\s\S]*?)(?=\n---\n## Proposed Changes to Section 3|$)/,
+    3: /## Proposed Changes to Section 3 \(Simulation \/ Modeling Plan\)\s*\n([\s\S]*?)(?=\n---\n## Proposed Changes to Section 4|$)/,
+    4: /## Proposed Changes to Section 4 \(Evaluation Strategy\)\s*\n([\s\S]*?)(?=\n---\n## Proposed Changes to Section 5|$)/,
+    5: /## Proposed Changes to Section 5 \(Feedback & Critique\)\s*\n([\s\S]*?)(?=\n---\n## Proposed Changes to Section 6|$)/,
+    6: /## Proposed Changes to Section 6 \(Results\)\s*\n([\s\S]*?)(?=\n---\n## Proposed Changes to Section 7|$)/,
+    7: /## Proposed Changes to Section 7 \(Revision Notes\)\s*\n([\s\S]*?)(?=\n---\n## Proposed Changes to Section 8|$)/,
+    8: /## Proposed Changes to Section 8 \(Next Actions\)\s*\n([\s\S]*?)(?=\n---\n> \*\*Proposal Tracking\*\*:|$)/,
   };
 
-  Object.entries(phases).forEach(([key, regex]) => {
+  Object.entries(sectionRegex).forEach(([key, regex]) => {
     const match = section.match(regex);
     if (match) {
       proposals[key] = match[1].trim();
@@ -181,105 +186,190 @@ function parseProposals(content) {
 }
 
 export function buildMissionSummary(parsedSpark) {
-  const spark = parsedSpark?.phases?.spark || {};
-  const design = parsedSpark?.phases?.design || {};
-  const logic = parsedSpark?.phases?.logic || {};
+  // Support both enhanced (section-based) and legacy (phase-based) sparks
+  // Detect enhanced by:
+  // 1. Explicit isEnhanced flag
+  // 2. Has sections object with content
+  // 3. Has rawContent with section headers
+  const hasEnhancedSections = parsedSpark?.sections && Object.values(parsedSpark.sections).some(s => s && s.length > 0);
+  const hasEnhancedRawContent = parsedSpark?.rawContent && (
+    parsedSpark.rawContent.includes('# 1. Spark Narrative') ||
+    parsedSpark.rawContent.includes('spark_type:')
+  );
+  const isEnhanced = (parsedSpark?.isEnhanced === true) || hasEnhancedSections || hasEnhancedRawContent;
 
-  const checks = {
-    spark_complete: true,
-    design_complete: Boolean(design.blueprint && design.interface),
-    logic_complete: Boolean(logic.technical_impl && logic.clutch_test),
-    interface_snappable: Boolean(design.interface),
-    logic_testable: Boolean(logic.clutch_test),
-  };
+  console.log('🔍 buildMissionSummary debug:', {
+    isEnhanced,
+    hasIsEnhancedFlag: parsedSpark?.isEnhanced,
+    hasEnhancedSections,
+    hasEnhancedRawContent,
+    sectionCount: parsedSpark?.sections ? Object.keys(parsedSpark.sections).length : 0,
+  });
 
-  const stablePhases = [
-    checks.spark_complete,
-    checks.design_complete,
-    checks.logic_complete,
-  ].filter(Boolean).length;
+  if (isEnhanced) {
+    // Enhanced spark validation (8 sections)
+    const sections = parsedSpark?.sections || {};
 
-  let status = 'RED';
-  if (stablePhases === 3) {
-    status = 'GREEN';
-  } else if (stablePhases >= 1) {
-    status = 'YELLOW';
-  }
+    // Helper to check if section has meaningful content (not just comments or placeholders)
+    const hasMeaningfulContent = (content) => {
+      if (!content) return false;
+      const cleaned = content
+        .replace(/<!--[\s\S]*?-->/g, '') // Remove HTML comments
+        .replace(/^#+\s+.*$/gm, '') // Remove headers
+        .replace(/^-\s+.*$/gm, '') // Remove list items
+        .trim();
+      return cleaned && cleaned.length > 20;
+    };
 
-  const criticalFlaws = [];
-  if (!spark.gap) {
-    criticalFlaws.push('Missing gap definition in Spark');
-  }
-  if (!design.interface) {
-    criticalFlaws.push('Missing interface specification');
-  }
-  if (!logic.clutch_test) {
-    criticalFlaws.push('Missing Clutch Power Test');
-  }
-  if (!logic.dependencies) {
-    criticalFlaws.push('Missing dependency list');
-  }
+    const checks = {
+      section_1_complete: hasMeaningfulContent(sections[1]), // Spark Narrative
+      section_2_complete: hasMeaningfulContent(sections[2]), // Hypothesis Formalization
+      section_3_or_4_complete:
+        hasMeaningfulContent(sections[3]) ||
+        hasMeaningfulContent(sections[4]) // Simulation or Evaluation
+    };
 
-  const recommendation = status === 'GREEN'
-    ? 'Final Lock'
-    : status === 'YELLOW'
-      ? 'Request Refinement'
-      : 'Reject';
+    const stableCount = Object.values(checks).filter(Boolean).length;
+    let status = 'RED';
+    if (stableCount === 3) {
+      status = 'GREEN';
+    } else if (stableCount >= 2) {
+      status = 'YELLOW';
+    }
 
-  const scribeReport = status === 'GREEN'
-    ? `✅ Fully stable across all three phases.`
-    : status === 'YELLOW'
-      ? `⚠️ Needs refinement before merge.`
-      : `❌ Unstable. Critical phases are missing or empty.`;
+    const criticalFlaws = [];
+    if (!checks.section_1_complete) {
+      criticalFlaws.push('Section 1 (Spark Narrative) is missing or needs more detail');
+    }
+    if (!checks.section_2_complete) {
+      criticalFlaws.push('Section 2 (Hypothesis Formalization) is missing or needs more detail');
+    }
+    if (!checks.section_3_or_4_complete) {
+      criticalFlaws.push('Section 3 (Simulation) or Section 4 (Evaluation) needed');
+    }
 
-  const meritPlan = [];
-  if (parsedSpark?.contributors?.scout) {
-    meritPlan.push({
-      handle: `@${parsedSpark.contributors.scout}`,
-      role: 'Scout',
-      reward: '+5 CS',
-    });
-  }
-  if (parsedSpark?.contributors?.designer) {
-    meritPlan.push({
-      handle: `@${parsedSpark.contributors.designer}`,
-      role: 'Designer',
-      reward: status === 'GREEN' ? '+15 CS (+5 Echo bonus)' : '+15 CS',
-    });
-  }
-  if (parsedSpark?.contributors?.builder) {
-    meritPlan.push({
-      handle: `@${parsedSpark.contributors.builder}`,
-      role: 'Builder',
-      reward: status === 'GREEN' ? '+25 CS (+10 Prototype bonus)' : '+25 CS',
-    });
-  }
+    const recommendation = status === 'GREEN'
+      ? 'Final Lock'
+      : status === 'YELLOW'
+        ? 'Request Refinement'
+        : 'Reject';
 
-  return {
-    status,
-    recommendation,
-    scribe_report: scribeReport,
-    critical_flaws: criticalFlaws,
-    checks,
-    merit_plan: meritPlan,
-  };
+    const scribeReport = status === 'GREEN'
+      ? `✅ Fully stable across core sections.`
+      : status === 'YELLOW'
+        ? `⚠️ Core sections need refinement before merge.`
+        : `❌ Unstable. Critical sections are missing or incomplete.`;
+
+    const meritPlan = [];
+    if (parsedSpark?.contributors?.scout) {
+      meritPlan.push({
+        handle: `@${parsedSpark.contributors.scout}`,
+        role: 'Scout',
+        reward: '+5 CS',
+      });
+    }
+
+    return {
+      status,
+      critical_flaws: criticalFlaws,
+      recommendation,
+      scribe_report: scribeReport,
+      merit_plan: meritPlan,
+    };
+  } else {
+    // Legacy phase-based validation
+    const spark = parsedSpark?.phases?.spark || {};
+    const design = parsedSpark?.phases?.design || {};
+    const logic = parsedSpark?.phases?.logic || {};
+
+    const checks = {
+      spark_complete: true,
+      design_complete: Boolean(design.blueprint && design.interface),
+      logic_complete: Boolean(logic.technical_impl && logic.clutch_test),
+      interface_snappable: Boolean(design.interface),
+      logic_testable: Boolean(logic.clutch_test),
+    };
+
+    const stablePhases = [
+      checks.spark_complete,
+      checks.design_complete,
+      checks.logic_complete,
+    ].filter(Boolean).length;
+
+    let status = 'RED';
+    if (stablePhases === 3) {
+      status = 'GREEN';
+    } else if (stablePhases >= 1) {
+      status = 'YELLOW';
+    }
+
+    const criticalFlaws = [];
+    if (!spark.gap) {
+      criticalFlaws.push('Missing gap definition in Spark');
+    }
+    if (!design.interface) {
+      criticalFlaws.push('Missing interface specification');
+    }
+    if (!logic.clutch_test) {
+      criticalFlaws.push('Missing Clutch Power Test');
+    }
+    if (!logic.dependencies) {
+      criticalFlaws.push('Missing dependency list');
+    }
+
+    const recommendation = status === 'GREEN'
+      ? 'Final Lock'
+      : status === 'YELLOW'
+        ? 'Request Refinement'
+        : 'Reject';
+
+    const scribeReport = status === 'GREEN'
+      ? `✅ Fully stable across all three phases.`
+      : status === 'YELLOW'
+        ? `⚠️ Needs refinement before merge.`
+        : `❌ Unstable. Critical phases are missing or empty.`;
+
+    const meritPlan = [];
+    if (parsedSpark?.contributors?.scout) {
+      meritPlan.push({
+        handle: `@${parsedSpark.contributors.scout}`,
+        role: 'Scout',
+        reward: '+5 CS',
+      });
+    }
+    if (parsedSpark?.contributors?.designer) {
+      meritPlan.push({
+        handle: `@${parsedSpark.contributors.designer}`,
+        role: 'Designer',
+        reward: status === 'GREEN' ? '+15 CS (+5 Echo bonus)' : '+15 CS',
+      });
+    }
+    if (parsedSpark?.contributors?.builder) {
+      meritPlan.push({
+        handle: `@${parsedSpark.contributors.builder}`,
+        role: 'Builder',
+        reward: status === 'GREEN' ? '+25 CS (+10 Prototype bonus)' : '+25 CS',
+      });
+    }
+
+    return {
+      status,
+      critical_flaws: criticalFlaws,
+      recommendation,
+      scribe_report: scribeReport,
+      merit_plan: meritPlan,
+    };
+  }
 }
 
 
 export function validateSparkData(sparkData) {
   const errors = [];
   const name = (sparkData?.name || '').trim();
-  const contributors = sparkData?.contributors || {};
-
-  const handlePattern = /^[A-Za-z0-9-]+$/;
 
   // --- Common checks ---
   if (!name || name === 'New Spark') {
     errors.push('Please give your spark a descriptive name');
-  }
-
-  if (!contributors.scout || !handlePattern.test(contributors.scout.replace(/^@/, ''))) {
-    errors.push('Spark requires a valid scout handle');
   }
 
   // --- Enhanced spark checks (sections-based) ---
@@ -535,17 +625,30 @@ export function generateSparkMarkdown(sparkData) {
 
   markdown += `---\n\n`;
 
-  // Community Proposals
-  const hasProposals = Object.keys(phases).some(k => phases[k].proposal || (sparkData.proposals && sparkData.proposals[k]));
+  // Community Proposals (Section-level contributions from non-owners)
+  const proposals = sparkData.proposals || {};
+  const sectionNames = {
+    1: 'Spark Narrative',
+    2: 'Hypothesis Formalization',
+    3: 'Simulation / Modeling Plan',
+    4: 'Evaluation Strategy',
+    5: 'Feedback & Critique',
+    6: 'Results',
+    7: 'Revision Notes',
+    8: 'Next Actions'
+  };
+
+  const hasProposals = Object.keys(proposals).some(k => proposals[k]);
   if (hasProposals) {
-    markdown += `## 📝 Community Proposals\n\n`;
-    Object.keys(phases).forEach(key => {
-      const proposal = phases[key].proposal || (sparkData.proposals && sparkData.proposals[key]);
-      if (proposal) {
-        markdown += `### Proposed Addition to ${key.charAt(0).toUpperCase() + key.slice(1)} Phase\n`;
-        markdown += `${proposal.trim()}\n\n`;
+    markdown += `# 9. Community Proposals\n\n`;
+    for (let i = 1; i <= 8; i++) {
+      if (proposals[i]) {
+        markdown += `## Proposed Changes to Section ${i} (${sectionNames[i]})\n`;
+        markdown += `${proposals[i].trim()}\n\n`;
+        markdown += `---\n\n`;
       }
-    });
+    }
+    markdown += `> **Proposal Tracking**: Each proposal is tracked with contributor attribution for Echo Bonus (+5 CS) and Validation Bonus (+10 CS) rewards per the Manifesto.\n\n`;
     markdown += `---\n\n`;
   }
 
