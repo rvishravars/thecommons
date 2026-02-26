@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, FileText, Zap, RefreshCw, Search, X, Globe, FolderGit2, ChevronDown, ChevronUp, GitPullRequest } from 'lucide-react';
+import { FileText, Zap, RefreshCw, Search, X, Globe, FolderGit2, ChevronDown, ChevronUp, GitPullRequest } from 'lucide-react';
 import { buildMissionSummary, parseSparkFile } from '../utils/sparkParser';
 import { getStoredToken, loadSparksFromGitHub } from '../utils/github';
 import RepoInput from './RepoInput';
 import GlobalSparkSearch from './GlobalSparkSearch';
 
-export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark, repoUrl, branch = 'main', onRepoChange, onBranchChange, currentSparkData, onPRRefresh, onPermissionChange, user }) {
+export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, branch = 'main', onRepoChange, onBranchChange, currentSparkData, onPRRefresh, onPermissionChange }) {
   console.log('🚀 SparkSelector component mounted!');
   const [activeTab, setActiveTab] = useState('repo'); // 'repo' or 'global'
   const [sparks, setSparks] = useState([]);
@@ -295,28 +295,13 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         />
       ) : (
         <>
-          <RepoInput 
-            onRepoChange={onRepoChange} 
+          <RepoInput
+            onRepoChange={onRepoChange}
             currentRepo={repoUrl}
             currentBranch={branch}
             onBranchChange={onBranchChange}
           />
 
-          <div className="p-4 border-b theme-border">
-            <button
-              onClick={onNewSpark}
-              disabled={!user}
-              title={!user ? "Please login with GitHub first" : "Create a new spark"}
-              className={`w-full flex items-center justify-center space-x-2 rounded-lg px-4 py-3 text-sm font-semibold transition-colors
-                ${user
-                  ? 'bg-design-600 hover:bg-design-700'
-                  : 'bg-design-600/50 cursor-not-allowed opacity-50'
-                }`}
-            >
-              <Plus className="h-4 w-4" />
-              <span>New Spark</span>
-            </button>
-          </div>
 
           {/* Search Bar */}
           <div className="px-4 pt-4 pb-2">
