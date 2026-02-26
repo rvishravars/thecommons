@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import SparkSelector from './components/SparkSelector';
 import AssemblyCanvas from './components/AssemblyCanvas';
 import Header from './components/Header';
-import { Sparkles, X } from 'lucide-react';
+import { Sparkles, X, Plus } from 'lucide-react';
 import { generateSparkMarkdown } from './utils/sparkParser';
 import { getStoredUserInfo, parseRepoUrl } from './utils/github';
 import { parseSparkFile } from './utils/sparkParser';
@@ -22,6 +22,10 @@ function AppMain() {
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [prRefreshCallback, setPrRefreshCallback] = useState(null);
   const [canPush, setCanPush] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    const stored = localStorage.getItem('sparkSidebarCollapsed');
+    return stored === null ? true : stored === 'true';
+  });
 
   const handlePermissionChange = (allowed) => {
     // Only allow push if user has repo permissions AND is the spark owner
@@ -114,7 +118,7 @@ function AppMain() {
     // Parse the enhanced template to get the structure
     const parsedTemplate = parseSparkFile(ENHANCED_SPARK_TEMPLATE);
 
-    setSparkData({
+    const initialData = {
       name: 'New Spark',
       markedForDeletion: false,
       isEnhanced: true,
@@ -124,9 +128,10 @@ function AppMain() {
       proposals: parsedTemplate.proposals || { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' },
       sourcePath: null,
       rawContent: ENHANCED_SPARK_TEMPLATE
-    });
+    };
 
-    setOriginalSparkData(null);
+    setSparkData(initialData);
+    setOriginalSparkData(JSON.parse(JSON.stringify(initialData)));
     setIsMobileMenuOpen(false);
     setShowTemplateSelector(false);
   };
@@ -158,6 +163,11 @@ function AppMain() {
         user={user}
         onUserChange={setUser}
         onGoHome={handleGoHome}
+        onSidebarToggle={() => {
+          const newState = !isSidebarCollapsed;
+          setIsSidebarCollapsed(newState);
+          localStorage.setItem('sparkSidebarCollapsed', newState);
+        }}
       />
 
       <div className="flex flex-1 overflow-hidden relative">
@@ -171,10 +181,11 @@ function AppMain() {
 
         {/* Sidebar: Spark Selector */}
         <aside className={`
-            w-80 border-r theme-border theme-surface overflow-y-auto
+            theme-border theme-surface overflow-y-auto
             fixed lg:static inset-y-0 left-0 z-50
-            transform transition-transform duration-300 ease-in-out
+            transform transition-all duration-300 ease-in-out
             ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            ${isSidebarCollapsed ? 'lg:-translate-x-full lg:w-0 lg:opacity-0' : 'lg:translate-x-0 w-80 border-r'}
             top-[73px] lg:top-0
           `}>
           {/* Mobile Close Button */}
@@ -212,6 +223,7 @@ function AppMain() {
               isReadOnly={!user}
               onPRCreated={() => prRefreshCallback?.()}
               canPush={canPush}
+              onNewSpark={handleNewSpark}
             />
           ) : (
             <div className="flex h-full items-center justify-center p-4">
@@ -224,10 +236,11 @@ function AppMain() {
                   Choose from existing sparks or start building from scratch
                 </p>
                 <button
-                  onClick={() => setIsMobileMenuOpen(true)}
-                  className="mt-4 lg:hidden px-4 py-2 bg-design-600 rounded-lg text-sm font-semibold hover:bg-design-700 transition-colors"
+                  onClick={handleNewSpark}
+                  className="mt-4 px-6 py-3 bg-design-600 rounded-lg text-sm font-semibold hover:bg-design-700 transition-colors flex items-center gap-2 mx-auto"
                 >
-                  Browse Sparks
+                  <Plus className="h-4 w-4" />
+                  New Spark
                 </button>
               </div>
             </div>

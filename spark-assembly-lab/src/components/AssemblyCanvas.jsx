@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, Copy, Eye, Brain, GitPullRequest, RotateCcw, Trash2, MoreVertical } from 'lucide-react';
+import { Download, Copy, Eye, Brain, AlertCircle, GitPullRequest, RotateCcw, Trash2, MoreVertical, Plus } from 'lucide-react';
 import MarkdownPreview from './MarkdownPreview';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -23,9 +23,10 @@ const ENHANCED_SECTIONS_CONFIG = {
   8: { title: '8. Next Actions', description: 'Concrete steps forward', color: 'spark' }
 };
 
-export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly, onPRCreated, canPush = true }) {
+export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly, onPRCreated, canPush = true, onNewSpark }) {
   const [showPreview, setShowPreview] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [improveMode, setImproveMode] = useState('quiz');
   const [showPRTracker, setShowPRTracker] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -91,14 +92,10 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
   };
 
   const stability = calculateStability();
-  // Don't validate new sparks during editing, only check when submitting/downloading
-  const isNewTemplate = sparkData?.name === 'New Spark';
-  const validation = (!originalSparkData || isNewTemplate)
-    ? { valid: true, errors: [] }
-    : validateSparkData(sparkData);
+  const validation = validateSparkData(sparkData);
   const isDirty = originalSparkData
     ? JSON.stringify(sparkData) !== JSON.stringify(originalSparkData)
-    : false;
+    : true;
 
   const handleEditDone = () => {
     const result = validateSparkData(sparkData);
@@ -340,6 +337,18 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Primary Toggle: Create New Spark */}
+            <button
+              onClick={onNewSpark}
+              className="flex items-center justify-center rounded-lg bg-design-600 hover:bg-design-700 p-1.5 sm:p-2 transition-colors flex-shrink-0 group relative"
+              title="Create New Spark"
+            >
+              <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+              <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-[70] border border-white/10">
+                New Spark
+              </span>
+            </button>
+
             {/* Primary Toggle: Preview/Edit */}
             <button
               onClick={() => setShowPreview(!showPreview)}
@@ -352,8 +361,8 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
             {/* Primary Action: Submit */}
             <button
               onClick={handleSubmit}
-              disabled={isSubmitting || isReadOnly}
-              className={`flex items-center space-x-1 sm:space-x-2 rounded-lg bg-logic-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-logic-700 transition-colors disabled:opacity-60 whitespace-nowrap flex-shrink-0 ${isReadOnly ? 'cursor-not-allowed grayscale' : ''}`}
+              disabled={isSubmitting || isReadOnly || !isDirty}
+              className={`flex items-center space-x-1 sm:space-x-2 rounded-lg bg-logic-600 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold hover:bg-logic-700 transition-colors disabled:opacity-60 whitespace-nowrap flex-shrink-0 ${isReadOnly || !isDirty ? 'cursor-not-allowed grayscale' : ''}`}
             >
               <GitPullRequest className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>{canPush ? 'Submit' : 'Propose'}</span>
@@ -378,12 +387,21 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                   />
                   <div className="absolute right-0 mt-2 w-48 rounded-xl theme-panel border theme-border shadow-2xl z-[60] py-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                     <button
-                      onClick={() => { setShowQuiz(true); setShowDropdown(false); }}
+                      onClick={() => { setImproveMode('quiz'); setShowQuiz(true); setShowDropdown(false); }}
                       disabled={!user}
                       className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm hover:bg-design-500/10 transition-colors disabled:opacity-50"
                     >
                       <Brain className="h-4 w-4 text-design-400" />
-                      <span>Improve</span>
+                      <span>Quiz</span>
+                    </button>
+
+                    <button
+                      onClick={() => { setImproveMode('critique'); setShowQuiz(true); setShowDropdown(false); }}
+                      disabled={!user}
+                      className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm hover:bg-design-500/10 transition-colors disabled:opacity-50"
+                    >
+                      <AlertCircle className="h-4 w-4 text-design-400" />
+                      <span>Critique</span>
                     </button>
 
                     <button
@@ -562,7 +580,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
                 );
               }
 
-              // No section selected yet — show a picker panel
+              // No section selected yet — show a picker panel and news pane
               return (
                 <div className="flex-1 flex flex-col rounded-xl border-2 border-white/10 theme-panel-soft min-w-0">
                   <div className="px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl bg-white/5">
@@ -591,7 +609,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
           </div>
 
           {/* Quiz Modal */}
-          {showQuiz && <QuizModal sparkData={sparkData} onClose={() => setShowQuiz(false)} />}
+          {showQuiz && <QuizModal sparkData={sparkData} onClose={() => setShowQuiz(false)} improveMode={improveMode} />}
 
           {/* Cool PR Confirmation Modal */}
           {showConfirmation && (

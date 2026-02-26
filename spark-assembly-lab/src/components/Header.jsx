@@ -6,7 +6,7 @@ const THEME_OPTIONS = [
   { value: 'light-theme', label: 'Light Theme' },
 ];
 
-export default function Header({ theme, onThemeChange, onMenuToggle, user, onUserChange, onGoHome }) {
+export default function Header({ theme, onThemeChange, onMenuToggle, onSidebarToggle, user, onUserChange, onGoHome }) {
   return (
     <header className="border-b theme-border theme-surface px-4 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-between">
@@ -16,6 +16,15 @@ export default function Header({ theme, onThemeChange, onMenuToggle, user, onUse
             onClick={onMenuToggle}
             className="lg:hidden p-2 rounded-lg theme-muted-hover -ml-2"
             aria-label="Toggle menu"
+          >
+            <Menu className="h-6 w-6" />
+          </button>
+
+          {/* Desktop Sidebar Toggle */}
+          <button
+            onClick={onSidebarToggle}
+            className="hidden lg:flex p-2 rounded-lg theme-muted-hover -ml-2"
+            aria-label="Toggle sidebar"
           >
             <Menu className="h-6 w-6" />
           </button>

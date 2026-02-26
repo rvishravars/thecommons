@@ -295,28 +295,13 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, onNewSpark
         />
       ) : (
         <>
-          <RepoInput 
-            onRepoChange={onRepoChange} 
+          <RepoInput
+            onRepoChange={onRepoChange}
             currentRepo={repoUrl}
             currentBranch={branch}
             onBranchChange={onBranchChange}
           />
 
-          <div className="p-4 border-b theme-border">
-            <button
-              onClick={onNewSpark}
-              disabled={!user}
-              title={!user ? "Please login with GitHub first" : "Create a new spark"}
-              className={`w-full flex items-center justify-center space-x-2 rounded-lg px-4 py-3 text-sm font-semibold transition-colors
-                ${user
-                  ? 'bg-design-600 hover:bg-design-700'
-                  : 'bg-design-600/50 cursor-not-allowed opacity-50'
-                }`}
-            >
-              <Plus className="h-4 w-4" />
-              <span>New Spark</span>
-            </button>
-          </div>
 
           {/* Search Bar */}
           <div className="px-4 pt-4 pb-2">

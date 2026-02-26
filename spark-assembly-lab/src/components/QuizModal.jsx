@@ -48,7 +48,7 @@ const clearApiKey = (provider) => {
   }
 };
 
-export default function QuizModal({ sparkData, onClose }) {
+export default function QuizModal({ sparkData, onClose, improveMode = 'quiz' }) {
   const [selectedProvider, setSelectedProvider] = useState('gemini');
   const [apiKey, setApiKey] = useState('');
   const [saveKeyToStorage, setSaveKeyToStorage] = useState(false);
@@ -57,7 +57,7 @@ export default function QuizModal({ sparkData, onClose }) {
   const [openaiModel, setOpenaiModel] = useState(OPENAI_MODELS[0].id);
   const [modelsLoading, setModelsLoading] = useState(false);
   const [modelsError, setModelsError] = useState(null);
-  const [quizMode, setQuizMode] = useState('spark');
+  const [quizMode, setQuizMode] = useState('1');
   const [quizStarted, setQuizStarted] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -126,10 +126,18 @@ export default function QuizModal({ sparkData, onClose }) {
 
   const buildGeminiPrompt = () => {
     const sparkContent = generateSparkMarkdown(sparkData);
+    const focusMap = {
+      '1': 'Spark Narrative',
+      '2': 'Hypothesis Formalization',
+      '3': 'Simulation / Modeling Plan',
+      '4': 'Evaluation Strategy'
+    };
+    const focusTitle = focusMap[quizMode] || 'GENERAL';
+
     return `You are an expert quiz generator for TheCommons Spark Assembly Lab.
 
 This quiz is a reflection exercise to strengthen the spark. There are no right answers.
-Focus the questions on: ${quizMode.toUpperCase()}.
+Focus the questions on: ${focusTitle}.
 
 Generate 5 multiple-choice quiz questions based on the following Spark document. Questions should test understanding of:
 1. The problem/gap identified in the SPARK phase
@@ -165,9 +173,17 @@ Make questions engaging and educational.`;
       return `${idx + 1}. ${q.question}\nSelected: ${selectedText}`;
     }).join('\n\n');
 
-    return `You are a Spark mentor. Provide a detailed feedback report based on the user's answers.
+    const focusMap = {
+      '1': 'Spark Narrative',
+      '2': 'Hypothesis Formalization',
+      '3': 'Simulation / Modeling Plan',
+      '4': 'Evaluation Strategy'
+    };
+    const focusTitle = focusMap[quizMode] || 'GENERAL';
 
-Focus area: ${quizMode.toUpperCase()}.
+    return `You are a Spark mentor. Provide a detailed and comprehensive feedback report based on the user's answers.
+
+Focus area: ${focusTitle}.
 There are no right or wrong answers. The goal is to strengthen the spark.
 
 Spark Name: ${sparkData.name}
@@ -178,13 +194,42 @@ ${sparkContent.slice(0, 3000)}
 User Answers:
 ${answerLines}
 
-Return a concise, structured feedback report with:
-- Strengths you observe
-- Risks or gaps to consider
-- Suggested next steps
-- One clarifying question to ask the team
+Return a thorough, structured feedback report with:
+- Detailed strengths you observe
+- Specific risks or gaps to consider
+- Concrete suggested next steps
+- One insightful clarifying question to ask the team
 
-Write in plain text (no JSON).`;
+Ensure the report is complete and does not cut off. Write in plain text.`;
+  };
+
+  const buildCritiquePrompt = () => {
+    const sparkContent = generateSparkMarkdown(sparkData);
+    const focusMap = {
+      '1': 'Spark Narrative',
+      '2': 'Hypothesis Formalization',
+      '3': 'Simulation / Modeling Plan',
+      '4': 'Evaluation Strategy'
+    };
+    const focusTitle = focusMap[quizMode] || 'GENERAL';
+
+    return `You are a Spark mentor. Provide a detailed, in-depth critique and comprehensive improvement suggestions for the following spark.
+
+Focus area: ${focusTitle}.
+The goal is to strengthen the spark's narrative, design, or logic.
+
+Spark Name: ${sparkData.name}
+
+Spark Content:
+${sparkContent.slice(0, 3000)}
+
+Return a thorough, structured feedback report with:
+- Strengths you observe in detail
+- Critical gaps or risks identified
+- Direct, actionable improvement suggestions for the content
+- One "stress-test" question to push the idea further
+
+Ensure the response is fully developed and complete. Write in plain text.`;
   };
 
   const generateGeminiQuiz = async () => {
@@ -301,7 +346,7 @@ IMPORTANT: Return ONLY a valid JSON array. Do not include any prose, markdown, o
         ],
         generationConfig: {
           temperature: 0.4,
-          maxOutputTokens: 1200,
+          maxOutputTokens: 4000,
           responseMimeType: 'text/plain',
         },
       }),
@@ -385,13 +430,58 @@ IMPORTANT: Return ONLY a valid JSON array. Do not include any prose, markdown, o
 
     try {
       if (!apiKey || apiKey.trim() === '') {
-        throw new Error(`Please enter your ${selectedProvider === 'openai' ? 'OpenAI' : 'Gemini'} API key to generate the quiz.`);
+        throw new Error(`Please enter your ${selectedProvider === 'openai' ? 'OpenAI' : 'Gemini'} API key to proceed.`);
       }
 
       if (saveKeyToStorage) {
         saveApiKey(selectedProvider, apiKey);
       }
 
+      if (improveMode === 'critique') {
+        setShowResults(true);
+        setSummaryLoading(true);
+        setSummary('');
+
+        const prompt = buildCritiquePrompt();
+        let report = '';
+
+        if (selectedProvider === 'openai') {
+          const response = await fetch('/api/quiz/summary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              provider: 'openai',
+              apiKey,
+              model: openaiModel,
+              prompt,
+            }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data?.error || 'OpenAI request failed');
+          report = data.summary || '';
+        } else {
+          // Gemini
+          const modelPath = selectedModel.startsWith('models/') ? selectedModel : `models/${selectedModel}`;
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/${modelPath}:generateContent?key=${encodeURIComponent(apiKey)}`;
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.4, maxOutputTokens: 4000, responseMimeType: 'text/plain' },
+            }),
+          });
+          const responseBody = await response.json();
+          if (!response.ok) throw new Error(responseBody?.error?.message || 'Gemini API request failed');
+          report = responseBody?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+
+        setSummary(report);
+        setSummaryLoading(false);
+        return;
+      }
+
+      // Default Quiz Mode
       const quiz = selectedProvider === 'openai'
         ? await generateOpenAIQuiz()
         : await generateGeminiQuiz();
@@ -555,19 +645,17 @@ IMPORTANT: Return ONLY a valid JSON array. Do not include any prose, markdown, o
                 <button
                   key={idx}
                   onClick={() => handleAnswerSelect(currentQuestion, idx)}
-                  className={`w-full text-left p-3 sm:p-4 rounded-lg border-2 transition-all ${
-                    selectedAnswers[currentQuestion] === idx
-                      ? 'border-design-500 bg-design-900/20'
-                      : 'theme-border theme-border-hover theme-card'
-                  }`}
+                  className={`w-full text-left p-3 sm:p-4 rounded-lg border-2 transition-all ${selectedAnswers[currentQuestion] === idx
+                    ? 'border-design-500 bg-design-900/20'
+                    : 'theme-border theme-border-hover theme-card'
+                    }`}
                 >
                   <div className="flex items-center space-x-3">
                     <div
-                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                        selectedAnswers[currentQuestion] === idx
-                          ? 'border-design-500 bg-design-500'
-                          : 'theme-border'
-                      }`}
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedAnswers[currentQuestion] === idx
+                        ? 'border-design-500 bg-design-500'
+                        : 'theme-border'
+                        }`}
                     >
                       {selectedAnswers[currentQuestion] === idx && (
                         <div className="w-3 h-3 rounded-full bg-white"></div>
@@ -604,8 +692,10 @@ IMPORTANT: Return ONLY a valid JSON array. Do not include any prose, markdown, o
           <div className="flex items-center space-x-3">
             <Brain className="h-8 w-8" />
             <div>
-              <h2 className="text-2xl font-bold">Improve Spark</h2>
-              <p className="text-sm opacity-90">Get AI feedback to strengthen your spark</p>
+              <h2 className="text-2xl font-bold">{improveMode === 'quiz' ? 'Improve Spark' : 'Critique Spark'}</h2>
+              <p className="text-sm opacity-90">
+                {improveMode === 'quiz' ? 'Get AI feedback to strengthen your spark' : 'Get direct AI suggestions to strengthen your spark'}
+              </p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/10 transition-colors">
@@ -628,11 +718,10 @@ IMPORTANT: Return ONLY a valid JSON array. Do not include any prose, markdown, o
                 <button
                   key={provider.id}
                   onClick={() => setSelectedProvider(provider.id)}
-                  className={`text-left p-3 rounded-lg border-2 transition-all ${
-                    selectedProvider === provider.id
-                      ? 'border-design-500 bg-design-900/20'
-                      : 'theme-border theme-border-hover theme-card'
-                  }`}
+                  className={`text-left p-3 rounded-lg border-2 transition-all ${selectedProvider === provider.id
+                    ? 'border-design-500 bg-design-900/20'
+                    : 'theme-border theme-border-hover theme-card'
+                    }`}
                 >
                   <div className="text-sm font-semibold">{provider.label}</div>
                   <div className="text-xs theme-subtle mt-1">{provider.description}</div>
@@ -642,21 +731,21 @@ IMPORTANT: Return ONLY a valid JSON array. Do not include any prose, markdown, o
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-semibold mb-2">Quiz Focus</label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <label className="block text-sm font-semibold mb-2">Focus Area</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { id: 'spark', label: 'Strengthen Spark', description: 'Clarify the gap and why it matters' },
-                { id: 'design', label: 'Improve Design', description: 'Refine the novel core and blueprint' },
-                { id: 'logic', label: 'Tighten Logic', description: 'Stress-test implementation details' },
+                { id: '1', label: '1. Spark Narrative', description: 'The core story of the idea' },
+                { id: '2', label: '2. Hypothesis', description: 'Falsifiable statement' },
+                { id: '3', label: '3. Simulation Plan', description: 'Test the idea before implementation' },
+                { id: '4', label: '4. Evaluation', description: 'Define how evidence is gathered' },
               ].map((option) => (
                 <button
                   key={option.id}
                   onClick={() => setQuizMode(option.id)}
-                  className={`text-left p-3 rounded-lg border-2 transition-all ${
-                    quizMode === option.id
+                  className={`text-left p-3 rounded-lg border-2 transition-all ${quizMode === option.id
                       ? 'border-design-500 bg-design-900/20'
                       : 'theme-border theme-border-hover theme-card'
-                  }`}
+                    }`}
                 >
                   <div className="text-sm font-semibold">{option.label}</div>
                   <div className="text-xs theme-subtle mt-1">{option.description}</div>
@@ -775,7 +864,7 @@ IMPORTANT: Return ONLY a valid JSON array. Do not include any prose, markdown, o
             disabled={!apiKey || loading}
             className="w-full px-6 py-3 bg-design-600 hover:bg-design-700 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Generating Quiz...' : 'Start Quiz'}
+            {loading ? (improveMode === 'quiz' ? 'Generating Quiz...' : 'Generating Critique...') : (improveMode === 'quiz' ? 'Start Quiz' : 'Get Suggestions')}
           </button>
         </div>
       </div>
