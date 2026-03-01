@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Download, Copy, Eye, Brain, AlertCircle, GitPullRequest, RotateCcw, Trash2, MoreVertical, Plus } from 'lucide-react';
 import MarkdownPreview from './MarkdownPreview';
 import ReactMarkdown from 'react-markdown';
@@ -11,6 +11,7 @@ import PRTracker from './PRTracker';
 import { generateSparkMarkdown, validateSparkData } from '../utils/sparkParser';
 import { useToast } from '../utils/ToastContext';
 import { getStoredToken, getStoredUserInfo, parseRepoUrl } from '../utils/github';
+import ContributorsList from './ContributorsList';
 
 const ENHANCED_SECTIONS_CONFIG = {
   1: { title: '1. Spark Narrative', description: 'The core story of the idea', color: 'spark' },
@@ -36,6 +37,8 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
   const [editingSection, setEditingSection] = useState(null);
   const [sectionDraft, setSectionDraft] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const [contributors, setContributors] = useState([]);
+  const [contributorsLoading, setContributorsLoading] = useState(false);
   const toast = useToast();
   const user = getStoredUserInfo();
   const isOwner = user && (() => {
@@ -50,6 +53,38 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
       user.login?.toLowerCase() === repoOwner.toLowerCase()
     );
   })();
+
+  // Load contributors for the selected spark
+  useEffect(() => {
+    if (!sparkData?.sourcePath || !repoUrl) {
+      setContributors([]);
+      return;
+    }
+
+    const controller = new AbortController();
+    const loadContributors = async () => {
+      setContributorsLoading(true);
+      try {
+        const response = await fetch(`/api/contributors?repo=${encodeURIComponent(repoUrl)}&path=${encodeURIComponent(sparkData.sourcePath)}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error('Failed to load contributors');
+        }
+        const data = await response.json();
+        setContributors(data.contributors || []);
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        console.error('Failed to load contributors:', err);
+        setContributors([]);
+      } finally {
+        setContributorsLoading(false);
+      }
+    };
+
+    loadContributors();
+    return () => controller.abort();
+  }, [sparkData?.sourcePath, repoUrl]);
 
 
   const handleDownload = () => {
@@ -308,6 +343,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
               className={`text-xl sm:text-2xl font-bold bg-transparent border border-transparent hover:border-design-400/50 focus:border-design-500 focus:outline-none focus:ring-2 focus:ring-design-500 rounded px-2 -ml-2 w-full transition-colors ${isReadOnly ? 'cursor-not-allowed opacity-80' : ''}`}
               placeholder="Spark Name"
             />
+            <ContributorsList contributors={contributors} loading={contributorsLoading} />
             <div className="mt-1 flex items-center space-x-2">
               {(() => {
                 const total = (sparkData.activeSections || [1]).length;
