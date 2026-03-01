@@ -4,7 +4,6 @@ import { buildMissionSummary, parseSparkFile } from '../utils/sparkParser';
 import { getStoredToken, loadSparksFromGitHub } from '../utils/github';
 import RepoInput from './RepoInput';
 import GlobalSparkSearch from './GlobalSparkSearch';
-import ContributorsList from './ContributorsList';
 
 export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, branch = 'main', onRepoChange, onBranchChange, currentSparkData, onPRRefresh, onPermissionChange }) {
   console.log('🚀 SparkSelector component mounted!');
@@ -22,9 +21,6 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, b
   const [searchQuery, setSearchQuery] = useState('');
   const [isScribeSummaryCollapsed, setIsScribeSummaryCollapsed] = useState(true);
   const [isSparksListCollapsed, setIsSparksListCollapsed] = useState(true);
-  const [isContributorsCollapsed, setIsContributorsCollapsed] = useState(true);
-  const [contributors, setContributors] = useState([]);
-  const [contributorsLoading, setContributorsLoading] = useState(false);
   const hasRegisteredRefresh = useRef(false);
 
   // Expose refresh function to parent
@@ -265,38 +261,6 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, b
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSpark, repoUrl, refreshToken]);
 
-  // Load contributors for the selected spark
-  useEffect(() => {
-    if (!selectedSpark?.sourcePath || !repoUrl) {
-      setContributors([]);
-      return;
-    }
-
-    const controller = new AbortController();
-    const loadContributors = async () => {
-      setContributorsLoading(true);
-      try {
-        const response = await fetch(`/api/contributors?repo=${encodeURIComponent(repoUrl)}&path=${encodeURIComponent(selectedSpark.sourcePath)}`, {
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          throw new Error('Failed to load contributors');
-        }
-        const data = await response.json();
-        setContributors(data.contributors || []);
-      } catch (err) {
-        if (err.name === 'AbortError') return;
-        console.error('Failed to load contributors:', err);
-        setContributors([]);
-      } finally {
-        setContributorsLoading(false);
-      }
-    };
-
-    loadContributors();
-    return () => controller.abort();
-  }, [selectedSpark, repoUrl]);
-
   return (
     <div className="flex flex-col h-full">
       {/* Tab Navigation */}
@@ -476,13 +440,6 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, b
                 )}
               </div>
             )}
-
-            <ContributorsList
-              contributors={contributors}
-              loading={contributorsLoading}
-              isCollapsed={isContributorsCollapsed}
-              onToggle={() => setIsContributorsCollapsed(!isContributorsCollapsed)}
-            />
 
             <div className="rounded-lg border theme-border theme-card-soft mb-3">
               <div
