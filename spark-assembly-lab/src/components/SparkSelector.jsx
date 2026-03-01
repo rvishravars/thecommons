@@ -22,7 +22,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, b
   const [searchQuery, setSearchQuery] = useState('');
   const [isScribeSummaryCollapsed, setIsScribeSummaryCollapsed] = useState(true);
   const [isSparksListCollapsed, setIsSparksListCollapsed] = useState(true);
-  const [isContributorsCollapsed, setIsContributorsCollapsed] = useState(false);
+  const [isContributorsCollapsed, setIsContributorsCollapsed] = useState(true);
   const [contributors, setContributors] = useState([]);
   const [contributorsLoading, setContributorsLoading] = useState(false);
   const hasRegisteredRefresh = useRef(false);
