@@ -603,6 +603,56 @@ def get_prs_for_spark():
         return jsonify({"error": str(err)}), 502
 
 
+@app.get("/api/contributors")
+def get_contributors():
+    repo_input = request.args.get("repo")
+    spark_path = request.args.get("path")
+    if not repo_input or not spark_path:
+        return jsonify({"error": "repo and path are required"}), 400
+
+    try:
+        parsed = parse_repo_url(repo_input)
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 400
+
+    owner = parsed["owner"]
+    repo = parsed["repo"]
+    headers = build_github_headers()
+    
+    # Filter for contributors who have raised issues/proposals related to the spark
+    spark_name = spark_path.split("/")[-1].replace(".spark.md", "")
+    
+    # We fetch ALL issues to get historical contributors as well
+    url = f"https://api.github.com/repos/{owner}/{repo}/issues?state=all&per_page=100"
+    
+    try:
+        issues = fetch_json(url, headers)
+        contributors_map = {}
+        
+        for issue in issues:
+            # Skip actual Pull Requests to focus on proposal contributors
+            if issue.get("pull_request"):
+                continue
+                
+            title = issue.get("title", "").lower()
+            body = issue.get("body", "").lower() if issue.get("body") else ""
+            
+            if spark_name.lower() in title or spark_name.lower() in body:
+                user = issue.get("user")
+                if user:
+                    login = user.get("login")
+                    if login not in contributors_map:
+                        contributors_map[login] = {
+                            "login": login,
+                            "avatar_url": user.get("avatar_url"),
+                            "html_url": user.get("html_url")
+                        }
+        
+        return jsonify({"contributors": list(contributors_map.values())})
+    except Exception as err:
+        return jsonify({"error": str(err)}), 502
+
+
 @app.post("/api/submit")
 def submit_spark():
     payload = request.get_json(silent=True) or {}
