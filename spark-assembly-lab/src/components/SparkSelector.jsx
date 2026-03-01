@@ -22,6 +22,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, b
   const [searchQuery, setSearchQuery] = useState('');
   const [isScribeSummaryCollapsed, setIsScribeSummaryCollapsed] = useState(true);
   const [isSparksListCollapsed, setIsSparksListCollapsed] = useState(true);
+  const [isContributorsCollapsed, setIsContributorsCollapsed] = useState(false);
   const [contributors, setContributors] = useState([]);
   const [contributorsLoading, setContributorsLoading] = useState(false);
   const hasRegisteredRefresh = useRef(false);
@@ -479,6 +480,8 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, b
             <ContributorsList
               contributors={contributors}
               loading={contributorsLoading}
+              isCollapsed={isContributorsCollapsed}
+              onToggle={() => setIsContributorsCollapsed(!isContributorsCollapsed)}
             />
 
             <div className="rounded-lg border theme-border theme-card-soft mb-3">
