@@ -114,15 +114,35 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, b
         // Handle errors
         const errorMsg = result.error || 'Failed to load sparks';
 
-        if (errorMsg.includes('not found') || errorMsg.includes("doesn't exist")) {
-          setErrorType('repo-not-found');
-          setError('Repository not found. Please check the URL and try again.');
-        } else if (errorMsg.includes('rate limit')) {
+        const normalizedError = String(errorMsg).toLowerCase();
+
+        // Be careful: GitHub returns 404 for private repos without access.
+        if (
+          normalizedError.includes("don't have access") ||
+          normalizedError.includes('access required') ||
+          normalizedError.includes('private')
+        ) {
+          setErrorType('no-access');
+          setError('Access required. If this repo is private, login with a GitHub token (repo scope) and try again.');
+        } else if (normalizedError.includes('branch') && normalizedError.includes('not found')) {
+          setErrorType('branch-not-found');
+          setError(errorMsg);
+        } else if (
+          normalizedError.includes("directory wasn't found") ||
+          normalizedError.includes("directory doesn't exist") ||
+          normalizedError.includes("'sparks/'")
+        ) {
+          setErrorType('no-sparks');
+          setError(errorMsg);
+        } else if (normalizedError.includes('rate limit')) {
           setErrorType('rate-limit');
           setError('GitHub API rate limit exceeded. Please add a GitHub token in the login menu.');
-        } else if (errorMsg.includes('Invalid repository format')) {
+        } else if (normalizedError.includes('invalid repository format')) {
           setErrorType('invalid-format');
           setError('Invalid repository format. Use: owner/repo or https://github.com/owner/repo');
+        } else if (normalizedError.includes('not found') || normalizedError.includes("doesn't exist")) {
+          setErrorType('repo-not-found');
+          setError('Repository not found. Please check the URL and try again.');
         } else {
           setErrorType('network-error');
           setError(errorMsg);
@@ -515,18 +535,30 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, b
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         )}
+                        {errorType === 'branch-not-found' && (
+                          <svg className="h-5 w-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        )}
                         {(errorType === 'network-error' || errorType === 'rate-limit' || errorType === 'invalid-format') && (
                           <svg className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         )}
+                        {errorType === 'no-access' && (
+                          <svg className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                        )}
                         <div className="flex-1">
                           <p className="text-sm font-semibold text-red-400 mb-1">
                             {errorType === 'repo-not-found' && 'Repository Not Found'}
+                            {errorType === 'no-access' && 'Access Required'}
                             {errorType === 'no-sparks' && 'No Spark Files'}
                             {errorType === 'no-repo' && 'No Repository'}
                             {errorType === 'rate-limit' && 'Rate Limit Exceeded'}
                             {errorType === 'invalid-format' && 'Invalid Format'}
+                            {errorType === 'branch-not-found' && 'Branch Not Found'}
                             {errorType === 'network-error' && 'Connection Error'}
                             {!errorType && 'Error'}
                           </p>

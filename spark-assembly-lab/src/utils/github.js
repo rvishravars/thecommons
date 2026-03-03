@@ -112,11 +112,28 @@ export const openTokenCreationPage = () => {
  * Parse repository URL into owner and repo
  */
 export const parseRepoUrl = (input) => {
-  const cleanInput = input.trim()
-    .replace(/https?:\/\//, '')
-    .replace(/github\.com\//, '');
+  const trimmed = (input || '').trim();
+  if (!trimmed) {
+    throw new Error('Invalid repository format. Use: owner/repo or https://github.com/owner/repo');
+  }
 
-  const parts = cleanInput.split('/').filter(part => part);
+  // Strip URL query/hash fragments early.
+  const withoutQuery = trimmed.split('?')[0].split('#')[0];
+
+  // Support common copy-paste formats:
+  // - https://github.com/owner/repo
+  // - http(s)://github.com/owner/repo
+  // - owner/repo
+  // - git@github.com:owner/repo.git
+  // - ssh://git@github.com/owner/repo.git
+  const normalized = withoutQuery
+    .replace(/^ssh:\/\/git@github\.com\//i, '')
+    .replace(/^git@github\.com:/i, '')
+    .replace(/^https?:\/\//i, '')
+    .replace(/^www\./i, '')
+    .replace(/^github\.com\//i, '');
+
+  const parts = normalized.split('/').filter(part => part);
 
   if (parts.length >= 2) {
     return {
@@ -126,6 +143,40 @@ export const parseRepoUrl = (input) => {
   }
 
   throw new Error('Invalid repository format. Use: owner/repo or https://github.com/owner/repo');
+};
+
+const fetchJson = async (url, options = {}) => {
+  const response = await fetch(url, options);
+  const contentType = response.headers.get('content-type') || '';
+  let body = null;
+  if (contentType.includes('application/json')) {
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+  }
+  return { response, body };
+};
+
+const checkRepoAccessible = async (owner, repo) => {
+  const url = `https://api.github.com/repos/${owner}/${repo}`;
+  const { response } = await fetchJson(url, { headers: buildGitHubHeaders() });
+  if (response.status === 403) {
+    throw new Error('GitHub API rate limit exceeded. Please add a GitHub token or try again later.');
+  }
+  return response.ok;
+};
+
+const checkBranchExists = async (owner, repo, branch) => {
+  if (!branch) return true;
+  const url = `https://api.github.com/repos/${owner}/${repo}/branches/${encodeURIComponent(branch)}`;
+  const { response } = await fetchJson(url, { headers: buildGitHubHeaders() });
+  if (response.status === 403) {
+    throw new Error('GitHub API rate limit exceeded. Please add a GitHub token or try again later.');
+  }
+  if (response.status === 404) return false;
+  return response.ok;
 };
 
 /**
@@ -179,7 +230,19 @@ const listDirectory = async (owner, repo, path = 'sparks', branch = 'main') => {
 
   if (!response.ok) {
     if (response.status === 404) {
-      throw new Error(`Repository '${owner}/${repo}' not found or the '${path}' directory doesn't exist`);
+      // 404 here is ambiguous: could be missing repo, missing access, missing branch, or missing directory.
+      // Do a couple of targeted checks to return a more actionable error.
+      const repoAccessible = await checkRepoAccessible(owner, repo);
+      if (!repoAccessible) {
+        throw new Error(`Repository '${owner}/${repo}' not found, or you don't have access. If it's private, add a GitHub token.`);
+      }
+
+      const branchExists = await checkBranchExists(owner, repo, branch);
+      if (!branchExists) {
+        throw new Error(`Branch '${branch}' not found in '${owner}/${repo}'. Please select a different branch.`);
+      }
+
+      throw new Error(`The '${path}/' directory wasn't found in '${owner}/${repo}' on branch '${branch}'.`);
     }
     if (response.status === 403) {
       throw new Error('GitHub API rate limit exceeded. Please add a GitHub token or try again later.');
@@ -201,12 +264,41 @@ const fetchFileContent = async (owner, repo, path, branch = 'main') => {
   const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
 
   const response = await fetch(url);
+  if (response.ok) {
+    return await response.text();
+  }
 
-  if (!response.ok) {
+  // Fallback: use GitHub Contents API (supports auth via PAT) and decode base64 content.
+  // This is more rate-limited than raw, but helps in environments where raw.githubusercontent.com is blocked.
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g, '/')}` +
+    `?ref=${encodeURIComponent(branch)}`;
+
+  const { response: apiResponse, body } = await fetchJson(apiUrl, { headers: buildGitHubHeaders() });
+  if (!apiResponse.ok) {
     throw new Error(`Failed to fetch ${path}: ${response.status}`);
   }
 
-  return await response.text();
+  if (!body || typeof body.content !== 'string') {
+    throw new Error(`Failed to fetch ${path}: unexpected GitHub API response`);
+  }
+
+  const base64 = body.content.replace(/\n/g, '');
+  try {
+    // atob is available in browsers; Buffer is a Node fallback.
+    if (typeof atob === 'function') {
+      return decodeURIComponent(
+        Array.prototype.map
+          .call(atob(base64), (c) => `%${(`00${c.charCodeAt(0).toString(16)}`).slice(-2)}`)
+          .join('')
+      );
+    }
+    if (globalThis?.Buffer?.from) {
+      return globalThis.Buffer.from(base64, 'base64').toString('utf-8');
+    }
+    throw new Error('No base64 decoder available');
+  } catch (e) {
+    throw new Error(`Failed to decode ${path} content`);
+  }
 };
 
 /**
@@ -222,20 +314,24 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
     let searchError = null;
     let dirError = null;
 
-    // Search first (fast, but can be stale)
-    try {
-      searchItems = await searchSparkFiles(owner, repo);
-    } catch (searchErr) {
-      searchError = searchErr;
-      console.warn('Search failed:', searchErr);
-    }
-
-    // Directory listing for authoritative results
+    // Directory listing is authoritative and avoids GitHub Code Search rate limiting.
     try {
       dirItems = await listDirectory(owner, repo, searchPath, branch);
     } catch (listErr) {
       dirError = listErr;
       console.warn('Directory listing failed:', listErr);
+    }
+
+    // Only fall back to code search if directory listing failed or returned nothing.
+    if (!dirError && Array.isArray(dirItems) && dirItems.length > 0) {
+      searchItems = [];
+    } else {
+      try {
+        searchItems = await searchSparkFiles(owner, repo);
+      } catch (searchErr) {
+        searchError = searchErr;
+        console.warn('Search failed:', searchErr);
+      }
     }
 
     const combinedItems = [];
@@ -278,6 +374,13 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
         console.warn(`Failed to fetch ${item.name || item.path}:`, err);
         // Continue with other files
       }
+    }
+
+    if (combinedItems.length > 0 && files.length === 0) {
+      return {
+        success: false,
+        error: `Found ${combinedItems.length} .spark.md file(s) but failed to fetch their contents. This can happen if raw.githubusercontent.com is blocked or if GitHub is rate-limiting requests. Try logging in with a GitHub token and refreshing.`,
+      };
     }
 
     return {
