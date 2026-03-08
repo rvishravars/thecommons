@@ -28,11 +28,6 @@ export function parseSparkFile(content) {
     if (deletionFlagMatch) {
       markedForDeletion = true;
     }
-    // Also extract scout/owner from frontmatter if present
-    const scoutFM = yaml.match(/^(?:scout|owner):\s*@?([\w-]+)/m);
-    if (scoutFM && !enhancedContributors.scout) {
-      enhancedContributors.scout = scoutFM[1];
-    }
   }
 
   // If no name found in frontmatter, fall back to the first H1 heading
@@ -237,7 +232,7 @@ export function validateSparkData(sparkData) {
  * Generate markdown from spark data
  */
 export function generateSparkMarkdown(sparkData) {
-  const { name, contributors = {}, markedForDeletion = false } = sparkData;
+  const { name, markedForDeletion = false } = sparkData;
   let markdown = '';
 
   // Add YAML frontmatter with deletion flag

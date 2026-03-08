@@ -113,8 +113,6 @@ function AppMain() {
 
   const handleTemplateSelect = () => {
     setSelectedSpark(null);
-    const userHandle = user?.login || '';
-
     // Parse the enhanced template to get the structure
     const parsedTemplate = parseSparkFile(ENHANCED_SPARK_TEMPLATE);
 
