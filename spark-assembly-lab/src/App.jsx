@@ -124,7 +124,7 @@ function AppMain() {
       isEnhanced: true,
       sections: parsedTemplate.sections, // All 8 sections from the template
       activeSections: [1], // Only Section 1 is active by default
-      contributors: { scout: userHandle },
+      contributors: {},
       proposals: parsedTemplate.proposals || { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '' },
       sourcePath: null,
       rawContent: ENHANCED_SPARK_TEMPLATE

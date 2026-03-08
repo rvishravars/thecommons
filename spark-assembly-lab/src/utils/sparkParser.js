@@ -252,9 +252,6 @@ export function generateSparkMarkdown(sparkData) {
 
   markdown = `# ${name}\n\n`;
 
-  const contactInfo = contributors.scout ? `*Owner: @${contributors.scout}*\n\n` : '';
-  markdown += contactInfo;
-
   const sections = sparkData.sections || {};
   ENHANCED_SECTION_HEADERS.forEach((header, index) => {
     const sectionNum = index + 1;
