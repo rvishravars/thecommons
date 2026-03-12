@@ -40,9 +40,9 @@ $$Weight = \log_{10}(CS_{active})$$
 
 * **Sybil Protection:** Voting rights are restricted to contributors with **CS > 20** or **3 merged actions**.
 
-### 3. The Scribe v2.0: Glass Box Intelligence
+### 3. Integrity Engine: Glass Box Intelligence
 
-The AI Scribe is the system's **Automated Standards Enforcer**, not a gatekeeper. It is:
+The integrity engine is the system's **Automated Standards Enforcer**, not a gatekeeper. It is:
 
 * **3.1 Local-First:** Runs locally using nano-models (Qwen2.5-1.5B-GGUF). Falls back to Groq API only when local resources are insufficient. Zero mandatory cost.
 * **3.2 Transparent (Glass Box):** Every decision includes a human-readable reasoning log: hardware used, prompts applied, stability findings, and decision path.
@@ -52,7 +52,7 @@ The AI Scribe is the system's **Automated Standards Enforcer**, not a gatekeeper
 ### 4. Conflict & Dispute Resolution (The Logic Audit)
 
 * **4.1 The Challenge:** Contributors may file a `!CHALLENGE` if they believe a Spark lacks evidence (it's "wobbly") or its hypothesis is unfalsifiable.
-* **4.2 The Cooling Rack:** If a Spark receives >5 critical flaws in 24 hours, the Scribe locks the thread for 12 hours to prevent dogpiling and allow the author to apply "Clutch Power" (revision).
+* **4.2 The Cooling Rack:** If a Spark receives >5 critical flaws in 24 hours, the system locks the thread for 12 hours to prevent dogpiling and allow the author to apply "Clutch Power" (revision).
 
 ---
 
@@ -63,7 +63,7 @@ Primer is built upon decades of research into decentralised cooperation, institu
 ### 1. The Governance of the Commons
 Based on **Elinor Ostrom** (*Governing the Commons*, 1990).
 * **The Principle:** Successful common-pool resources require "graduated sanctions" and "collective-choice arrangements."
-* **Application:** The **Manifesto** is the constitutional layer. The **Scribe** is the automated monitor. The **Reputation Shield** (CS decay) is the graduated sanction.
+* **Application:** The **Manifesto** is the constitutional layer. The **integrity engine** is the automated monitor. The **Reputation Shield** (CS decay) is the graduated sanction.
 
 ### 2. Commons-Based Peer Production (CBPP)
 Based on **Yochai Benkler** (*The Wealth of Networks*, 2006).
@@ -83,7 +83,7 @@ Based on **Logarithmic Scaling** and **Plural Control** (Glen Weyl et al.).
 ### 5. Open-Source Translucence
 Based on **Dabbish et al.** (*Social Translucence in GitHub*, 2012).
 * **The Principle:** Transparency in contribution history drives trust and attracts quality Builders.
-* **Application:** All Spark sections, revision histories, Glass Box Scribe logs, and CS scores are public. **"Execution is the Moat."**
+* **Application:** All Spark sections, revision histories, Glass Box reasoning logs, and CS scores are public. **"Execution is the Moat."**
 
 ---
 
@@ -155,12 +155,12 @@ Run the experiment, simulation, or implementation.
 ## Part 4: Development Roadmap
 
 * [x] **Manifesto v2.0:** Integrated modular meritocracy (Owner/Others).
-* [x] **Scribe v2.0:** Glass Box AI agent — local CPU inference, hardware switching, PR bot.
+* [x] **Integrity Engine v2.0:** Glass Box AI agent — local CPU inference, hardware switching, PR bot.
 * [x] **Spark Assembly Lab:** React-based canvas for composing and submitting sparks.
 * [x] **Reputation Shield:** CS decay for inactive contributors (10%/month via logarithmic scaling).
 * [x] **Enhanced Spark Template:** 8-section modular format with YAML frontmatter and maturity levels.
-* [x] **Manifesto v3.0:** Updated governance, Scribe spec, and Enhanced Spark Standard.
-* [ ] **The DePIN Grid:** Community-powered GPU node for Scribe heavy-compute tasks.
+* [x] **Manifesto v3.0:** Updated governance, integrity engine spec, and Enhanced Spark Standard.
+* [ ] **The DePIN Grid:** Community-powered GPU node for heavy-compute tasks.
 * [ ] **The "Snap" Bot:** Automate Echo & Prototype bonus distribution via GitHub Actions.
 * [ ] **Governance Vote v1:** First on-chain (or off-chain weighted) vote using logarithmic CS weights.
 

@@ -346,7 +346,7 @@ def get_sparks():
             return jsonify(stale_data)
         return jsonify({"error": str(err), "files": []}), 502
 
-## Scribe missions and /api/mission endpoints removed
+## Legacy missions and /api/mission endpoints removed
 
 
 

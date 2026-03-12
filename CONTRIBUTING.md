@@ -105,7 +105,6 @@ primer/
 ├── spark-assembly-lab/          # Main application
 │   ├── src/                     # React frontend
 │   ├── server_py/               # Flask backend
-│   ├── scribe/                  # Python utilities
 │   └── docker-compose.yml
 ├── sparks/                      # Example sparks
 ├── templates/                   # Spark templates

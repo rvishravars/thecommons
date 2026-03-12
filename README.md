@@ -20,7 +20,7 @@ The Commons is governed by a meritocratic hierarchy where influence (Contributio
 *   **💡 The Spark:** The atomic unit of value. A structured markdown file following the [8-section standard](templates/enhanced_spark.md).
 *   **🛠️ Execution is the Moat:** We reward the "rigor" — the modeling, experimental results, and code that makes an idea solid.
 *   **🔗 Interoperability:** Everything is designed to be snapped onto. No closed silos.
-*   **📡 Host-Agnostic:** Data belongs to the community. Transition-ready via the Scribe v2.0 protocol.
+*   **📡 Host-Agnostic:** Data belongs to the community. Transition-ready via open, implementation-agnostic formats.
 
 ---
 
@@ -42,13 +42,12 @@ Try the **[Live Demo](https://spark-assembly-lab-bgbmwuia5q-uc.a.run.app/)** to 
 
 ---
 
-## 🤖 AI Scribe v2.0 (The Glass Box)
+## 🤖 AI Workbench (The Glass Box)
 
-The Commons is assisted by an AI Scribe that ensures every new brick follows the standard gauge of the community.
+The Commons is assisted by an AI workbench that helps structure and refine sparks while keeping humans in control.
 
-*   **Local-First:** Runs on your CPU/GPU using `llama-cpp-python` or falls back to Groq.
-*   **Reasoning Logs:** See exactly why the Scribe accepted or challenged a maturity shift.
-*   **Maturity Audit:** Validates Sect. 2 (Hypothesis) for falsifiability before allowing a `structured` merge.
+*   **Local-First (Optional):** Can run locally on contributor hardware or via hosted AI APIs.
+*   **Integrity Checks:** Validates key sections (like Hypothesis) before submission to keep sparks structurally sound.
 
 ---
 
@@ -57,7 +56,7 @@ The Commons is assisted by an AI Scribe that ensures every new brick follows the
 ```mermaid
 graph TB
     A["Spark Assembly Lab<br/>(React/Vite)"]
-    B["Scribe Backend<br/>(Flask/Python)"]
+    B["Backend API<br/>(Flask/Python)"]
     C["AI Engine<br/>(Local Qwen / OpenAI)"]
     D["GitHub API<br/>(Auth + Storage)"]
     

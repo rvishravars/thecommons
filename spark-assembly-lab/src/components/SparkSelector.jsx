@@ -13,7 +13,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, b
   const [error, setError] = useState(null);
   const [errorType, setErrorType] = useState(null); // 'repo-not-found', 'no-sparks', 'network-error'
   // const [repoInfo, setRepoInfo] = useState(null);
-  // Scribe Summary (missions) removed
+  // Legacy missions/summary removed
   const [prInfo, setPrInfo] = useState({ count: null, items: [], urls: [] });
   const [refreshToken, setRefreshToken] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,13 +21,13 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, b
   const [isSparksListCollapsed, setIsSparksListCollapsed] = useState(false);
   const hasRegisteredRefresh = useRef(false);
   const onPermissionChangeRef = useRef(onPermissionChange);
-  // Scribe Summary content refs removed
+  // Legacy missions/summary content refs removed
 
   useEffect(() => {
     onPermissionChangeRef.current = onPermissionChange;
   }, [onPermissionChange]);
 
-  // Scribe Summary wiring removed
+  // Legacy missions/summary wiring removed
 
   // Expose refresh function to parent
   useEffect(() => {
@@ -254,7 +254,7 @@ export default function SparkSelector({ selectedSpark, onSparkSelect, repoUrl, b
     }
   }, [sparks, selectedSpark, onSparkSelect, currentSparkData]);
 
-  // Scribe Summary effect removed
+  // Legacy missions/summary effect removed
 
   useEffect(() => {
     const sparkPath = selectedSpark?.sourcePath;
