@@ -95,7 +95,7 @@ docker build -f spark-assembly-lab/Dockerfile.prod -t spark-assembly-lab:latest 
 Stability is no longer a simple 1-2-3 count. It is calculated based on the number of **Active Sections** that contain meaningful content:
 
 - **Seed**: Narrative (S1) + Hypothesis (S2) populated.
-- **Stable (8/8)**: All sections populated and validated against the Scribe's glass-box criteria.
+- **Stable (8/8)**: All sections populated and validated against core glass-box integrity criteria.
 - **Indicator**: Visual progress bar in the sidebar and canvas header.
 
 ---

@@ -12,6 +12,6 @@ All text, project ideas, and governance frameworks in this repository are licens
 * **ShareAlike:** If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
 
 ## 2. Software & AI Logic
-All source code (The AI Scribe, automated scripts, and platform architecture) is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. 
+All source code (the application logic, automated scripts, and platform architecture) is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. 
 
 This ensures that any "Software-as-a-Service" built using this logic must also contribute its source code back to the community.
