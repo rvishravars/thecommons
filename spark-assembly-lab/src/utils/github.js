@@ -289,6 +289,43 @@ const listDirectory = async (owner, repo, path = 'sparks', branch = 'main') => {
 };
 
 /**
+ * Recursively list all .spark.md files in a repository starting from the root.
+ * This is a fallback when code search is unavailable or empty so we don't
+ * depend on a specific 'sparks/' directory.
+ */
+const listAllSparkFiles = async (owner, repo, branch = 'main') => {
+  const results = [];
+  const visited = new Set();
+
+  const visit = async (path = '') => {
+    const key = path || '<root>';
+    if (visited.has(key)) return;
+    visited.add(key);
+
+    const encodedPath = path ? encodeURIComponent(path).replace(/%2F/g, '/') : '';
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodedPath}?ref=${encodeURIComponent(branch)}`;
+
+    const response = await fetchGitHub(url);
+    if (!response.ok) {
+      // Best-effort only; just stop recursion on errors.
+      return;
+    }
+
+    const items = await response.json();
+    for (const item of items) {
+      if (item.type === 'file' && item.name.endsWith('.spark.md')) {
+        results.push(item);
+      } else if (item.type === 'dir' && item.path) {
+        await visit(item.path);
+      }
+    }
+  };
+
+  await visit('');
+  return results;
+};
+
+/**
  * Fetch file content from GitHub
  */
 const fetchFileContent = async (owner, repo, path, branch = 'main') => {
@@ -388,23 +425,23 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
     let searchError = null;
     let dirError = null;
 
-    // Directory listing is authoritative and avoids GitHub Code Search rate limiting.
+    // 1. Prefer code search across the whole repo so sparks can
+    //    live anywhere, not just under a specific directory.
     try {
-      dirItems = await listDirectory(owner, repo, searchPath, branch);
-    } catch (listErr) {
-      dirError = listErr;
-      console.warn('Directory listing failed:', listErr);
+      searchItems = await searchSparkFiles(owner, repo);
+    } catch (searchErr) {
+      searchError = searchErr;
+      console.warn('Search failed:', searchErr);
     }
 
-    // Only fall back to code search if directory listing failed or returned nothing.
-    if (!dirError && Array.isArray(dirItems) && dirItems.length > 0) {
-      searchItems = [];
-    } else {
+    // 2. If search is empty or unavailable, fall back to a recursive
+    //    scan of the entire repo tree for .spark.md files.
+    if (!Array.isArray(searchItems) || searchItems.length === 0) {
       try {
-        searchItems = await searchSparkFiles(owner, repo);
-      } catch (searchErr) {
-        searchError = searchErr;
-        console.warn('Search failed:', searchErr);
+        dirItems = await listAllSparkFiles(owner, repo, branch);
+      } catch (listErr) {
+        dirError = listErr;
+        console.warn('Recursive listing failed:', listErr);
       }
     }
 
@@ -421,8 +458,8 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
     dirItems.forEach(addItem);
 
     if (combinedItems.length === 0) {
-      if (dirError) throw dirError;
       if (searchError) throw searchError;
+      if (dirError) throw dirError;
       return {
         success: true,
         owner,
@@ -456,7 +493,7 @@ export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPat
       // Browser-side fetching can be blocked by extensions/privacy tools.
       // Cloud Run includes a backend endpoint that fetches server-side, which is typically more reliable.
       try {
-        const backendUrl = `/api/sparks?repo=${encodeURIComponent(repoInput)}&branch=${encodeURIComponent(branch)}&path=${encodeURIComponent(searchPath)}`;
+        const backendUrl = `/api/sparks?repo=${encodeURIComponent(repoInput)}&branch=${encodeURIComponent(branch)}`;
         const backendResponse = await fetch(backendUrl);
         if (backendResponse.ok) {
           const backendData = await backendResponse.json();

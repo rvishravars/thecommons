@@ -23,6 +23,8 @@ function AppMain() {
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [prRefreshCallback, setPrRefreshCallback] = useState(null);
   const [canPush, setCanPush] = useState(true);
+  const [showRepoPrompt, setShowRepoPrompt] = useState(false);
+  const [repoPromptValue, setRepoPromptValue] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
     const stored = localStorage.getItem('sparkSidebarCollapsed');
     return stored === null ? true : stored === 'true';
@@ -110,6 +112,25 @@ function AppMain() {
   };
 
   const handleNewSpark = () => {
+    if (user && repoUrl) {
+      let repoOwner = '';
+      try {
+        repoOwner = parseRepoUrl(repoUrl).owner;
+      } catch (e) {
+        console.warn('Error parsing repo URL in handleNewSpark:', e);
+      }
+
+      const userIsRepoOwner = repoOwner && user.login && user.login.toLowerCase() === repoOwner.toLowerCase();
+      const confirmKey = user.login ? `sparkRepoConfirmed:${user.login.toLowerCase()}` : 'sparkRepoConfirmed:anon';
+      const alreadyConfirmed = localStorage.getItem(confirmKey) === 'true';
+
+      if (!userIsRepoOwner && !alreadyConfirmed) {
+        setRepoPromptValue(repoUrl || '');
+        setShowRepoPrompt(true);
+        return;
+      }
+    }
+
     setShowTemplateSelector(true);
   };
 
@@ -275,6 +296,66 @@ function AppMain() {
                 <p className="text-sm text-gray-300">A structured template for any new idea or project</p>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Repo Context Prompt for New Sparks (primarily for non-owners) */}
+      {showRepoPrompt && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-900 rounded-lg border border-design-500/30 max-w-lg w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-white">Choose a repository for this spark</h2>
+              <button
+                onClick={() => setShowRepoPrompt(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-300 mb-4">
+              Select the GitHub repository where feedback, proposals, and issues for this spark will be tracked.
+            </p>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!repoPromptValue.trim()) return;
+                const trimmed = repoPromptValue.trim();
+                handleRepoChange(trimmed);
+                if (user?.login) {
+                  const confirmKey = `sparkRepoConfirmed:${user.login.toLowerCase()}`;
+                  localStorage.setItem(confirmKey, 'true');
+                }
+                setShowRepoPrompt(false);
+                setShowTemplateSelector(true);
+              }}
+              className="space-y-4"
+            >
+              <input
+                type="text"
+                value={repoPromptValue}
+                onChange={(e) => setRepoPromptValue(e.target.value)}
+                placeholder="https://github.com/owner/repo or owner/repo"
+                className="w-full px-3 py-2 text-sm rounded-lg theme-input focus:outline-none focus:ring-2 focus:ring-design-500"
+                autoFocus
+              />
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setShowRepoPrompt(false)}
+                  className="px-3 py-2 text-sm rounded-lg theme-muted-hover"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-sm rounded-lg bg-design-600 hover:bg-design-700 font-semibold transition-colors disabled:opacity-60"
+                  disabled={!repoPromptValue.trim()}
+                >
+                  Continue
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
