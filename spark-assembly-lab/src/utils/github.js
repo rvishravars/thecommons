@@ -253,42 +253,6 @@ const searchSparkFiles = async (owner, repo) => {
 };
 
 /**
- * List files in a directory
- */
-const listDirectory = async (owner, repo, path = 'sparks', branch = 'main') => {
-  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`;
-
-  const response = await fetchGitHub(url);
-
-  if (!response.ok) {
-    if (response.status === 404) {
-      // 404 here is ambiguous: could be missing repo, missing access, missing branch, or missing directory.
-      // Do a couple of targeted checks to return a more actionable error.
-      const repoAccessible = await checkRepoAccessible(owner, repo);
-      if (!repoAccessible) {
-        throw new Error(`Repository '${owner}/${repo}' not found, or you don't have access. If it's private, add a GitHub token.`);
-      }
-
-      const branchExists = await checkBranchExists(owner, repo, branch);
-      if (!branchExists) {
-        throw new Error(`Branch '${branch}' not found in '${owner}/${repo}'. Please select a different branch.`);
-      }
-
-      throw new Error(`The '${path}/' directory wasn't found in '${owner}/${repo}' on branch '${branch}'.`);
-    }
-    if (response.status === 403) {
-      throw new Error('GitHub API rate limit exceeded. Please add a GitHub token or try again later.');
-    }
-    throw new Error(`GitHub API error: ${response.status}`);
-  }
-
-  const items = await response.json();
-  return items.filter(item =>
-    item.type === 'file' && item.name.endsWith('.spark.md')
-  );
-};
-
-/**
  * Recursively list all .spark.md files in a repository starting from the root.
  * This is a fallback when code search is unavailable or empty so we don't
  * depend on a specific 'sparks/' directory.
@@ -415,7 +379,7 @@ export const fetchLastCommitAuthor = async (owner, repo, filepath, branch = 'mai
 /**
  * Load all sparks from a GitHub repository
  */
-export const loadSparksFromGitHub = async (repoInput, branch = 'main', searchPath = 'sparks') => {
+export const loadSparksFromGitHub = async (repoInput, branch = 'main') => {
   try {
     // Parse repository URL
     const { owner, repo } = parseRepoUrl(repoInput);

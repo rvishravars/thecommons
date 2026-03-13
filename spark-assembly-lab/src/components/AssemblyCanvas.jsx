@@ -26,24 +26,8 @@ const ENHANCED_SECTIONS_CONFIG = {
   8: { title: '8. Next Actions', description: 'Concrete steps forward', color: 'spark' }
 };
 
-const buildMarkdownDraftStorageKey = (repoUrl, draftId) => {
-  let repoKey = 'local';
-  try {
-    if (repoUrl) {
-      const { owner, repo } = parseRepoUrl(repoUrl);
-      repoKey = `${owner}/${repo}`;
-    }
-  } catch (e) {
-    repoKey = repoUrl || 'local';
-  }
-
-  const safeDraftId = draftId || 'untitled';
-  return `spark_lab_markdown_draft:${repoKey}:${safeDraftId}`;
-};
-
 export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, originalSparkData, onResetSpark, isReadOnly, onPRCreated, canPush = true, onNewSpark, viewMode = 'components' }) {
   const [showPreview, setShowPreview] = useState(false);
-  const [showMarkdownPreview, setShowMarkdownPreview] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showPRTracker, setShowPRTracker] = useState(false);
   const [showCommentsPanel, setShowCommentsPanel] = useState(false);
@@ -58,14 +42,11 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
   const [aiApplied, setAiApplied] = useState(false);
   const [contributors, setContributors] = useState([]);
   const [contributorsLoading, setContributorsLoading] = useState(false);
-  const [markdownDraft, setMarkdownDraft] = useState('');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackDraft, setFeedbackDraft] = useState('');
   const [hasHighlightedFeedback, setHasHighlightedFeedback] = useState(false);
   const [highlightPropose, setHighlightPropose] = useState(false);
   const sparkDataRef = useRef(sparkData);
-  const markdownDraftId = originalSparkData?.sourcePath || sparkData?.sourcePath || sparkData?.name || 'untitled';
-  const markdownDraftStorageKey = buildMarkdownDraftStorageKey(repoUrl, markdownDraftId);
   const toast = useToast();
   const user = getStoredUserInfo();
   const isOwner = user && (() => {
@@ -106,12 +87,7 @@ export default function AssemblyCanvas({ sparkData, onSparkUpdate, repoUrl, orig
     setShowPreview(false);
     setShowPRTracker(false);
     setShowCommentsPanel(false);
-    if (viewMode === 'markdown') {
-      setShowMarkdownPreview(false);
-    }
   }, [viewMode]);
-
-  // Deprecated: markdown view is no longer exposed in the UI; keep local state unused.
 
   // Load contributors for the selected spark
   useEffect(() => {

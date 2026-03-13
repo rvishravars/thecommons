@@ -179,8 +179,6 @@ function AppMain() {
       <Header
         theme={theme}
         onThemeChange={setTheme}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
         onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         isMobileMenuOpen={isMobileMenuOpen}
         user={user}

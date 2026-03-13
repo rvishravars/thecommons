@@ -6,7 +6,7 @@ const THEME_OPTIONS = [
   { value: 'light-theme', label: 'Light Theme' },
 ];
 
-export default function Header({ theme, onThemeChange, viewMode, onViewModeChange, onMenuToggle, onSidebarToggle, user, onUserChange, onGoHome }) {
+export default function Header({ theme, onThemeChange, onMenuToggle, onSidebarToggle, user, onUserChange, onGoHome }) {
   return (
     <header className="border-b theme-border theme-surface px-4 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-between">
