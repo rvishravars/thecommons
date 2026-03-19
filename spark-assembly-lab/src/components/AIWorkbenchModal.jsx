@@ -8,7 +8,7 @@ import {
 } from '../utils/llmConfig';
 
 export default function AIWorkbenchModal({ sparkData, onClose, onApplyMarkdown }) {
-  const [{ vendorId, vendor, apiKey }, setLlmConfig] = useState(() => getActiveLlmConfig());
+  const [{ vendor, apiKey }, setLlmConfig] = useState(() => getActiveLlmConfig());
   const [messages, setMessages] = useState(() => [
     {
       id: 'assistant-initial',
@@ -31,46 +31,6 @@ export default function AIWorkbenchModal({ sparkData, onClose, onApplyMarkdown }
     // Refresh LLM config when the modal mounts so it reflects the latest login.
     setLlmConfig(getActiveLlmConfig());
   }, []);
-
-  const buildWorkbenchPrompt = (conversation, markdown) => {
-    const historyText = conversation
-      .map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
-      .join('\n\n');
-
-    const taskLabel =
-      selectedTask === 'improve_spark_maturity'
-        ? 'Audit maturity'
-        : selectedTask === 'design_experiment_from_spark'
-          ? 'Refine experiment design'
-          : 'Summarize results for review';
-
-    return `You are an AI workbench helping improve a Spark document in Primer Spark Assembly Lab.
-
-Current task: ${taskLabel}
-
-You always respond as a JSON object (no markdown code fences, no prose) with this exact shape:
-{
-  "reply": "short, conversational response to the user",
-  "updatedSpark": "full updated spark markdown if you propose concrete edits, or an empty string if you are only discussing"
-}
-
-Spark name: ${sparkData.name}
-
-Current Spark markdown (may be truncated):
-<<<SPARK_MARKDOWN>>>
-${markdown.slice(0, 8000)}
-<<<END_SPARK_MARKDOWN>>>
-
-Conversation so far:
-${historyText || '(no previous conversation)'}
-
-When you propose edits, return the full spark in updatedSpark so the UI can apply it. Do not include any keys other than reply and updatedSpark.`;
-  };
-
-  const callGeminiWorkbench = async (conversation) => {
-    // This function is no longer used; kept only as a safety net.
-    throw new Error('Gemini is no longer supported. Please use Codex or Claude Code via LLM Login.');
-  };
 
   const callOpenAIWorkbench = async (conversation) => {
     const cfg = getActiveLlmConfig();
